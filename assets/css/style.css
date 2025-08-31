@@ -1,0 +1,709 @@
+/* ==============================================
+   Copisteria - Custom Styles
+   Styles pour l'interface de configuration
+   ============================================== */
+
+/* Configuration Sections */
+.config-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+/* Section Titles */
+.section-title {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: -8px;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+/* Option Buttons */
+.option-btn {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: center;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    color: #374151;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.option-btn.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
+}
+
+.option-btn:not(.active):hover {
+    border-color: #9ca3af;
+    background-color: #f9fafb;
+}
+
+.option-btn > div:first-child {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.option-btn > div:last-child {
+    font-size: 12px;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+/* Quantity Controls */
+.quantity-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background-color: white;
+}
+
+.quantity-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quantity-btn:first-child {
+    border-color: #bfdbfe;
+    color: #3b82f6;
+}
+
+.quantity-btn:first-child:hover {
+    background-color: #eff6ff;
+}
+
+.quantity-btn:last-child {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.quantity-btn:last-child:hover {
+    background-color: #2563eb;
+}
+
+/* Grid Layouts */
+.option-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.option-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.finishing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* Sidebar Scroll */
+.sidebar-scroll {
+    overflow-y: auto;
+    max-height: calc(100vh - 100px);
+    padding-right: 8px;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+    border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
+
+/* Upload Zone */
+.upload-zone {
+    background-image: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cpattern id='a' patternUnits='userSpaceOnUse' width='20' height='20' patternTransform='scale(0.5) rotate(0)'%3e%3crect x='0' y='0' width='100%25' height='100%25' fill='hsla(0,0%25,100%25,0)'/%3e%3cpath d='m0 10h20M10 0v20' stroke-width='1' stroke='hsla(210,14%25,83%25,0.5)' fill='none'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='100%25' height='100%25' fill='url(%23a)'/%3e%3c/svg%3e");
+}
+
+.upload-zone:hover {
+    transform: scale(1.02);
+}
+
+/* Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    z-index: 10;
+    width: 128px;
+    background-color: #000;
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    border-radius: 4px;
+    padding: 4px 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -64px;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .config-section {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .option-btn {
+        padding: 10px 12px;
+        min-height: 60px;
+        font-size: 13px;
+    }
+    
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .option-grid-2 {
+        gap: 8px;
+    }
+    
+    .option-grid-3 {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    
+    .finishing-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .section-title {
+        font-size: 15px;
+    }
+    
+    .section-subtitle {
+        font-size: 13px;
+    }
+}
+
+/* Status Badges */
+.status-pending { 
+    background-color: #f59e0b;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-confirmed { 
+    background-color: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-processing { 
+    background-color: #8b5cf6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-ready { 
+    background-color: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-completed { 
+    background-color: #059669;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Pickup Code */
+.pickup-code { 
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    background-color: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+/* Error Messages */
+.error { 
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+    margin-bottom: 16px;
+}
+
+.success {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #bbf7d0;
+    margin-bottom: 16px;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 50;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.notification.success {
+    background-color: #10b981;
+    color: white;
+}
+
+.notification.error {
+    background-color: #ef4444;
+    color: white;
+}
+
+.notification.info {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* File List */
+.file-item {
+    background-color: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.file-item:hover {
+    background-color: #f3f4f6;
+}
+
+.file-item .file-icon {
+    color: #dc2626;
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+.file-item .file-info {
+    flex: 1;
+}
+
+.file-item .file-name {
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 2px;
+}
+
+.file-item .file-details {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.file-item .file-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-item .delete-btn {
+    color: #dc2626;
+    padding: 8px;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+.file-item .delete-btn:hover {
+    color: #b91c1c;
+}
+
+/* Focus States for Accessibility */
+.option-btn:focus,
+.quantity-btn:focus,
+button:focus,
+input:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-right: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateX(100%); 
+    }
+    to { 
+        transform: translateX(0); 
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Custom Button Styles */
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-secondary {
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #d1d5db;
+}
+
+.btn-success {
+    background-color: #10b981;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Focus States for Accessibility */
+.option-btn:focus,
+.quantity-btn:focus,
+button:focus,
+input:focus,
+textarea:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Loading States */
+.loading {
+    @apply opacity-50 pointer-events-none;
+}
+
+.spinner {
+    @apply inline-block w-4 h-4 border-2 border-current border-r-transparent rounded-full animate-spin;
+}
+
+/* Utility Classes */
+.text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.backdrop-blur {
+    backdrop-filter: blur(4px);
+}
+
+/* Custom Button Styles */
+.btn-primary {
+    @apply bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors;
+}
+/* Configuration Badges */
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-radius: 4px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.badge-blue { background-color: #3b82f6; }
+.badge-green { background-color: #10b981; }
+.badge-orange { background-color: #f59e0b; }
+.badge-purple { background-color: #8b5cf6; }
+.badge-teal { background-color: #14b8a6; }
+.badge-cyan { background-color: #06b6d4; }
+.badge-pink { background-color: #ec4899; }
+
+/* User Menu Styles */
+#user-dropdown {
+    z-index: 50;
+    min-width: 180px;
+}
+
+#user-dropdown a {
+    transition: all 0.2s ease;
+}
+
+#user-dropdown a:hover {
+    transform: translateX(2px);
+}
+
+/* Shopping cart badge */
+.bg-blue-500 {
+    background-color: #3b82f6;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 18px;
+    z-index: 1;
+}
+
+.input-field {
+    padding-left: 50px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1;
+}
+
+.password-toggle:hover {
+    color: #6b7280;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+
+/* Modal Login Styles (même styles que register) */
+#loginModal .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+#loginModal .modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Loading button state */
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Error message styling */
+.error {
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.error.hidden {
+    display: none;
+}
+
+/* Remember me checkbox */
+input[type="checkbox"] {
+    accent-color: #3b82f6;
+}

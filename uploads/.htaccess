@@ -1,0 +1,18 @@
+# Sécurité pour le dossier uploads
+# Interdire l'exécution de scripts
+Options -ExecCGI
+AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi
+Commande ECHO désactivée.
+# Types MIME autorisés uniquement
+<FilesMatch "\.\(pdf\|doc\|docx\|txt\)$">
+    Allow from all
+</FilesMatch>
+Commande ECHO désactivée.
+<FilesMatch "^\.\(pdf\|doc\|docx\|txt\)$">
+    Deny from all
+</FilesMatch>
+Commande ECHO désactivée.
+# Interdire l'accès aux fichiers PHP
+<Files "*.php">
+    Deny from all
+</Files>
