@@ -228,56 +228,43 @@ function initializeFileUpload() {
         handleFiles(e.target.files);
     });
 }
-
 async function handleFiles(files) {
-    const fileArray = Array.from(files);
+    console.log('=== DEBUG UPLOAD ===');
+    console.log('Files received:', files);
     
-    // Vérifier la connexion utilisateur
-    if (!isUserLoggedIn()) {
+    const fileArray = Array.from(files);
+    console.log('File array:', fileArray);
+    
+    // Test connexion utilisateur
+    const userConnected = isUserLoggedIn();
+    console.log('User logged in:', userConnected);
+    
+    if (!userConnected) {
+        console.log('❌ Usuario no conectado');
         showNotification('Debes iniciar sesión para subir archivos', 'error');
         openLoginModal();
         return;
     }
     
-    // Afficher indicateur de chargement
-    showUploadProgress(true);
-    
-    for (let file of fileArray) {
+    // Test simple avec premier fichier
+    if (fileArray.length > 0) {
+        const file = fileArray[0];
+        console.log('Testing first file:', {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        });
+        
         try {
-            // Validation côté client
-            if (!validateFile(file)) {
-                continue;
-            }
-            
-            // Upload vers le serveur
-            const uploadedFile = await uploadFileToServer(file);
-            
-            if (uploadedFile) {
-                // Ajouter à la configuration
-                config.files.push(uploadedFile);
-                addFileToList(uploadedFile);
-                
-                showNotification(`${file.name} subido correctamente`, 'success');
-            }
-            
+            const result = await uploadFileToServer(file);
+            console.log('✅ Upload success:', result);
+            alert('Upload exitoso: ' + file.name);
         } catch (error) {
-            console.error('Erreur upload:', error);
-            showNotification(`Error al subir ${file.name}: ${error.message}`, 'error');
+            console.error('❌ Upload error:', error);
+            alert('Error upload: ' + error.message);
         }
     }
-    
-    // Masquer indicateur et mettre à jour
-    showUploadProgress(false);
-    
-    if (config.files.length > 0) {
-        const fileList = document.getElementById('file-list');
-        if (fileList) fileList.classList.remove('hidden');
-        calculatePrice();
-        updateAddToCartButton();
-        saveConfiguration();
-    }
 }
-
 // Validation fichier côté client
 function validateFile(file) {
     // Types autorisés
@@ -314,38 +301,56 @@ function validateFile(file) {
 }
 
 // Upload vers le serveur
+
 async function uploadFileToServer(file) {
+    console.log('Uploading file:', file.name);
+    
     const formData = new FormData();
     formData.append('files', file);
     
-    const response = await fetch('api/upload.php', {
-        method: 'POST',
-        body: formData
-    });
+    console.log('FormData created, sending to api/upload.php');
     
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    try {
+        const response = await fetch('api/upload.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        const text = await response.text();
+        console.log('Response text:', text);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+        
+        const result = JSON.parse(text);
+        console.log('Parsed result:', result);
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Error desconocido');
+        }
+        
+        return result.files[0];
+        
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
     }
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-        throw new Error(result.error || 'Error desconocido');
-    }
-    
-    if (!result.files || result.files.length === 0) {
-        throw new Error('No se recibieron archivos del servidor');
-    }
-    
-    // Retourner le premier fichier uploadé
-    return result.files[0];
 }
-
-// Vérifier si utilisateur connecté
-function isUserLoggedIn() {
-    // Simple vérification - vous pouvez l'améliorer
-    return document.querySelector('.fas.fa-user') && 
-           !document.querySelector('a[href="login.php"]');
+// Version corrigée pour détecter la connexion
+async function isUserLoggedIn() {
+    try {
+        const response = await fetch('api/check-session.php');
+        const result = await response.json();
+        console.log('Session check result:', result);
+        return result.logged_in === true;
+    } catch (error) {
+        console.error('Session check error:', error);
+        return false;
+    }
 }
 
 // Indicateur de progression
