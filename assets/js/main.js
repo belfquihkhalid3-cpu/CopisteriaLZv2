@@ -14,6 +14,18 @@ let config = {
     finishing: 'individual',
     files: []
 };
+// Au début du fichier, après la déclaration de pricing, ajouter :
+function initializeDefaultPricing() {
+    // Prix par défaut si l'API ne répond pas
+    if (!pricing['A4'] || !pricing['A4']['80g']) {
+        pricing['A4'] = pricing['A4'] || {};
+        pricing['A4']['80g'] = pricing['A4']['80g'] || {};
+        pricing['A4']['80g']['bw'] = 0.05;
+        pricing['A4']['80g']['color'] = 0.15;
+    }
+    calculatePrice();
+}
+
 
 // Pricing data (corresponds to your SQL table)
 const pricing = {
@@ -59,30 +71,40 @@ function updateActiveButton(container, activeData, value) {
 }
 
 function calculatePrice() {
-    if (config.files.length === 0) {
+    // Vérifier que les données pricing existent
+    if (!pricing[config.paperSize] || 
+        !pricing[config.paperSize][config.paperWeight] || 
+        !pricing[config.paperSize][config.paperWeight][config.colorMode]) {
         updatePriceDisplay(0);
         return;
     }
-
-    let totalPages = config.files.reduce((sum, file) => sum + (file.pages || 1), 0);
+    
+    let totalPages = config.files.length > 0 
+        ? config.files.reduce((sum, file) => sum + (file.pages || 1), 0) 
+        : 1;
+    
     let basePrice = pricing[config.paperSize][config.paperWeight][config.colorMode];
     let totalPrice = basePrice * totalPages * config.copies;
     
-    // Add finishing cost
-    totalPrice += finishingCosts[config.finishing] * config.copies;
+    // Vérifier que finishingCosts existe
+    let finishingCost = finishingCosts[config.finishing] || 0;
+    totalPrice += finishingCost * config.copies;
 
     updatePriceDisplay(totalPrice);
 }
 
 function updatePriceDisplay(price) {
+    // Vérifier que price est un nombre valide
+    const validPrice = isNaN(price) || price < 0 ? 0 : price;
+    
     const totalPriceElement = document.getElementById('total-price');
     const priceDisplayElement = document.getElementById('price-display');
     
     if (totalPriceElement) {
-        totalPriceElement.textContent = price.toFixed(2) + ' €';
+        totalPriceElement.textContent = validPrice.toFixed(2) + ' €';
     }
     if (priceDisplayElement) {
-        priceDisplayElement.textContent = price.toFixed(2);
+        priceDisplayElement.textContent = validPrice.toFixed(2);
     }
 }
 
@@ -312,6 +334,7 @@ function loadConfiguration() {
         console.warn('Could not load configuration from localStorage:', e);
     }
 }
+loadConfiguration();
 
 function updateUIFromConfig() {
     // Update copies counter
@@ -525,6 +548,30 @@ function initializeApp() {
     
     console.log('Copisteria app initialized successfully');
 }
+
+// Charger les prix depuis l'API au démarrage
+async function loadPricingFromAPI() {
+    try {
+        const response = await fetch('api/get-pricing.php');
+        const data = await response.json();
+        if (data.success) {
+            Object.assign(pricing, data.pricing);
+        }
+        
+        const finishingResponse = await fetch('api/get-finishing.php');
+        const finishingData = await finishingResponse.json();
+        if (finishingData.success) {
+            Object.assign(finishingCosts, finishingData.finishing_costs);
+        }
+        
+        calculatePrice(); // Recalculer avec les nouveaux prix
+    } catch (error) {
+        console.warn('Impossible de charger les prix depuis l\'API');
+    }
+}
+
+// Appeler au démarrage
+loadPricingFromAPI();
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

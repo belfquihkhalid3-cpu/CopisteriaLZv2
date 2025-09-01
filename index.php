@@ -65,7 +65,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
     <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 hidden" id="user-dropdown">
         <?php if ($user_id): ?>
             <a href="account.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mi cuenta</a>
-            <a href="cart.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mis pedidos</a>
+            <a href="orders.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mis pedidos</a>
             <hr class="my-1">
             <a href="logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Cerrar sesión</a>
         <?php else: ?>
