@@ -341,16 +341,22 @@ async function uploadFileToServer(file) {
     }
 }
 // Version corrigée pour détecter la connexion
-async function isUserLoggedIn() {
-    try {
-        const response = await fetch('api/check-session.php');
-        const result = await response.json();
-        console.log('Session check result:', result);
-        return result.logged_in === true;
-    } catch (error) {
-        console.error('Session check error:', error);
-        return false;
-    }
+// Version debug pour identifier le problème
+function isUserLoggedIn() {
+    console.log('=== CONNECTION CHECK ===');
+    
+    // Tests spécifiques et précis
+    const accountLink = document.querySelector('a[href="account.php"]');
+    const logoutLink = document.querySelector('a[href="logout.php"]');
+    
+    console.log('Account link found:', !!accountLink);
+    console.log('Logout link found:', !!logoutLink);
+    
+    // Si on a les liens de compte ET logout, c'est qu'on est connecté
+    const connected = accountLink && logoutLink;
+    
+    console.log('Final connection status:', connected);
+    return connected;
 }
 
 // Indicateur de progression
