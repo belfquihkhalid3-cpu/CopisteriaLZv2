@@ -280,10 +280,7 @@ $user = getCurrentUser();
         updateCartTotal(currentCart.folders);
     }
 });
-function displayAllFolders(folders) {
-    // Code pour afficher dynamiquement tous les dossiers
-    // (implementation détaillée sur votre signal)
-}
+
 
 
         function updateInterface() {
