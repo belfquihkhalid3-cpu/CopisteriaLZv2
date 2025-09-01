@@ -71,25 +71,42 @@ function updateActiveButton(container, activeData, value) {
 }
 
 function calculatePrice() {
-    // Vérifier que les données pricing existent
-    if (!pricing[config.paperSize] || 
-        !pricing[config.paperSize][config.paperWeight] || 
-        !pricing[config.paperSize][config.paperWeight][config.colorMode]) {
+    // Afficher 0 s'il n'y a pas de fichiers
+    if (config.files.length === 0) {
         updatePriceDisplay(0);
         return;
     }
     
-    let totalPages = config.files.length > 0 
-        ? config.files.reduce((sum, file) => sum + (file.pages || 1), 0) 
-        : 1;
+    console.log('Calcul prix avec config:', config);
+    console.log('Pricing disponible:', pricing);
     
+    // Vérifier que les données pricing existent
+    if (!pricing[config.paperSize]) {
+        console.error('Pas de pricing pour', config.paperSize);
+        updatePriceDisplay(0);
+        return;
+    }
+    
+    if (!pricing[config.paperSize][config.paperWeight]) {
+        console.error('Pas de pricing pour', config.paperSize, config.paperWeight);
+        updatePriceDisplay(0);
+        return;
+    }
+    
+    if (!pricing[config.paperSize][config.paperWeight][config.colorMode]) {
+        console.error('Pas de pricing pour', config.paperSize, config.paperWeight, config.colorMode);
+        updatePriceDisplay(0);
+        return;
+    }
+    
+    let totalPages = config.files.reduce((sum, file) => sum + (file.pages || 1), 0);
     let basePrice = pricing[config.paperSize][config.paperWeight][config.colorMode];
     let totalPrice = basePrice * totalPages * config.copies;
     
-    // Vérifier que finishingCosts existe
+    // Ajouter coût de finition
     let finishingCost = finishingCosts[config.finishing] || 0;
     totalPrice += finishingCost * config.copies;
-
+    
     updatePriceDisplay(totalPrice);
 }
 
@@ -231,6 +248,7 @@ function handleFiles(files) {
     }
 
     calculatePrice();
+    updateAddToCartButton();
     saveConfiguration();
 }
 
@@ -281,6 +299,7 @@ function removeFile(fileName) {
     }
 
     calculatePrice();
+      updateAddToCartButton();
     saveConfiguration();
 }
 
@@ -378,43 +397,26 @@ function addToCart() {
         return;
     }
     
-    // Prepare order data
-    const orderData = {
+    // Récupérer le panier existant
+    const existingCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
+    
+    // Créer un nouveau dossier
+    const newFolder = {
+        id: existingCart.folders.length + 1,
+        name: `Carpeta ${existingCart.folders.length + 1}`,
         files: config.files,
         configuration: config,
+        copies: config.copies,
         total: parseFloat(document.getElementById('price-display')?.textContent || 0),
         comments: document.getElementById('print-comments')?.value || ''
     };
     
-    console.log('Order data:', orderData);
+    existingCart.folders.push(newFolder);
     
-    // Here you would typically send data to server
-    // Example AJAX call:
-    /*
-    fetch('api/add-to-cart.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('Documentos añadidos al carrito correctamente', 'success');
-        } else {
-            showNotification('Error al añadir al carrito: ' + data.error, 'error');
-        }
-    })
-    .catch(error => {
-        showNotification('Error de conexión', 'error');
-    });
-    */
-    
-    // For now, just show success message
-    showNotification('Documentos añadidos al carrito correctamente', 'success');
+    // Sauvegarder et rediriger
+    sessionStorage.setItem('currentCart', JSON.stringify(existingCart));
+    window.location.href = 'cart.php';
 }
-
 function validateConfiguration() {
     const errors = [];
     
@@ -528,7 +530,7 @@ function initializeRealTimeUpdates() {
  * Initialize Application
  */
 function initializeApp() {
-    // Load saved configuration
+    // Load saved configuration FIRST
     loadConfiguration();
     
     // Initialize components
@@ -537,39 +539,71 @@ function initializeApp() {
     initializeMobileToggle();
     initializeRealTimeUpdates();
     
+    
     // Setup add to cart button
     const addToCartBtn = document.querySelector('.bg-green-500');
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', addToCart);
     }
-    
-    // Initial price calculation
-    calculatePrice();
-    
-    console.log('Copisteria app initialized successfully');
+     const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('from') === 'cart') {
+        showNotification('Agregue más documentos para crear una nueva carpeta', 'info');
+    }
+    // Load pricing AFTER everything is initialized
+    loadPricingFromAPI();
+       updateAddToCartButton();
+
 }
 
 // Charger les prix depuis l'API au démarrage
 async function loadPricingFromAPI() {
     try {
+      
+        
         const response = await fetch('api/get-pricing.php');
         const data = await response.json();
-        if (data.success) {
-            Object.assign(pricing, data.pricing);
+        
+     
+        
+        if (data.success && data.pricing) {
+            // Convertir la structure BDD vers JS
+            for (let size in data.pricing) {
+                for (let weight in data.pricing[size]) {
+                    for (let color in data.pricing[size][weight]) {
+                        if (!pricing[size]) pricing[size] = {};
+                        if (!pricing[size][weight]) pricing[size][weight] = {};
+                        
+                        // Mapper BW/COLOR vers bw/color
+                        const colorKey = color === 'BW' ? 'bw' : 'color';
+                        pricing[size][weight][colorKey] = data.pricing[size][weight][color];
+                    }
+                }
+            }
         }
         
+     
+        
+        // Charger les coûts de finition
         const finishingResponse = await fetch('api/get-finishing.php');
         const finishingData = await finishingResponse.json();
+        
+        
+        
         if (finishingData.success) {
             Object.assign(finishingCosts, finishingData.finishing_costs);
         }
         
-        calculatePrice(); // Recalculer avec les nouveaux prix
+       
+        
+        // Recalculer le prix maintenant que les données sont chargées
+        calculatePrice();
+        
     } catch (error) {
-        console.warn('Impossible de charger les prix depuis l\'API');
+        console.error('Erreur chargement prix:', error);
+        // Utiliser les prix par défaut en cas d'erreur
+        calculatePrice();
     }
 }
-
 // Appeler au démarrage
 loadPricingFromAPI();
 
@@ -867,3 +901,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function updateAddToCartButton() {
+    const addToCartBtn = document.querySelector('.bg-green-500');
+    if (!addToCartBtn) return;
+    
+    if (config.files.length > 0) {
+        // Activer le bouton
+        addToCartBtn.disabled = false;
+        addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        addToCartBtn.classList.add('hover:bg-green-600');
+        addToCartBtn.textContent = 'Añadir al carro';
+    } else {
+        // Désactiver le bouton
+        addToCartBtn.disabled = true;
+        addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        addToCartBtn.classList.remove('hover:bg-green-600');
+        addToCartBtn.textContent = 'Subir archivos primero';
+    }
+}

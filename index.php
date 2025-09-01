@@ -334,7 +334,15 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
             </div>
 
             <!-- Upload Zone -->
+             <div class="hidden p-6 border-t border-gray-200" id="file-list">
+                <h4 class="font-medium text-gray-800 mb-4">Documentos subidos:</h4>
+                <div id="files-container" class="space-y-2">
+                    <!-- Files will be dynamically added here -->
+                </div>
+            </div>
             <div class="flex-1 flex items-center justify-center p-8">
+                  <!-- File List (initially hidden) -->
+            
                 <div class="upload-zone w-full max-w-2xl h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer" id="upload-zone">
                     <!-- Illustration -->
                     <div class="mb-6">
@@ -375,13 +383,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                 </div>
             </div>
 
-            <!-- File List (initially hidden) -->
-            <div class="hidden p-6 border-t border-gray-200" id="file-list">
-                <h4 class="font-medium text-gray-800 mb-4">Documentos subidos:</h4>
-                <div id="files-container" class="space-y-2">
-                    <!-- Files will be dynamically added here -->
-                </div>
-            </div>
+          
         </main>
     </div>
 <!-- Modal d'inscription -->
