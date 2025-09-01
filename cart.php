@@ -4,7 +4,6 @@ require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/user_functions.php';
 
-// Vérifier si l'utilisateur est connecté
 if (!isLoggedIn()) {
     header('Location: index.php');
     exit();
@@ -36,27 +35,24 @@ $user = getCurrentUser();
                 </div>
                 
                 <div class="flex items-center space-x-4">
-                    <!-- Botón Imprimir -->
                     <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
                         <i class="fas fa-print"></i>
                         <span>Imprimir</span>
                     </button>
                     
-                    <!-- Total carrito -->
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-shopping-cart text-blue-500"></i>
                         <div class="text-center">
                             <div class="text-sm text-gray-600">Total carrito</div>
                             <div class="font-bold text-blue-600">
-                                <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded" id="cart-count">1</span>
-                                <span id="cart-total">2,01 €</span>
+                                <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded" id="cart-count">0</span>
+                                <span id="cart-total">0,00 €</span>
                             </div>
                             <div class="text-xs text-gray-500">(Envío incluido)</div>
                         </div>
                     </div>
                     
-                    <!-- Menu Utilisateur -->
-                    <div class="relative" id="user-menu">
+                    <div class="relative">
                         <button class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">
                             <i class="fas fa-bars text-gray-600"></i>
                             <i class="fas fa-user text-gray-600"></i>
@@ -71,7 +67,7 @@ $user = getCurrentUser();
         <div class="grid grid-cols-12 gap-6">
             
             <!-- Colonne gauche - Carpetas de impresión -->
-            <div class="col-span-8">
+            <div class="col-span-8" id="folders-container">
                 
                 <!-- Header section -->
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -84,99 +80,21 @@ $user = getCurrentUser();
                                 <h2 class="text-lg font-semibold text-gray-800">Carpetas de impresión</h2>
                                 <p class="text-sm text-gray-600">
                                     <i class="fas fa-folder mr-1"></i>
-                                    <span id="folder-count">1</span> carpetas para imprimir
+                                    <span id="folder-count">0</span> carpetas para imprimir
                                 </p>
                             </div>
                         </div>
-                      <button onclick="createNewFolder()" class="flex items-center space-x-2 px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
-    <i class="fas fa-plus"></i>
-    <span>Crear nueva carpeta</span>
-</button>
+                        <button onclick="createNewFolder()" class="flex items-center space-x-2 px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                            <i class="fas fa-plus"></i>
+                            <span>Crear nueva carpeta</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Carpeta sin título -->
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="bg-blue-500 text-white w-8 h-8 rounded flex items-center justify-center font-semibold">
-                                1
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Carpeta sin título</h3>
-                                <i class="fas fa-edit text-gray-400 text-sm cursor-pointer ml-2"></i>
-                            </div>
-                            <!-- Badges configuration -->
-                            <div class="flex flex-wrap gap-1">
-                                <span class="badge badge-blue" id="config-color">BN</span>
-                                <span class="badge badge-green" id="config-size">A4</span>
-                                <span class="badge badge-orange" id="config-weight">80</span>
-                                <span class="badge badge-purple" id="config-sides">DC</span>
-                                <span class="badge badge-teal" id="config-finishing">IN</span>
-                                <span class="badge badge-cyan" id="config-orientation">VE</span>
-                                <span class="badge badge-pink" id="config-copies">LL</span>
-                                <span class="badge badge-gray" id="config-special">SA</span>
-                                <span class="badge badge-yellow" id="config-binding">SP</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <!-- Controls de quantité -->
-                            <div class="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                                <i class="fas fa-copy text-blue-500"></i>
-                                <span class="text-sm text-gray-600">Copias</span>
-                                <button onclick="changeQuantity(-1)" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
-                                    <i class="fas fa-minus text-xs"></i>
-                                </button>
-                                <span class="font-semibold px-2" id="quantity-display">1</span>
-                                <button onclick="changeQuantity(1)" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600">
-                                    <i class="fas fa-plus text-xs"></i>
-                                </button>
-                            </div>
-                            <!-- Price -->
-                            <div class="text-right">
-                                <div class="text-lg font-bold text-gray-800" id="folder-price">0,02 €</div>
-                                <div class="text-xs text-gray-500">(IVA incluido)</div>
-                            </div>
-                            <!-- Actions -->
-                            <div class="flex space-x-2">
-                                <button class="p-2 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="p-2 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button class="p-2 text-gray-400 hover:text-red-500">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Les dossiers seront ajoutés ici dynamiquement -->
+                <div id="dynamic-folders"></div>
 
-                    <!-- Table des fichiers -->
-                    <div class="overflow-hidden">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pos.</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tamaño</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Páginas</th>
-                                </tr>
-                            </thead>
-                            <tbody id="files-table">
-                                <!-- Files will be populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Botón crear nueva carpeta -->
-                <div class="text-center">
-                   <button onclick="createNewFolder()" class="inline-flex items-center space-x-2 px-6 py-3 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-    <i class="fas fa-plus"></i>
-    <span>Crear nueva carpeta para imprimir</span>
-</button>
-                </div>
+                <!-- Bouton crear nueva carpeta (sera ajouté dynamiquement) -->
 
             </div>
 
@@ -203,7 +121,6 @@ $user = getCurrentUser();
                     </div>
 
                     <div class="space-y-4">
-                        <!-- Dirección de envío -->
                         <div>
                             <h4 class="font-medium text-gray-700 mb-2">Dirección de envío</h4>
                             <div class="text-sm text-gray-500 mb-2">No proporcionada</div>
@@ -212,7 +129,6 @@ $user = getCurrentUser();
                             </button>
                         </div>
 
-                        <!-- Envío Low-Cost -->
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center space-x-2">
@@ -240,61 +156,408 @@ $user = getCurrentUser();
                 </div>
 
                 <!-- Método de pago -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Método de pago</h3>
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
-                            <div>
-                                <div class="font-medium">Pagar con tarjeta</div>
-                                <div class="text-sm text-gray-500">Pago seguro cifrado con certif...</div>
-                            </div>
-                        </div>
-                        <i class="fas fa-chevron-right text-gray-400"></i>
-                    </div>
-                </div>
+               <!-- Método de pago -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="font-semibold text-gray-800 mb-4">Método de pago</h3>
+    <button onclick="openPaymentModal()" class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
+            <div>
+                <div class="font-medium" id="selected-payment-method">Pagar con tarjeta</div>
+                <div class="text-sm text-gray-500">Pago seguro cifrado con certif...</div>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right text-gray-400"></i>
+    </button>
+</div>
+
+
+
+   <div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="font-semibold text-gray-800 mb-4">Resumen del pedido</h3>
+    
+    <!-- Code promotionnel -->
+    <div class="flex items-center justify-between mb-4">
+        <span class="text-sm text-gray-700">¿Tienes un código promocional?</span>
+        <button onclick="togglePromoCode()" class="text-blue-500 text-sm font-medium hover:text-blue-600">
+            Añadir
+        </button>
+    </div>
+    
+    <!-- Input code promo (caché par défaut) -->
+    <div id="promo-code-section" class="hidden mb-4">
+        <div class="flex space-x-2">
+            <input type="text" id="promo-code-input" placeholder="Código promocional" 
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <button onclick="applyPromoCode()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
+                Aplicar
+            </button>
+        </div>
+        <div id="promo-message" class="hidden mt-2 text-sm"></div>
+    </div>
+    
+    <!-- Détails prix -->
+    <div class="space-y-3 py-4 border-t border-gray-200">
+        
+        <!-- Total -->
+        <div class="flex justify-between items-center">
+            <span class="text-gray-700">Subtotal</span>
+            <span class="font-medium" id="order-subtotal">0,02 €</span>
+        </div>
+        
+        <!-- Remise (si applicable) -->
+        <div id="discount-line" class="flex justify-between items-center text-green-600 hidden">
+            <span class="text-sm">Descuento (<span id="discount-code"></span>)</span>
+            <span class="text-sm font-medium" id="discount-amount">-0,00 €</span>
+        </div>
+        
+        <!-- Reconnu/Gratuit -->
+        <div class="flex justify-between items-center">
+            <span class="text-gray-700">Envío</span>
+            <span class="font-medium text-gray-500">GRATIS</span>
+        </div>
+        
+    </div>
+    
+    <!-- Total à payer -->
+    <div class="border-t border-gray-200 pt-4">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <div class="font-semibold text-gray-800 text-lg">TOTAL A PAGAR</div>
+                <div class="text-xs text-gray-500">(Impuestos incluidos)</div>
+            </div>
+            <div class="text-2xl font-bold text-green-600" id="final-total">0,02€</div>
+        </div>
+        
+        <!-- Bouton Acheter -->
+        <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg mb-3 transition-colors">
+            Comprar ahora
+        </button>
+        
+        <!-- Sécurité -->
+        <div class="flex items-center justify-center space-x-2 text-sm text-gray-600 mb-3">
+            <i class="fas fa-lock text-green-500"></i>
+            <span>Pago seguro en línea</span>
+        </div>
+        
+        <!-- Conditions -->
+        <div class="text-xs text-gray-500 text-center">
+            Al hacer clic en « <strong>Comprar ahora</strong> », indica que acepta las 
+            <a href="#" class="text-blue-500 hover:underline">condiciones generales de venta</a>.
+        </div>
+    </div>
+</div>
+
+</div>
 
             </div>
 
         </div>
     </div>
+<!-- Modal Métodos de pago -->
+<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+        
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Métodos de pago</h2>
+            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-4">
+            <p class="text-gray-600 text-sm mb-6">Selecciona un método de pago</p>
+            
+            <!-- Payment options -->
+            <div class="space-y-3">
+                
+                <!-- Pagar con tarjeta -->
+                <div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('card', 'Pagar con tarjeta', 'Pago seguro cifrado con certificado de seguridad SSL')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-credit-card text-gray-600 text-xl"></i>
+                            <div>
+                                <div class="font-medium text-gray-800">Pagar con tarjeta</div>
+                                <div class="text-sm text-gray-500">Pago seguro cifrado con certificado de seguridad SSL</div>
+                            </div>
+                        </div>
+                        <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pago con Bizum -->
+                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('bizum', 'Pago con Bizum', 'Se requiere tener activado Bizum para compras online')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-mobile-alt text-gray-600 text-xl"></i>
+                            <div>
+                                <div class="font-medium text-gray-800">Pago con Bizum</div>
+                                <div class="text-sm text-gray-500">Se requiere tener activado Bizum para compras online</div>
+                            </div>
+                        </div>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                    </div>
+                </div>
+                
+                <!-- Transferencia bancaria -->
+                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-university text-gray-600 text-xl"></i>
+                            <div>
+                                <div class="font-medium text-gray-800">Transferencia bancaria</div>
+                                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
+                            </div>
+                        </div>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                    </div>
+                </div>
+                
+                <!-- Pago en tienda -->
+                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('store', 'Pago en tienda', 'Realiza el pago en nuestra tienda física seleccionada')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-store text-gray-600 text-xl"></i>
+                            <div>
+                                <div class="font-medium text-gray-800">Pago en tienda</div>
+                                <div class="text-sm text-gray-500">Realiza el pago en nuestra tienda física seleccionada</div>
+                            </div>
+                        </div>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        
+    </div>
+    
+</div>
 
     <script>
-        let cartConfig = {
-            copies: 1,
-            files: []
-        };
+        // Variables globales
+        let currentCartData = { folders: [] };
 
-        // Récupérer les données du panier depuis sessionStorage
-       document.addEventListener('DOMContentLoaded', function() {
-    const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== CART.PHP INITIALIZED ===');
+            initializeCart();
+        });
+
+        function initializeCart() {
+            // Vérifier les différentes sources de données
+            const cartData = sessionStorage.getItem('cartData');
+            const currentCart = sessionStorage.getItem('currentCart');
+            
+            console.log('cartData from sessionStorage:', cartData);
+            console.log('currentCart from sessionStorage:', currentCart);
+            
+            if (currentCart) {
+                // Utiliser currentCart (format multi-dossiers)
+                currentCartData = JSON.parse(currentCart);
+            } else if (cartData) {
+                // Convertir cartData (format simple) en currentCart
+                const parsedData = JSON.parse(cartData);
+                currentCartData = {
+                    folders: [{
+                        id: 1,
+                        name: 'Carpeta sin título',
+                        files: parsedData.files || [],
+                        configuration: parsedData.configuration || {},
+                        copies: parsedData.configuration?.copies || 1,
+                        total: parsedData.total || 0,
+                        comments: parsedData.comments || ''
+                    }]
+                };
+                
+                // Sauvegarder au nouveau format
+                sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+                sessionStorage.removeItem('cartData'); // Nettoyer l'ancien
+            } else {
+                // Pas de données, retourner à index
+                console.log('No cart data found, redirecting to index');
+                window.location.href = 'index.php';
+                return;
+            }
+            
+            console.log('Final cart data:', currentCartData);
+            
+            if (currentCartData.folders && currentCartData.folders.length > 0) {
+                displayFolders();
+                updateCartSummary();
+                 // Synchroniser le prix initial
+        syncPriceToSummary();
+        
+        // Activer la synchronisation automatique
+        setupPriceSync();
+            } else {
+                window.location.href = 'index.php';
+            }
+        }
+
+        // Fonction pour observer les changements du prix du panier
+function setupPriceSync() {
+    const cartTotalElement = document.getElementById('cart-total');
     
-    if (currentCart.folders && currentCart.folders.length > 0) {
-        // Mettre à jour le compte de dossiers
-        document.getElementById('folder-count').textContent = currentCart.folders.length;
+    if (!cartTotalElement) return;
+    
+    // Observer les changements du texte du prix du panier
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                // Le prix du panier a changé, synchroniser avec le résumé
+                syncPriceToSummary();
+            }
+        });
+    });
+    
+    // Observer le contenu du prix du panier
+    observer.observe(cartTotalElement, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    console.log('✅ Synchronisation automatique prix activée');
+}
+
+// Fonction simple pour synchroniser le prix du panier avec le résumé
+function syncPriceToSummary() {
+    const cartTotalElement = document.getElementById('cart-total');
+    const orderSubtotalElement = document.getElementById('order-subtotal');
+    const finalTotalElement = document.getElementById('final-total');
+    
+    if (!cartTotalElement || !orderSubtotalElement || !finalTotalElement) return;
+    
+    const cartPrice = cartTotalElement.textContent; // Ex: "34,80 €"
+    
+    // Si pas de code promo appliqué, copier le prix directement
+    if (document.getElementById('discount-line').classList.contains('hidden')) {
+        orderSubtotalElement.textContent = cartPrice;
+        finalTotalElement.textContent = cartPrice.replace(' €', '€');
+    } else {
+        // Si code promo appliqué, garder le subtotal original et recalculer le final
+        const originalPrice = parseFloat(cartPrice.replace(',', '.').replace(' €', ''));
+        const discountText = document.getElementById('discount-amount').textContent;
+        const discountAmount = parseFloat(discountText.replace('-', '').replace(',', '.').replace(' €', ''));
+        const finalPrice = originalPrice - discountAmount;
         
-        // Afficher tous les dossiers
-        displayAllFolders(currentCart.folders);
-        
-        // Calculer le total général
-        updateCartTotal(currentCart.folders);
+        orderSubtotalElement.textContent = cartPrice;
+        finalTotalElement.textContent = finalPrice.toFixed(2).replace('.', ',') + '€';
     }
-});
+}
 
 
-
-        function updateInterface() {
-            // Mettre à jour le nombre de copies
-            document.getElementById('quantity-display').textContent = cartConfig.copies;
+        function displayFolders() {
+            const dynamicContainer = document.getElementById('dynamic-folders');
+            dynamicContainer.innerHTML = '';
             
-            // Remplir la table des fichiers
-            const filesTable = document.getElementById('files-table');
-            filesTable.innerHTML = '';
+            currentCartData.folders.forEach((folder, index) => {
+                const folderElement = createFolderHTML(folder);
+                dynamicContainer.appendChild(folderElement);
+            });
             
-            cartConfig.files.forEach((file, index) => {
-                const row = document.createElement('tr');
-                row.className = 'border-t border-gray-200';
-                row.innerHTML = `
+            // Ajouter bouton "Crear nueva carpeta" à la fin
+            addCreateFolderButton(dynamicContainer);
+        }
+
+        function createFolderHTML(folder) {
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'bg-white rounded-lg shadow-sm p-6 mb-6';
+            folderDiv.setAttribute('data-folder-id', folder.id);
+            
+            folderDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-500 text-white w-8 h-8 rounded flex items-center justify-center font-semibold">
+                            ${folder.id}
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">${folder.name}</h3>
+                            <i class="fas fa-edit text-gray-400 text-sm cursor-pointer ml-2" onclick="editFolderName(${folder.id})"></i>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${generateConfigBadges(folder.configuration)}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
+                            <i class="fas fa-copy text-blue-500"></i>
+                            <span class="text-sm text-gray-600">Copias</span>
+                            <button onclick="changeFolderQuantity(${folder.id}, -1)" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
+                                <i class="fas fa-minus text-xs"></i>
+                            </button>
+                            <span class="font-semibold px-2" id="quantity-${folder.id}">${folder.copies}</span>
+                            <button onclick="changeFolderQuantity(${folder.id}, 1)" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-800" id="price-${folder.id}">${folder.total.toFixed(2)} €</div>
+                            <div class="text-xs text-gray-500">(IVA incluido)</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="duplicateFolder(${folder.id})" class="p-2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="deleteFolder(${folder.id})" class="p-2 text-gray-400 hover:text-red-500">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pos.</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tamaño</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Páginas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateFilesTable(folder.files)}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            return folderDiv;
+        }
+
+        function generateConfigBadges(config) {
+            if (!config) return '';
+            
+            const finishingCodes = {
+                'individual': 'IN', 'grouped': 'AG', 'none': 'SA',
+                'spiral': 'EN', 'staple': 'GR', 'laminated': 'PL',
+                'perforated2': 'P2', 'perforated4': 'P4'
+            };
+            
+            return `
+                <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
+                <span class="badge badge-green">${config.paperSize || 'A4'}</span>
+                <span class="badge badge-orange">${(config.paperWeight || '80g').replace('g', '')}</span>
+                <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
+                <span class="badge badge-teal">${finishingCodes[config.finishing] || 'IN'}</span>
+                <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
+                <span class="badge badge-pink">${config.copies || 1}</span>
+            `;
+        }
+
+        function generateFilesTable(files) {
+            if (!files || files.length === 0) return '<tr><td colspan="4" class="text-center py-4 text-gray-500">Sin archivos</td></tr>';
+            
+            return files.map((file, index) => `
+                <tr class="border-t border-gray-200">
                     <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
                     <td class="px-4 py-3">
                         <div class="flex items-center space-x-3">
@@ -307,39 +570,95 @@ $user = getCurrentUser();
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">${formatFileSize(file.size)}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">${file.pages || 1}</td>
-                `;
-                filesTable.appendChild(row);
-            });
-            
-            // Calculer et afficher le prix
-            calculateCartPrice();
+                </tr>
+            `).join('');
         }
 
-        function updateConfigBadges(config) {
-            if (!config) return;
-            
-            document.getElementById('config-color').textContent = config.colorMode === 'bw' ? 'BN' : 'CO';
-            document.getElementById('config-size').textContent = config.paperSize;
-            document.getElementById('config-weight').textContent = config.paperWeight.replace('g', '');
-            document.getElementById('config-sides').textContent = config.sides === 'single' ? 'UC' : 'DC';
-            document.getElementById('config-orientation').textContent = config.orientation === 'portrait' ? 'VE' : 'HO';
+        function addCreateFolderButton(container) {
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'text-center mt-6';
+            buttonDiv.innerHTML = `
+                <button onclick="createNewFolder()" class="inline-flex items-center space-x-2 px-6 py-3 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                    <i class="fas fa-plus"></i>
+                    <span>Crear nueva carpeta para imprimir</span>
+                </button>
+            `;
+            container.appendChild(buttonDiv);
         }
 
-        function changeQuantity(delta) {
-            cartConfig.copies = Math.max(1, cartConfig.copies + delta);
-            document.getElementById('quantity-display').textContent = cartConfig.copies;
-            calculateCartPrice();
+        // Actions sur les dossiers
+        function changeFolderQuantity(folderId, delta) {
+            const folder = currentCartData.folders.find(f => f.id === folderId);
+            if (folder) {
+                folder.copies = Math.max(1, folder.copies + delta);
+                document.getElementById(`quantity-${folderId}`).textContent = folder.copies;
+                
+                // Recalculer prix (simulation)
+                folder.total = folder.total / (folder.copies - delta) * folder.copies;
+                document.getElementById(`price-${folderId}`).textContent = folder.total.toFixed(2) + ' €';
+                
+                sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+                updateCartSummary();
+            }
         }
 
-        function calculateCartPrice() {
-            // Simulation du calcul (utilisez votre logique de pricing)
-            const basePrice = 0.02; // Prix de base
-            const totalPrice = basePrice * cartConfig.copies;
+        function editFolderName(folderId) {
+            const folder = currentCartData.folders.find(f => f.id === folderId);
+            if (folder) {
+                const newName = prompt('Nuevo nombre para la carpeta:', folder.name);
+                if (newName && newName.trim()) {
+                    folder.name = newName.trim();
+                    sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+                    displayFolders();
+                }
+            }
+        }
+
+        function duplicateFolder(folderId) {
+            const folder = currentCartData.folders.find(f => f.id === folderId);
+            if (folder) {
+                const newFolder = {
+                    ...folder,
+                    id: Math.max(...currentCartData.folders.map(f => f.id)) + 1,
+                    name: folder.name + ' (copia)'
+                };
+                currentCartData.folders.push(newFolder);
+                sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+                displayFolders();
+                updateCartSummary();
+                showNotification('Carpeta duplicada correctamente', 'success');
+            }
+        }
+
+        function deleteFolder(folderId) {
+            if (confirm('¿Eliminar esta carpeta?')) {
+                currentCartData.folders = currentCartData.folders.filter(f => f.id !== folderId);
+                if (currentCartData.folders.length === 0) {
+                    sessionStorage.removeItem('currentCart');
+                    window.location.href = 'index.php';
+                } else {
+                    sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+                    displayFolders();
+                    updateCartSummary();
+                }
+            }
+        }
+
+        function createNewFolder() {
+            sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+            window.location.href = 'index.php?from=cart';
+        }
+
+        function updateCartSummary() {
+            const totalPrice = currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0);
+            const totalItems = currentCartData.folders.length;
             
-            document.getElementById('folder-price').textContent = totalPrice.toFixed(2) + ' €';
             document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' €';
+            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('folder-count').textContent = totalItems;
         }
 
+        // Fonctions utilitaires
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -347,311 +666,85 @@ $user = getCurrentUser();
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
-        function createNewFolder() {
-    // Sauvegarder le panier actuel
-    const currentCart = {
-        folders: [
-            {
-                id: 1,
-                name: 'Carpeta sin título',
-                files: cartConfig.files,
-                copies: cartConfig.copies,
-                price: document.getElementById('folder-price').textContent
-            }
-        ]
-    };
-    
-    sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
-    
-    // Rediriger vers index.php pour ajouter plus de documents
-    window.location.href = 'index.php?from=cart';
-}
-function displayAllFolders(folders) {
-    const foldersContainer = document.querySelector('.col-span-8');
-    
-    // Garder le header, supprimer le reste
-    const headerSection = foldersContainer.querySelector('.bg-white.rounded-lg.shadow-sm.p-6.mb-6');
-    foldersContainer.innerHTML = '';
-    foldersContainer.appendChild(headerSection);
-    
-    // Afficher chaque dossier
-    folders.forEach((folder, index) => {
-        const folderElement = createFolderElement(folder, index);
-        foldersContainer.appendChild(folderElement);
-    });
-    
-    // Ajouter le bouton "Crear nueva carpeta" à la fin
-    const createButton = document.createElement('div');
-    createButton.className = 'text-center mt-6';
-    createButton.innerHTML = `
-        <button onclick="createNewFolder()" class="inline-flex items-center space-x-2 px-6 py-3 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-            <i class="fas fa-plus"></i>
-            <span>Crear nueva carpeta para imprimir</span>
-        </button>
-    `;
-    foldersContainer.appendChild(createButton);
-}
 
-function createFolderElement(folder, index) {
-    const folderDiv = document.createElement('div');
-    folderDiv.className = 'bg-white rounded-lg shadow-sm p-6 mb-6';
-    folderDiv.setAttribute('data-folder-id', folder.id);
-    
-    folderDiv.innerHTML = `
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-500 text-white w-8 h-8 rounded flex items-center justify-center font-semibold">
-                    ${folder.id}
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-800">${folder.name}</h3>
-                    <i class="fas fa-edit text-gray-400 text-sm cursor-pointer ml-2" onclick="editFolderName(${folder.id})"></i>
-                </div>
-                <!-- Badges configuration -->
-                <div class="flex flex-wrap gap-1">
-                    ${generateConfigBadges(folder.configuration)}
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <!-- Controls de quantité -->
-                <div class="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                    <i class="fas fa-copy text-blue-500"></i>
-                    <span class="text-sm text-gray-600">Copias</span>
-                    <button onclick="changeFolderQuantity(${folder.id}, -1)" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
-                        <i class="fas fa-minus text-xs"></i>
-                    </button>
-                    <span class="font-semibold px-2" id="quantity-${folder.id}">${folder.copies}</span>
-                    <button onclick="changeFolderQuantity(${folder.id}, 1)" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600">
-                        <i class="fas fa-plus text-xs"></i>
-                    </button>
-                </div>
-                <!-- Price -->
-                <div class="text-right">
-                    <div class="text-lg font-bold text-gray-800" id="price-${folder.id}">${folder.total.toFixed(2)} €</div>
-                    <div class="text-xs text-gray-500">(IVA incluido)</div>
-                </div>
-                <!-- Actions -->
-                <div class="flex space-x-2">
-                    <button onclick="editFolder(${folder.id})" class="p-2 text-gray-400 hover:text-gray-600" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="duplicateFolder(${folder.id})" class="p-2 text-gray-400 hover:text-gray-600" title="Duplicar">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button onclick="deleteFolder(${folder.id})" class="p-2 text-gray-400 hover:text-red-500" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table des fichiers -->
-        <div class="overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pos.</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tamaño</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Páginas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${generateFilesRows(folder.files)}
-                </tbody>
-            </table>
-        </div>
-    `;
-    
-    return folderDiv;
-}
-
-function generateConfigBadges(config) {
-    if (!config) return '';
-    
-    return `
-        <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
-        <span class="badge badge-green">${config.paperSize}</span>
-        <span class="badge badge-orange">${config.paperWeight.replace('g', '')}</span>
-        <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
-        <span class="badge badge-teal">${getFinishingCode(config.finishing)}</span>
-        <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
-        <span class="badge badge-pink">${config.copies}</span>
-    `;
-}
-
-function getFinishingCode(finishing) {
-    const codes = {
-        'individual': 'IN',
-        'grouped': 'AG', 
-        'none': 'SA',
-        'spiral': 'EN',
-        'staple': 'GR',
-        'laminated': 'PL',
-        'perforated2': 'P2',
-        'perforated4': 'P4'
-    };
-    return codes[finishing] || 'SA';
-}
-
-function generateFilesRows(files) {
-    return files.map((file, index) => `
-        <tr class="border-t border-gray-200">
-            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-            <td class="px-4 py-3">
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-file-pdf text-red-500"></i>
-                    <div>
-                        <div class="font-medium text-gray-800">${file.name}</div>
-                        <div class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full inline-block">Sin acabado</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-600">${formatFileSize(file.size)}</td>
-            <td class="px-4 py-3 text-sm text-gray-600">${file.pages || 1}</td>
-        </tr>
-    `).join('');
-}
-
-// Fonctions d'action sur les dossiers
-function changeFolderQuantity(folderId, delta) {
-    const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
-    const folder = currentCart.folders.find(f => f.id === folderId);
-    
-    if (folder) {
-        folder.copies = Math.max(1, folder.copies + delta);
-        
-        // Mettre à jour l'affichage
-        document.getElementById(`quantity-${folderId}`).textContent = folder.copies;
-        
-        // Recalculer le prix
-        recalculateFolderPrice(folder);
-        
-        // Sauvegarder
-        sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
-        
-        // Mettre à jour le total général
-        updateCartTotal(currentCart.folders);
-    }
-}
-
-function editFolderName(folderId) {
-    const nameElement = document.querySelector(`[data-folder-id="${folderId}"] h3`);
-    const currentName = nameElement.textContent;
-    
-    const newName = prompt('Nuevo nombre para la carpeta:', currentName);
-    if (newName && newName.trim()) {
-        nameElement.textContent = newName.trim();
-        
-        // Sauvegarder dans sessionStorage
-        const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
-        const folder = currentCart.folders.find(f => f.id === folderId);
-        if (folder) {
-            folder.name = newName.trim();
-            sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg bg-${type === 'success' ? 'green' : 'blue'}-500 text-white`;
+            notification.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
         }
-    }
+
+        // Variables pour le paiement
+let selectedPayment = {
+    type: 'card',
+    title: 'Pagar con tarjeta',
+    description: 'Pago seguro cifrado con certificado de seguridad SSL'
+};
+
+function openPaymentModal() {
+    document.getElementById('paymentModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
-function duplicateFolder(folderId) {
-    const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
-    const folderToDuplicate = currentCart.folders.find(f => f.id === folderId);
-    
-    if (folderToDuplicate) {
-        const newFolder = {
-            ...folderToDuplicate,
-            id: Math.max(...currentCart.folders.map(f => f.id)) + 1,
-            name: folderToDuplicate.name + ' (copia)'
-        };
-        
-        currentCart.folders.push(newFolder);
-        sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
-        
-        // Recharger l'affichage
-        displayAllFolders(currentCart.folders);
-        updateCartTotal(currentCart.folders);
-        
-        showNotification('Carpeta duplicada correctamente', 'success');
-    }
+function closePaymentModal() {
+    document.getElementById('paymentModal').classList.add('hidden');
+    document.body.style.overflow = '';
 }
 
-function deleteFolder(folderId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta carpeta?')) {
-        const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
-        currentCart.folders = currentCart.folders.filter(f => f.id !== folderId);
-        
-        if (currentCart.folders.length === 0) {
-            // Si no hay más carpetas, volver a index
-            sessionStorage.removeItem('currentCart');
-            window.location.href = 'index.php';
-        } else {
-            sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
-            
-            // Recharger l'affichage
-            displayAllFolders(currentCart.folders);
-            updateCartTotal(currentCart.folders);
-        }
-        
-        showNotification('Carpeta eliminada', 'success');
-    }
-}
-
-function editFolder(folderId) {
-    // Sauvegarder l'ID du dossier à éditer
-    sessionStorage.setItem('editingFolderId', folderId);
-    
-    // Rediriger vers index.php pour modifier la configuration
-    window.location.href = 'index.php?edit=' + folderId;
-}
-
-function recalculateFolderPrice(folder) {
-    // Utiliser la même logique de pricing que dans main.js
-    // (simulation pour l'exemple)
-    const basePrice = 0.05; // Prix de base par page
-    const totalPages = folder.files.reduce((sum, file) => sum + (file.pages || 1), 0);
-    folder.total = basePrice * totalPages * folder.copies;
+function selectPaymentMethod(type, title, description) {
+    // Actualizar la sélection
+    selectedPayment = { type, title, description };
     
     // Mettre à jour l'affichage
-    document.getElementById(`price-${folder.id}`).textContent = folder.total.toFixed(2) + ' €';
-}
-
-function updateCartTotal(folders) {
-    const totalPrice = folders.reduce((sum, folder) => sum + folder.total, 0);
-    const totalItems = folders.length;
+    document.getElementById('selected-payment-method').textContent = title;
     
-    document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' €';
-    document.getElementById('cart-count').textContent = totalItems;
+    // Mettre à jour les styles des options
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.classList.remove('border-blue-500', 'bg-blue-50');
+        option.classList.add('border-gray-300');
+        
+        // Mettre à jour les cercles de sélection
+        const circle = option.querySelector('.w-5.h-5');
+        circle.classList.remove('border-blue-500', 'bg-blue-500');
+        circle.classList.add('border-gray-300');
+        circle.innerHTML = '';
+    });
     
-    // Mettre à jour le compte de dossiers
-    document.getElementById('folder-count').textContent = totalItems;
-}
-
-function showNotification(message, type = 'info') {
-    // Fonction de notification (utiliser la même que dans main.js)
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300`;
+    // Styler l'option sélectionnée
+    const selectedOption = event.currentTarget;
+    selectedOption.classList.remove('border-gray-300');
+    selectedOption.classList.add('border-blue-500', 'bg-blue-50');
     
-    const colors = {
-        'success': 'bg-green-500 text-white',
-        'error': 'bg-red-500 text-white',
-        'info': 'bg-blue-500 text-white'
-    };
+    const selectedCircle = selectedOption.querySelector('.w-5.h-5');
+    selectedCircle.classList.remove('border-gray-300');
+    selectedCircle.classList.add('border-blue-500', 'bg-blue-500');
+    selectedCircle.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
     
-    notification.className += ` ${colors[type] || colors.info}`;
-    notification.innerHTML = `
-        <div class="flex items-center space-x-2">
-            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
+    // Fermer le modal après 500ms
     setTimeout(() => {
-        notification.remove();
-    }, 3000);
+        closePaymentModal();
+    }, 500);
 }
 
+// Fermer modal si clic sur overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePaymentModal();
+            }
+        });
+    }
+});
+
+// Fermer avec Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePaymentModal();
+    }
+});
     </script>
 
 </body>

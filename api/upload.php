@@ -1,8 +1,4 @@
 <?php
-/**
- * API pour upload de fichiers - Copisteria
- */
-
 session_start();
 
 header('Content-Type: application/json');
@@ -17,14 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Méthode non autorisée']);
+    echo json_encode(['success' => false, 'error' => 'Método no permitido']);
     exit();
 }
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Utilisateur non connecté']);
+    echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);
     exit();
 }
 
@@ -35,28 +31,24 @@ try {
     $max_file_size = 50 * 1024 * 1024; // 50MB
     $allowed_types = [
         'application/pdf',
-        'application/msword',
+        'application/msword', 
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'text/plain'
     ];
     $allowed_extensions = ['pdf', 'doc', 'docx', 'txt'];
     
     $upload_dir = '../uploads/documents/';
-    $temp_dir = '../uploads/temp/';
     
-    // Créer les dossiers s'ils n'existent pas
+    // Créer le dossier s'il n'existe pas
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
-    }
-    if (!is_dir($temp_dir)) {
-        mkdir($temp_dir, 0755, true);
+        if (!mkdir($upload_dir, 0755, true)) {
+            throw new Exception('Impossible de créer le dossier uploads');
+        }
     }
     
-    // Vérifier si des fichiers ont été uploadés
+    // Vérifier les fichiers uploadés
     if (empty($_FILES['files'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Aucun fichier reçu']);
-        exit();
+        throw new Exception('Aucun fichier reçu');
     }
     
     $files = $_FILES['files'];
@@ -75,99 +67,90 @@ try {
             'size' => is_array($files['size']) ? $files['size'][$i] : $files['size']
         ];
         
-        // Vérifier les erreurs d'upload
+        // Vérifications
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = "Erreur upload pour {$file['name']}: " . $file['error'];
+            $errors[] = "Error upload {$file['name']}: código {$file['error']}";
             continue;
         }
         
-        // Vérifier la taille
         if ($file['size'] > $max_file_size) {
-            $errors[] = "Fichier {$file['name']} trop volumineux (max 50MB)";
+            $errors[] = "Archivo {$file['name']} demasiado grande (máx 50MB)";
             continue;
         }
         
-        // Vérifier l'extension
         $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if (!in_array($extension, $allowed_extensions)) {
-            $errors[] = "Extension non autorisée pour {$file['name']}";
+            $errors[] = "Extensión no permitida: {$file['name']}";
             continue;
         }
         
-        // Vérifier le type MIME
+        // Vérifier le type MIME réel
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
         
         if (!in_array($mime_type, $allowed_types)) {
-            $errors[] = "Type de fichier non autorisé pour {$file['name']}";
+            $errors[] = "Tipo MIME no válido: {$file['name']}";
             continue;
         }
         
-        // Générer un nom unique
+        // Générer nom unique
         $unique_name = uniqid('doc_') . '_' . time() . '.' . $extension;
         $file_path = $upload_dir . $unique_name;
         
         // Déplacer le fichier
-        if (move_uploaded_file($file['tmp_name'], $file_path)) {
-            // Compter les pages (simulation pour PDF)
-            $page_count = 1;
-            if ($extension === 'pdf' && extension_loaded('imagick')) {
-                try {
-                    $imagick = new Imagick($file_path);
-                    $page_count = $imagick->getNumberImages();
-                    $imagick->clear();
-                } catch (Exception $e) {
-                    // Garder 1 par défaut si erreur
-                    error_log("Erreur comptage pages PDF: " . $e->getMessage());
-                }
-            }
-            
-            // Calculer le hash du fichier
-            $file_hash = hash_file('sha256', $file_path);
-            
-            // Vérifier si le fichier existe déjà
-            $existing = fetchOne("SELECT id FROM files WHERE file_hash = ? AND user_id = ?", 
-                                [$file_hash, $_SESSION['user_id']]);
-            
-            if ($existing) {
-                unlink($file_path); // Supprimer le doublon
-                $errors[] = "Fichier {$file['name']} déjà uploadé";
-                continue;
-            }
-            
-            // Insérer en base de données
-            $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
-            
-            $stmt = executeQuery($sql, [
-                $_SESSION['user_id'],
-                $file['name'],
-                $unique_name,
-                $file_path,
-                $file['size'],
-                $mime_type,
-                $page_count,
-                $file_hash
-            ]);
-            
-            if ($stmt) {
-                $file_id = getLastInsertId();
-                $uploaded_files[] = [
-                    'id' => $file_id,
-                    'name' => $file['name'],
-                    'size' => $file['size'],
-                    'pages' => $page_count,
-                    'type' => $mime_type,
-                    'stored_name' => $unique_name
-                ];
-            } else {
-                unlink($file_path);
-                $errors[] = "Erreur base de données pour {$file['name']}";
-            }
-            
+        if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+            $errors[] = "Error al mover archivo: {$file['name']}";
+            continue;
+        }
+        
+        // Compter les pages pour PDF
+        $page_count = 1;
+        if ($extension === 'pdf') {
+            $page_count = countPDFPages($file_path);
+        }
+        
+        // Calculer hash
+        $file_hash = hash_file('sha256', $file_path);
+        
+        // Vérifier doublon
+        $existing = fetchOne("SELECT id FROM files WHERE file_hash = ? AND user_id = ?", 
+                            [$file_hash, $_SESSION['user_id']]);
+        
+        if ($existing) {
+            unlink($file_path);
+            $errors[] = "Archivo duplicado: {$file['name']}";
+            continue;
+        }
+        
+        // Sauvegarder en BDD
+        $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
+        
+        $stmt = executeQuery($sql, [
+            $_SESSION['user_id'],
+            $file['name'],
+            $unique_name,
+            $file_path,
+            $file['size'],
+            $mime_type,
+            $page_count,
+            $file_hash
+        ]);
+        
+        if ($stmt) {
+            $file_id = getLastInsertId();
+            $uploaded_files[] = [
+                'id' => $file_id,
+                'name' => $file['name'],
+                'size' => $file['size'],
+                'pages' => $page_count,
+                'type' => $mime_type,
+                'stored_name' => $unique_name
+            ];
         } else {
-            $errors[] = "Erreur déplacement fichier {$file['name']}";
+            unlink($file_path);
+            $errors[] = "Error base de datos: {$file['name']}";
         }
     }
     
@@ -180,18 +163,45 @@ try {
     
     if (!empty($errors)) {
         $response['errors'] = $errors;
+        $response['message'] = 'Algunos archivos tuvieron errores';
     }
     
     if (empty($uploaded_files)) {
         http_response_code(400);
-        $response['error'] = 'Aucun fichier n\'a pu être uploadé';
+        $response['error'] = 'No se pudo subir ningún archivo';
     }
     
     echo json_encode($response);
     
 } catch (Exception $e) {
-    error_log("Erreur upload: " . $e->getMessage());
+    error_log("Error upload: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Erreur serveur lors de l\'upload']);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Error del servidor: ' . $e->getMessage()
+    ]);
+}
+
+// Fonction pour compter pages PDF
+function countPDFPages($filepath) {
+    try {
+        if (extension_loaded('imagick')) {
+            $imagick = new Imagick($filepath);
+            $pages = $imagick->getNumberImages();
+            $imagick->clear();
+            return $pages;
+        } elseif (class_exists('PDFInfo')) {
+            $pdf = new PDFInfo($filepath);
+            return $pdf->pages;
+        } else {
+            // Méthode basique avec regex
+            $content = file_get_contents($filepath);
+            $pages = preg_match_all("/\/Page\W/", $content);
+            return max(1, $pages);
+        }
+    } catch (Exception $e) {
+        error_log("Erreur comptage pages PDF: " . $e->getMessage());
+        return 1;
+    }
 }
 ?>

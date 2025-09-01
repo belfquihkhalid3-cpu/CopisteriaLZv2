@@ -229,27 +229,148 @@ function initializeFileUpload() {
     });
 }
 
-function handleFiles(files) {
-    Array.from(files).forEach(file => {
-        const fileObj = {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            pages: Math.floor(Math.random() * 10) + 1 // Simulate page count
-        };
-        
-        config.files.push(fileObj);
-        addFileToList(fileObj);
-    });
-
-    const fileList = document.getElementById('file-list');
-    if (config.files.length > 0 && fileList) {
-        fileList.classList.remove('hidden');
+async function handleFiles(files) {
+    const fileArray = Array.from(files);
+    
+    // Vérifier la connexion utilisateur
+    if (!isUserLoggedIn()) {
+        showNotification('Debes iniciar sesión para subir archivos', 'error');
+        openLoginModal();
+        return;
     }
+    
+    // Afficher indicateur de chargement
+    showUploadProgress(true);
+    
+    for (let file of fileArray) {
+        try {
+            // Validation côté client
+            if (!validateFile(file)) {
+                continue;
+            }
+            
+            // Upload vers le serveur
+            const uploadedFile = await uploadFileToServer(file);
+            
+            if (uploadedFile) {
+                // Ajouter à la configuration
+                config.files.push(uploadedFile);
+                addFileToList(uploadedFile);
+                
+                showNotification(`${file.name} subido correctamente`, 'success');
+            }
+            
+        } catch (error) {
+            console.error('Erreur upload:', error);
+            showNotification(`Error al subir ${file.name}: ${error.message}`, 'error');
+        }
+    }
+    
+    // Masquer indicateur et mettre à jour
+    showUploadProgress(false);
+    
+    if (config.files.length > 0) {
+        const fileList = document.getElementById('file-list');
+        if (fileList) fileList.classList.remove('hidden');
+        calculatePrice();
+        updateAddToCartButton();
+        saveConfiguration();
+    }
+}
 
-    calculatePrice();
-    updateAddToCartButton();
-    saveConfiguration();
+// Validation fichier côté client
+function validateFile(file) {
+    // Types autorisés
+    const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain'
+    ];
+    
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'txt'];
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    
+    // Vérifier l'extension
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(extension)) {
+        showNotification(`Formato no permitido: ${file.name}. Solo PDF, DOC, DOCX, TXT`, 'error');
+        return false;
+    }
+    
+    // Vérifier le type MIME
+    if (!allowedTypes.includes(file.type)) {
+        showNotification(`Tipo de archivo no válido: ${file.name}`, 'error');
+        return false;
+    }
+    
+    // Vérifier la taille
+    if (file.size > maxSize) {
+        showNotification(`Archivo demasiado grande: ${file.name} (máx 50MB)`, 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+// Upload vers le serveur
+async function uploadFileToServer(file) {
+    const formData = new FormData();
+    formData.append('files', file);
+    
+    const response = await fetch('api/upload.php', {
+        method: 'POST',
+        body: formData
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+        throw new Error(result.error || 'Error desconocido');
+    }
+    
+    if (!result.files || result.files.length === 0) {
+        throw new Error('No se recibieron archivos del servidor');
+    }
+    
+    // Retourner le premier fichier uploadé
+    return result.files[0];
+}
+
+// Vérifier si utilisateur connecté
+function isUserLoggedIn() {
+    // Simple vérification - vous pouvez l'améliorer
+    return document.querySelector('.fas.fa-user') && 
+           !document.querySelector('a[href="login.php"]');
+}
+
+// Indicateur de progression
+function showUploadProgress(show) {
+    let progressDiv = document.getElementById('upload-progress');
+    
+    if (show) {
+        if (!progressDiv) {
+            progressDiv = document.createElement('div');
+            progressDiv.id = 'upload-progress';
+            progressDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            progressDiv.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <span>Subiendo archivos...</span>
+                </div>
+            `;
+            document.body.appendChild(progressDiv);
+        }
+        progressDiv.style.display = 'block';
+    } else {
+        if (progressDiv) {
+            progressDiv.style.display = 'none';
+        }
+    }
 }
 
 function addFileToList(file) {
