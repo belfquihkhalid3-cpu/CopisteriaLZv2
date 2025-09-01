@@ -260,7 +260,116 @@ $user = getCurrentUser();
     </div>
 
     <script>
-       function displayAllFolders(folders) {
+        let cartConfig = {
+            copies: 1,
+            files: []
+        };
+
+        // Récupérer les données du panier depuis sessionStorage
+       document.addEventListener('DOMContentLoaded', function() {
+    const currentCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
+    
+    if (currentCart.folders && currentCart.folders.length > 0) {
+        // Mettre à jour le compte de dossiers
+        document.getElementById('folder-count').textContent = currentCart.folders.length;
+        
+        // Afficher tous les dossiers
+        displayAllFolders(currentCart.folders);
+        
+        // Calculer le total général
+        updateCartTotal(currentCart.folders);
+    }
+});
+function displayAllFolders(folders) {
+    // Code pour afficher dynamiquement tous les dossiers
+    // (implementation détaillée sur votre signal)
+}
+
+
+        function updateInterface() {
+            // Mettre à jour le nombre de copies
+            document.getElementById('quantity-display').textContent = cartConfig.copies;
+            
+            // Remplir la table des fichiers
+            const filesTable = document.getElementById('files-table');
+            filesTable.innerHTML = '';
+            
+            cartConfig.files.forEach((file, index) => {
+                const row = document.createElement('tr');
+                row.className = 'border-t border-gray-200';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-file-pdf text-red-500"></i>
+                            <div>
+                                <div class="font-medium text-gray-800">${file.name}</div>
+                                <div class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full inline-block">Sin acabado</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${formatFileSize(file.size)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${file.pages || 1}</td>
+                `;
+                filesTable.appendChild(row);
+            });
+            
+            // Calculer et afficher le prix
+            calculateCartPrice();
+        }
+
+        function updateConfigBadges(config) {
+            if (!config) return;
+            
+            document.getElementById('config-color').textContent = config.colorMode === 'bw' ? 'BN' : 'CO';
+            document.getElementById('config-size').textContent = config.paperSize;
+            document.getElementById('config-weight').textContent = config.paperWeight.replace('g', '');
+            document.getElementById('config-sides').textContent = config.sides === 'single' ? 'UC' : 'DC';
+            document.getElementById('config-orientation').textContent = config.orientation === 'portrait' ? 'VE' : 'HO';
+        }
+
+        function changeQuantity(delta) {
+            cartConfig.copies = Math.max(1, cartConfig.copies + delta);
+            document.getElementById('quantity-display').textContent = cartConfig.copies;
+            calculateCartPrice();
+        }
+
+        function calculateCartPrice() {
+            // Simulation du calcul (utilisez votre logique de pricing)
+            const basePrice = 0.02; // Prix de base
+            const totalPrice = basePrice * cartConfig.copies;
+            
+            document.getElementById('folder-price').textContent = totalPrice.toFixed(2) + ' €';
+            document.getElementById('cart-total').textContent = totalPrice.toFixed(2) + ' €';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        function createNewFolder() {
+    // Sauvegarder le panier actuel
+    const currentCart = {
+        folders: [
+            {
+                id: 1,
+                name: 'Carpeta sin título',
+                files: cartConfig.files,
+                copies: cartConfig.copies,
+                price: document.getElementById('folder-price').textContent
+            }
+        ]
+    };
+    
+    sessionStorage.setItem('currentCart', JSON.stringify(currentCart));
+    
+    // Rediriger vers index.php pour ajouter plus de documents
+    window.location.href = 'index.php?from=cart';
+}
+function displayAllFolders(folders) {
     const foldersContainer = document.querySelector('.col-span-8');
     
     // Garder le header, supprimer le reste
@@ -545,6 +654,7 @@ function showNotification(message, type = 'info') {
         notification.remove();
     }, 3000);
 }
+
     </script>
 
 </body>
