@@ -230,39 +230,67 @@ function initializeFileUpload() {
 }
 async function handleFiles(files) {
     console.log('=== DEBUG UPLOAD ===');
-    console.log('Files received:', files);
-    
     const fileArray = Array.from(files);
-    console.log('File array:', fileArray);
     
-    // Test connexion utilisateur
-    const userConnected = isUserLoggedIn();
-    console.log('User logged in:', userConnected);
-    
-    if (!userConnected) {
-        console.log('❌ Usuario no conectado');
+    // Vérifier connexion
+    if (!isUserLoggedIn()) {
         showNotification('Debes iniciar sesión para subir archivos', 'error');
         openLoginModal();
         return;
     }
     
-    // Test simple avec premier fichier
-    if (fileArray.length > 0) {
-        const file = fileArray[0];
-        console.log('Testing first file:', {
-            name: file.name,
-            size: file.size,
-            type: file.type
-        });
-        
+    // Afficher indicateur de chargement
+    showUploadProgress(true);
+    
+    let successCount = 0;
+    
+    for (let file of fileArray) {
         try {
-            const result = await uploadFileToServer(file);
-            console.log('✅ Upload success:', result);
-            alert('Upload exitoso: ' + file.name);
+            // Validation
+            if (!validateFile(file)) {
+                continue;
+            }
+            
+            // Upload vers serveur
+            const uploadedFile = await uploadFileToServer(file);
+            console.log('File uploaded successfully:', uploadedFile);
+            
+            if (uploadedFile) {
+                // Ajouter à la configuration locale
+                config.files.push(uploadedFile);
+                
+                // Afficher dans l'interface
+                addFileToList(uploadedFile);
+                
+                successCount++;
+                showNotification(`${file.name} subido correctamente`, 'success');
+            }
+            
         } catch (error) {
-            console.error('❌ Upload error:', error);
-            alert('Error upload: ' + error.message);
+            console.error('Upload error:', error);
+            showNotification(`Error al subir ${file.name}: ${error.message}`, 'error');
         }
+    }
+    
+    // Masquer indicateur
+    showUploadProgress(false);
+    
+    // Mettre à jour l'interface si au moins un fichier uploadé
+    if (successCount > 0) {
+        console.log('Updated config.files:', config.files);
+        
+        // Afficher la liste des fichiers
+        const fileList = document.getElementById('file-list');
+        if (fileList) {
+            fileList.classList.remove('hidden');
+        }
+        
+        // Recalculer prix et mettre à jour boutons
+        calculatePrice();
+        updateAddToCartButton();
+        saveConfiguration();
+        
+        console.log('Interface updated successfully');
     }
 }
 // Validation fichier côté client
@@ -308,32 +336,34 @@ async function uploadFileToServer(file) {
     const formData = new FormData();
     formData.append('files', file);
     
-    console.log('FormData created, sending to api/upload.php');
-    
     try {
         const response = await fetch('api/upload.php', {
             method: 'POST',
             body: formData
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+        const result = await response.json();
+        console.log('Upload result:', result);
         
-        const text = await response.text();
-        console.log('Response text:', text);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${text}`);
+        // Gérer le cas où il y a des erreurs mais aussi des succès
+        if (result.files && result.files.length > 0) {
+            // Il y a au moins un fichier uploadé/trouvé
+            const uploadedFile = result.files[0];
+            
+            if (uploadedFile.is_duplicate) {
+                showNotification(`${file.name} ya existe, usando archivo existente`, 'info');
+            }
+            
+            return uploadedFile;
         }
         
-        const result = JSON.parse(text);
-        console.log('Parsed result:', result);
-        
-        if (!result.success) {
-            throw new Error(result.error || 'Error desconocido');
+        // Aucun fichier retourné
+        if (result.errors && result.errors.length > 0) {
+            // Afficher la première erreur
+            throw new Error(result.errors[0]);
         }
         
-        return result.files[0];
+        throw new Error(result.error || 'Error desconocido');
         
     } catch (error) {
         console.error('Fetch error:', error);
@@ -566,36 +596,72 @@ function validateConfiguration() {
 /**
  * Notification System
  */
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type} slide-in`;
+
+function showNotification(message, type = 'info', duration = 5000) {
+    // Supprimer notifications existantes
+    document.querySelectorAll('.simple-notification').forEach(n => n.remove());
     
-    const icons = {
-        'success': 'fas fa-check-circle',
-        'error': 'fas fa-exclamation-triangle',
-        'info': 'fas fa-info-circle'
-    };
+    const notification = document.createElement('div');
+    notification.className = 'simple-notification';
+    
+    const bgColor = {
+        'success': '#10b981',
+        'error': '#ef4444', 
+        'info': '#3b82f6',
+        'warning': '#f59e0b'
+    }[type] || '#3b82f6';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: ${bgColor};
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 350px;
+        word-wrap: break-word;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+    `;
     
     notification.innerHTML = `
-        <div class="flex items-center space-x-2">
-            <i class="${icons[type] || icons.info}"></i>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
             <span>${escapeHtml(message)}</span>
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 0; margin-left: auto;">
+                ×
+            </button>
         </div>
     `;
     
     document.body.appendChild(notification);
     
-    // Remove after 4 seconds
+    // Animation d'entrée
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
-    }, 4000);
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Auto-fermeture
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    notification.remove();
+                }
+            }, 300);
+        }
+    }, duration);
 }
-
 /**
  * Keyboard Shortcuts
  */

@@ -674,12 +674,13 @@ function syncPriceToSummary() {
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
-
+let currentPromoCode = null;
+let discountAmount = 0;
         // Variables pour le paiement
 let selectedPayment = {
-    type: 'card',
-    title: 'Pagar con tarjeta',
-    description: 'Pago seguro cifrado con certificado de seguridad SSL'
+ type: 'store',
+    title: 'Pago en tienda',
+    description: 'Realiza el pago en nuestra tienda física seleccionada'
 };
 
 function openPaymentModal() {
@@ -745,6 +746,98 @@ document.addEventListener('keydown', function(e) {
         closePaymentModal();
     }
 });
+
+async function processOrder() {
+    console.log('=== PROCESSING ORDER ===');
+    
+    // Vérifier que tout est prêt
+    if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
+        showNotification('Tu carrito está vacío', 'error');
+        return;
+    }
+    
+    // Vérifier mode de paiement sélectionné
+    if (selectedPayment.type !== 'store') {
+        showNotification('Solo está disponible el pago en tienda actualmente', 'warning');
+        return;
+    }
+    
+    // Désactiver le bouton pendant le traitement
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
+    
+    try {
+        // Préparer les données de commande
+        const orderData = {
+            folders: currentCartData.folders,
+            paymentMethod: selectedPayment,
+            promoCode: currentPromoCode,
+            discount: discountAmount || 0,
+            subtotal: calculateSubtotal(),
+            total: calculateSubtotal() - (discountAmount || 0),
+            comments: document.getElementById('order-comments')?.value || '',
+            orderDate: new Date().toISOString()
+        };
+        
+        console.log('Sending order data:', orderData);
+        
+        // Envoyer à l'API
+        const response = await fetch('api/create-order.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        console.log('Order result:', result);
+        
+        if (result.success) {
+            // Succès - nettoyer le panier et rediriger
+            sessionStorage.removeItem('currentCart');
+            sessionStorage.removeItem('cartData');
+            
+            // Sauvegarder info commande pour page confirmation
+            sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
+            
+            showNotification('¡Pedido creado correctamente!', 'success');
+            
+            // Rediriger vers page confirmation
+            setTimeout(() => {
+                window.location.href = 'order-confirmation.php';
+            }, 2000);
+            
+        } else {
+            throw new Error(result.error || 'Error desconocido');
+        }
+        
+    } catch (error) {
+        console.error('Order error:', error);
+        showNotification('Error al procesar el pedido: ' + error.message, 'error');
+    } finally {
+        // Restaurer le bouton
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+// Version simple qui utilise les totaux déjà calculés
+function calculateSubtotal() {
+    if (!currentCartData || !currentCartData.folders) {
+        return 0;
+    }
+    
+    // Utiliser les totaux déjà stockés dans les dossiers
+    const total = currentCartData.folders.reduce((sum, folder) => {
+        return sum + (folder.total || 0);
+    }, 0);
+    
+    console.log('Simple subtotal calculation:', total);
+    return total;
+}
     </script>
 
 </body>

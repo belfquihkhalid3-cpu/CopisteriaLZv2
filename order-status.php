@@ -2,60 +2,474 @@
 session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+require_once 'includes/user_functions.php';
 
 // Vérifier si l'utilisateur est connecté
-if (isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+if (!isLoggedIn()) {
+    header('Location: index.php');
     exit();
 }
 
+$user = getCurrentUser();
+
+// Récupérer l'ID de la commande
 $order_id = $_GET['id'] ?? 0;
-$order = getOrderById($order_id, $_SESSION['user_id']);
 
-if ($order) {
-    header('Location: account.php');
+if (!$order_id) {
+    header('Location: orders.php');
     exit();
 }
 
-$order_items = getOrderItems($order_id);
+// Récupérer les détails de la commande
+$order = fetchOne("SELECT * FROM orders WHERE id = ? AND user_id = ?", [$order_id, $_SESSION['user_id']]);
 
-require_once 'includes/header.php';
+if (!$order) {
+    header('Location: orders.php');
+    exit();
+}
+
+// Récupérer les items de la commande
+$order_items = fetchAll("SELECT * FROM order_items WHERE order_id = ? ORDER BY id", [$order_id]);
+
+// Récupérer les notifications liées à cette commande
+$notifications = fetchAll("SELECT * FROM notifications WHERE order_id = ? ORDER BY created_at DESC", [$order_id]);
+
+// Décoder la configuration d'impression
+$print_config = json_decode($order['print_config'], true) ?: [];
+
+// Calculer des statistiques
+$total_files = count($order_items);
+$unique_files = array_unique(array_column($order_items, 'file_original_name'));
+$total_unique_files = count($unique_files);
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Pedido #<?= htmlspecialchars($order['order_number']) ?> - Copisteria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
 
-<div class="order-status-container">
-    <h2>Estado del Pedido #<?= htmlspecialchars($order['order_number']) ?></h2>
-Commande ECHO désactivée.
-    <div class="order-info">
-        <div class="status-badge status-^<?= strtolower^($order['status'^]^) ?^>">
-            <?= htmlspecialchars($order['status']) ?>
-        </div>
-Commande ECHO désactivée.
-        <div class="order-details">
-            <p><strong>Fecha:</strong> <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
-            <p><strong>Total:</strong> €<?= number_format($order['total_price'], 2) ?></p>
-            <p><strong>Páginas totales:</strong> <?= $order['total_pages'] ?></p>
-            <p><strong>Archivos:</strong> <?= $order['total_files'] ?></p>
-Commande ECHO désactivée.
-            <?php if($order['pickup_code']): ?>
-                <p><strong>Código de recogida:</strong> <span class="pickup-code"><?= htmlspecialchars($order['pickup_code']) ?></span></p>
-            <?php endif; ?>
-        </div>
-    </div>
-Commande ECHO désactivée.
-    <div class="order-items">
-        <h3>Archivos del Pedido</h3>
-        <?php foreach($order_items as $item): ?>
-            <div class="order-item">
-                <p><strong><?= htmlspecialchars($item['file_original_name']) ?></strong></p>
-                <p>Páginas: <?= $item['page_count'] ?> x <?= $item['copies'] ?> copias</p>
-                <p>Configuración: <?= htmlspecialchars($item['paper_size']) ?> - <?= htmlspecialchars($item['color_mode']) ?></p>
-                <p>Subtotal: €<?= number_format($item['item_total'], 2) ?></p>
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <a href="index.php" class="flex items-center space-x-2">
+                        <i class="fas fa-print text-blue-500 text-xl"></i>
+                        <h1 class="text-xl font-bold text-gray-800">Copisteria</h1>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="orders.php" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver a Pedidos
+                    </a>
+                    <a href="account.php" class="text-gray-600 hover:text-gray-800">Mi cuenta</a>
+                    <span class="text-gray-600">Hola, <?= htmlspecialchars($user['first_name']) ?></span>
+                    <a href="logout.php" class="text-red-600 hover:text-red-800">Salir</a>
+                </div>
             </div>
-        <?php endforeach; ?>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Breadcrumb -->
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="index.php" class="text-gray-700 hover:text-blue-600">Inicio</a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                        <a href="orders.php" class="text-gray-700 hover:text-blue-600">Mis Pedidos</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                        <span class="text-gray-500">#<?= htmlspecialchars($order['order_number']) ?></span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Colonne principale -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Order Header -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                                Pedido #<?= htmlspecialchars($order['order_number']) ?>
+                            </h1>
+                            <p class="text-gray-600">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                Creado el <?= date('d/m/Y', strtotime($order['created_at'])) ?> a las <?= date('H:i', strtotime($order['created_at'])) ?>
+                            </p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <?php
+                            $status_classes = [
+                                'DRAFT' => 'bg-gray-100 text-gray-800',
+                                'PENDING' => 'bg-yellow-100 text-yellow-800',
+                                'CONFIRMED' => 'bg-blue-100 text-blue-800',
+                                'PROCESSING' => 'bg-purple-100 text-purple-800',
+                                'PRINTING' => 'bg-indigo-100 text-indigo-800',
+                                'READY' => 'bg-green-100 text-green-800',
+                                'COMPLETED' => 'bg-green-200 text-green-900',
+                                'CANCELLED' => 'bg-red-100 text-red-800'
+                            ];
+                            
+                            $status_labels = [
+                                'DRAFT' => 'Borrador',
+                                'PENDING' => 'Pendiente',
+                                'CONFIRMED' => 'Confirmado',
+                                'PROCESSING' => 'En Proceso',
+                                'PRINTING' => 'Imprimiendo',
+                                'READY' => 'Listo',
+                                'COMPLETED' => 'Completado',
+                                'CANCELLED' => 'Cancelado'
+                            ];
+                            
+                            $status_icons = [
+                                'DRAFT' => 'fa-edit',
+                                'PENDING' => 'fa-clock',
+                                'CONFIRMED' => 'fa-check',
+                                'PROCESSING' => 'fa-cog',
+                                'PRINTING' => 'fa-print',
+                                'READY' => 'fa-check-circle',
+                                'COMPLETED' => 'fa-check-double',
+                                'CANCELLED' => 'fa-times'
+                            ];
+                            
+                            $current_status = $order['status'];
+                            $status_class = $status_classes[$current_status] ?? 'bg-gray-100 text-gray-800';
+                            $status_label = $status_labels[$current_status] ?? $current_status;
+                            $status_icon = $status_icons[$current_status] ?? 'fa-question';
+                            ?>
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium <?= $status_class ?>">
+                                <i class="fas <?= $status_icon ?> mr-2"></i>
+                                <?= $status_label ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <?php if ($order['pickup_code']): ?>
+                    <!-- Pickup Code (si status READY) -->
+                    <?php if ($order['status'] === 'READY'): ?>
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-green-800">¡Tu pedido está listo!</h3>
+                                <div class="text-sm text-green-700 mt-1">
+                                    <p>Presenta este código en nuestra tienda para recoger tu pedido:</p>
+                                    <div class="text-2xl font-mono font-bold text-green-900 mt-2 tracking-wider">
+                                        <?= htmlspecialchars($order['pickup_code']) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php elseif (in_array($order['status'], ['PENDING', 'CONFIRMED', 'PROCESSING', 'PRINTING'])): ?>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-400 text-xl"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Código de recogida</h3>
+                                <div class="text-sm text-blue-700 mt-1">
+                                    <p>Tu código de recogida: <span class="font-mono font-bold"><?= htmlspecialchars($order['pickup_code']) ?></span></p>
+                                    <p class="text-xs mt-1">Lo necesitarás cuando tu pedido esté listo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php endif; ?>
+
+                    <!-- Order Progress -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Progreso del Pedido</h3>
+                        <div class="flex items-center">
+                            <?php
+                            $all_statuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'PRINTING', 'READY', 'COMPLETED'];
+                            $current_index = array_search($order['status'], $all_statuses);
+                            
+                            foreach ($all_statuses as $index => $status) {
+                                $is_current = ($status === $order['status']);
+                                $is_completed = ($index < $current_index || $order['status'] === 'COMPLETED');
+                                $is_active = $is_current || $is_completed;
+                                
+                                $circle_class = $is_active ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600';
+                                $line_class = $is_completed ? 'bg-blue-600' : 'bg-gray-300';
+                            ?>
+                                <div class="flex items-center">
+                                    <div class="flex items-center justify-center w-8 h-8 rounded-full <?= $circle_class ?> text-sm font-medium">
+                                        <?php if ($is_completed): ?>
+                                            <i class="fas fa-check text-xs"></i>
+                                        <?php else: ?>
+                                            <?= $index + 1 ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="ml-2 text-xs text-gray-600 hidden md:block">
+                                        <?= $status_labels[$status] ?>
+                                    </div>
+                                    <?php if ($index < count($all_statuses) - 1): ?>
+                                        <div class="w-12 h-1 mx-2 <?= $line_class ?> rounded"></div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-gray-900"><?= $order['total_files'] ?></div>
+                            <div class="text-xs text-gray-600">Archivos</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-gray-900"><?= $order['total_pages'] ?></div>
+                            <div class="text-xs text-gray-600">Páginas</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-blue-600"><?= number_format($order['total_price'], 2) ?>€</div>
+                            <div class="text-xs text-gray-600">Total</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-gray-900"><?= ucfirst(str_replace('_', ' ', strtolower($order['payment_method']))) ?></div>
+                            <div class="text-xs text-gray-600">Pago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        Archivos del Pedido
+                        <span class="text-sm text-gray-500 ml-2">(<?= count($order_items) ?> items)</span>
+                    </h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archivo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Configuración</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Páginas</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Copias</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($order_items as $item): ?>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-file-pdf text-red-500 mr-3"></i>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    <?= htmlspecialchars($item['file_original_name']) ?>
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    <?= number_format($item['file_size'] / 1024, 1) ?> KB
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <div class="space-y-1">
+                                            <div><?= htmlspecialchars($item['paper_size']) ?> - <?= htmlspecialchars($item['paper_weight']) ?></div>
+                                            <div>
+                                                <?= $item['color_mode'] === 'BW' ? 'Blanco y Negro' : 'Color' ?> - 
+                                                <?= $item['sides'] === 'SINGLE' ? 'Una cara' : 'Doble cara' ?>
+                                            </div>
+                                            <?php if ($item['binding'] && $item['binding'] !== 'NONE'): ?>
+                                            <div class="text-xs">
+                                                Encuadernado: <?= htmlspecialchars($item['binding']) ?>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <?= $item['page_count'] ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <?= $item['copies'] ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <?= number_format($item['item_total'], 2) ?>€
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Configuration Details -->
+                <?php if (!empty($print_config)): ?>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración Original</h3>
+                    <pre class="bg-gray-100 rounded-lg p-4 text-sm overflow-x-auto"><?= htmlspecialchars(json_encode($print_config, JSON_PRETTY_PRINT)) ?></pre>
+                </div>
+                <?php endif; ?>
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h3>
+                    <div class="space-y-3">
+                        <?php if ($order['status'] === 'READY'): ?>
+                        <button class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-store mr-2"></i>
+                            Marcar como Recogido
+                        </button>
+                        <?php endif; ?>
+                        
+                        <a href="orders.php" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center">
+                            <i class="fas fa-list mr-2"></i>
+                            Ver Todos los Pedidos
+                        </a>
+                        
+                        <a href="index.php" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors inline-block text-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Nuevo Pedido
+                        </a>
+                        
+                        <?php if (in_array($order['status'], ['PENDING', 'CONFIRMED'])): ?>
+                        <button onclick="cancelOrder()" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar Pedido
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Pago</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Método:</span>
+                            <span class="font-medium">
+                                <?= $order['payment_method'] === 'ON_SITE' ? 'Pago en tienda' : ucfirst(str_replace('_', ' ', strtolower($order['payment_method']))) ?>
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Estado:</span>
+                            <?php
+                            $payment_status_classes = [
+                                'PENDING' => 'text-yellow-600',
+                                'PAID' => 'text-green-600',
+                                'FAILED' => 'text-red-600',
+                                'REFUNDED' => 'text-blue-600'
+                            ];
+                            $payment_status_labels = [
+                                'PENDING' => 'Pendiente',
+                                'PAID' => 'Pagado',
+                                'FAILED' => 'Fallido',
+                                'REFUNDED' => 'Reembolsado'
+                            ];
+                            $payment_class = $payment_status_classes[$order['payment_status']] ?? 'text-gray-600';
+                            $payment_label = $payment_status_labels[$order['payment_status']] ?? $order['payment_status'];
+                            ?>
+                            <span class="font-medium <?= $payment_class ?>">
+                                <?= $payment_label ?>
+                            </span>
+                        </div>
+                        <div class="flex justify-between border-t pt-3">
+                            <span class="text-gray-900 font-medium">Total:</span>
+                            <span class="font-bold text-lg"><?= number_format($order['total_price'], 2) ?>€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <?php if (!empty($notifications)): ?>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        Historial
+                        <span class="text-sm text-gray-500 ml-2">(<?= count($notifications) ?>)</span>
+                    </h3>
+                    <div class="space-y-3 max-h-64 overflow-y-auto">
+                        <?php foreach ($notifications as $notif): ?>
+                        <div class="flex items-start space-x-3 p-3 <?= $notif['is_read'] ? 'bg-gray-50' : 'bg-blue-50' ?> rounded-lg">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-bell text-blue-500 text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium text-gray-900">
+                                    <?= htmlspecialchars($notif['title']) ?>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    <?= htmlspecialchars($notif['message']) ?>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-2">
+                                    <?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Contact Info -->
+                <div class="bg-gray-50 rounded-lg p-6 text-center">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">¿Necesitas Ayuda?</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Si tienes preguntas sobre tu pedido, contacta con nosotros
+                    </p>
+                    <div class="space-y-2">
+                        <a href="tel:+34900123456" class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-phone mr-2"></i>
+                            +34 900 123 456
+                        </a>
+                        <br>
+                        <a href="mailto:info@copisteria.com" class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-envelope mr-2"></i>
+                            info@copisteria.com
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-Commande ECHO désactivée.
-    <div class="actions">
-        <a href="account.php">Volver a Mi Cuenta</a>
-        <a href="index.php">Nuevo Pedido</a>
-    </div>
-</div>
+
+    <script>
+        function cancelOrder() {
+            if (confirm('¿Estás seguro de que quieres cancelar este pedido?')) {
+                // Aquí implementarías la cancelación via AJAX
+                alert('Función de cancelación pendiente de implementar');
+            }
+        }
+
+        // Auto-refresh pour les statuts en temps réel (optionnel)
+        // setInterval(() => {
+        //     location.reload();
+        // }, 30000); // Refresh cada 30 segundos
+    </script>
+
+</body>
+</html>

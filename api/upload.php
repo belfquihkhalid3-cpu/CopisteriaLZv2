@@ -113,15 +113,26 @@ try {
         // Calculer hash
         $file_hash = hash_file('sha256', $file_path);
         
-        // Vérifier doublon
-        $existing = fetchOne("SELECT id FROM files WHERE file_hash = ? AND user_id = ?", 
-                            [$file_hash, $_SESSION['user_id']]);
-        
-        if ($existing) {
-            unlink($file_path);
-            $errors[] = "Archivo duplicado: {$file['name']}";
-            continue;
-        }
+       // Vérifier doublon SEULEMENT pour le même nom de fichier
+$existing = fetchOne("SELECT id FROM files WHERE original_name = ? AND user_id = ?", 
+                    [$file['name'], $_SESSION['user_id']]);
+
+if ($existing) {
+    // Créer un nom unique en ajoutant un suffixe
+    $name_parts = pathinfo($file['name']);
+    $base_name = $name_parts['filename'];
+    $extension_orig = $name_parts['extension'];
+    
+    $counter = 1;
+    do {
+        $new_name = $base_name . "_($counter)." . $extension_orig;
+        $existing = fetchOne("SELECT id FROM files WHERE original_name = ? AND user_id = ?", 
+                           [$new_name, $_SESSION['user_id']]);
+        $counter++;
+    } while ($existing);
+    
+    $file['name'] = $new_name; // Utiliser le nouveau nom
+}
         
         // Sauvegarder en BDD
         $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 

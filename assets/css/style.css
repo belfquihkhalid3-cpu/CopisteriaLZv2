@@ -707,3 +707,57 @@ button[disabled] {
 input[type="checkbox"] {
     accent-color: #3b82f6;
 }
+
+
+/* Notifications améliorées */
+.notification {
+    pointer-events: auto;
+}
+
+.notification div {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    word-wrap: break-word;
+    white-space: normal;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.notification button:hover {
+    transform: scale(1.1);
+}
+
+/* S'assurer que les notifications sont au-dessus de tout */
+.notification {
+    z-index: 9999 !important;
+}
+
+/* Animation personnalisée */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.notification-enter {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+    animation: slideOutRight 0.3s ease-in;
+}
