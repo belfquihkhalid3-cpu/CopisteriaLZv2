@@ -83,7 +83,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
     <div class="flex h-screen">
         <!-- Sidebar de Configuration -->
-        <aside class="w-96 bg-gray-50 border-r border-gray-200">
+        <aside class="w-100 bg-gray-50 border-r border-gray-200">
             <div class="sidebar-scroll p-6">
                 <!-- Header Sidebar -->
                 <div class="mb-6">
@@ -464,18 +464,17 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                     <div class="flex-1 border-t border-gray-300"></div>
                 </div>
                 
-                <!-- Botones de redes sociales -->
-                <div class="flex space-x-3">
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-google text-red-500 text-xl"></i>
-                    </button>
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-facebook text-blue-600 text-xl"></i>
-                    </button>
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-apple text-gray-800 text-xl"></i>
-                    </button>
-                </div>
+             <div class="flex space-x-3">
+    <a href="auth/google.php?action=register" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-google text-red-500 text-xl"></i>
+    </a>
+    <a href="auth/facebook.php?action=login" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-facebook text-blue-600 text-xl"></i>
+    </a>
+    <button type="button" onclick="appleLogin()" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-apple text-gray-800 text-xl"></i>
+    </button>
+</div>
                 
                 <!-- Link login -->
                 <div class="text-center mt-6">
@@ -561,17 +560,17 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                 </div>
                 
                 <!-- Botones de redes sociales -->
-                <div class="flex space-x-3">
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-google text-red-500 text-xl"></i>
-                    </button>
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-facebook text-blue-600 text-xl"></i>
-                    </button>
-                    <button type="button" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fab fa-apple text-gray-800 text-xl"></i>
-                    </button>
-                </div>
+               <div class="flex space-x-3">
+    <a href="auth/google.php?action=login" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-google text-red-500 text-xl"></i>
+    </a>
+    <a href="auth/facebook.php?action=login" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-facebook text-blue-600 text-xl"></i>
+    </a>
+    <button type="button" onclick="appleLogin()" class="flex-1 flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <i class="fab fa-apple text-gray-800 text-xl"></i>
+    </button>
+</div>
                 
                 <!-- Link register -->
                 <div class="text-center mt-6">

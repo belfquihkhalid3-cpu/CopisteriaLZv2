@@ -1118,3 +1118,45 @@ function updateAddToCartButton() {
         addToCartBtn.textContent = 'Subir archivos primero';
     }
 }
+
+// Ajouter après les autres fonctions
+
+// Apple Sign In (simulation)
+function appleLogin() {
+    showNotification('Apple Sign In estará disponible próximamente', 'info');
+}
+
+// Gérer les retours de connexion sociale
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('social_login') === 'success') {
+        showNotification('¡Conectado con éxito!', 'success');
+        // Nettoyer URL
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+    
+    if (urlParams.get('social_register') === 'success') {
+        showNotification('¡Cuenta creada con éxito!', 'success');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+    
+    if (urlParams.get('social_error')) {
+        showNotification('Error: ' + urlParams.get('social_error'), 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+});
+
+// Améliorer les modals avec loading states
+function socialLogin(provider) {
+    // Afficher loading
+    const buttons = document.querySelectorAll('.fab.fa-' + provider);
+    buttons.forEach(btn => {
+        const parent = btn.parentElement;
+        parent.classList.add('opacity-50', 'pointer-events-none');
+        btn.className = 'fas fa-spinner fa-spin text-xl';
+    });
+    
+    // Message de redirection
+    showNotification(`Redirigiendo a ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`, 'info');
+}

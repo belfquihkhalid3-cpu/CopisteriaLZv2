@@ -242,12 +242,12 @@ $stats = fetchOne($stats_sql, [$_SESSION['user_id']]);
                                         <?= $order['total_files'] ?> archivo(s)<br>
                                         <span class="text-xs text-gray-500"><?= $order['total_pages'] ?> páginas</span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="font-medium text-gray-900">€<?= number_format($order['total_price'], 2) ?></div>
-                                        <div class="text-xs text-gray-500">
-                                            <?= ucfirst(strtolower(str_replace('_', ' ', $order['payment_method']))) ?>
-                                        </div>
-                                    </td>
+                                  <td class="px-6 py-4 whitespace-nowrap">
+    <div class="font-medium text-gray-900">€<?= number_format($order['total_price'] * $order['total_pages'], 2) ?></div>
+    <div class="text-xs text-gray-500">
+        <?= ucfirst(strtolower(str_replace('_', ' ', $order['payment_method']))) ?>
+    </div>
+</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
                                             <a href="order-status.php?id=<?= $order['id'] ?>" 

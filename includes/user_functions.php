@@ -314,4 +314,116 @@ function getUserStats($user_id) {
         'active_orders' => 0
     ];
 }
+
+
+
+// Ajouter après les fonctions existantes
+
+/**
+ * Créer ou connecter utilisateur via réseau social
+ * @param array $social_data
+ * @param string $provider
+ * @param string $action
+ * @return array
+ */
+function handleSocialAuth($social_data, $provider, $action = 'login') {
+    try {
+        $email = $social_data['email'];
+        $provider_id = $social_data['id'];
+        
+        // Chercher utilisateur existant
+        $provider_column = $provider . '_id';
+        $existing_user = fetchOne("SELECT * FROM users WHERE email = ? OR {$provider_column} = ?", 
+                                 [$email, $provider_id]);
+        
+        if ($existing_user) {
+            // Connexion utilisateur existant
+            if (!$existing_user['is_active']) {
+                return ['success' => false, 'error' => 'Cuenta desactivada'];
+            }
+            
+            // Mettre à jour provider ID si manquant
+            if (!$existing_user[$provider_column]) {
+                executeQuery("UPDATE users SET {$provider_column} = ?, social_provider = ? WHERE id = ?", 
+                           [$provider_id, $provider, $existing_user['id']]);
+            }
+            
+            // Créer session
+            $_SESSION['user_id'] = $existing_user['id'];
+            $_SESSION['email'] = $existing_user['email'];
+            $_SESSION['first_name'] = $existing_user['first_name'];
+            $_SESSION['last_name'] = $existing_user['last_name'];
+            
+            executeQuery("UPDATE users SET last_login_at = NOW() WHERE id = ?", [$existing_user['id']]);
+            
+            return ['success' => true, 'action' => 'login'];
+            
+        } else {
+            // Nouvel utilisateur
+            if ($action === 'login') {
+                return ['success' => false, 'error' => 'Usuario no encontrado. Regístrate primero.'];
+            }
+            
+            $first_name = $social_data['first_name'] ?? $social_data['given_name'] ?? '';
+            $last_name = $social_data['last_name'] ?? $social_data['family_name'] ?? '';
+            
+            // Créer compte
+            $sql = "INSERT INTO users (email, first_name, last_name, {$provider_column}, social_provider, email_verified, password, avatar_url, created_at) 
+                    VALUES (?, ?, ?, ?, ?, 1, ?, ?, NOW())";
+            
+            $temp_password = password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
+            $avatar_url = $social_data['picture'] ?? null;
+            
+            $stmt = executeQuery($sql, [
+                $email, $first_name, $last_name, $provider_id, $provider, $temp_password, $avatar_url
+            ]);
+            
+            if (!$stmt) {
+                return ['success' => false, 'error' => 'Error al crear cuenta'];
+            }
+            
+            $user_id = getLastInsertId();
+            
+            // Notification bienvenue
+            createNotification($user_id, 'Bienvenido a Copisteria', 
+                             "Tu cuenta ha sido creada con {$provider}. ¡Ya puedes empezar a imprimir!");
+            
+            // Créer session
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['email'] = $email;
+            $_SESSION['first_name'] = $first_name;
+            $_SESSION['last_name'] = $last_name;
+            
+            return ['success' => true, 'action' => 'register'];
+        }
+        
+    } catch (Exception $e) {
+        error_log("Social auth error: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error del servidor'];
+    }
+}
+
+/**
+ * Déconnecter compte des réseaux sociaux
+ * @param int $user_id
+ * @param string $provider
+ * @return bool
+ */
+function unlinkSocialAccount($user_id, $provider) {
+    $provider_column = $provider . '_id';
+    
+    $sql = "UPDATE users SET {$provider_column} = NULL";
+    
+    // Si c'était le seul provider, garder au moins un moyen de connexion
+    $user = fetchOne("SELECT * FROM users WHERE id = ?", [$user_id]);
+    if ($user && !$user['password'] && $user['social_provider'] === $provider) {
+        $sql .= ", social_provider = NULL";
+    }
+    
+    $sql .= " WHERE id = ?";
+    
+    $stmt = executeQuery($sql, [$user_id]);
+    return $stmt && $stmt->rowCount() > 0;
+}
+
 ?>

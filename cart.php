@@ -771,14 +771,15 @@ async function processOrder() {
     try {
         // Préparer les données de commande
         const orderData = {
-            folders: currentCartData.folders,
-            paymentMethod: selectedPayment,
-            promoCode: currentPromoCode,
-            discount: discountAmount || 0,
-            subtotal: calculateSubtotal(),
-            total: calculateSubtotal() - (discountAmount || 0),
-            comments: document.getElementById('order-comments')?.value || '',
-            orderDate: new Date().toISOString()
+           folders: currentCartData.folders,
+    paymentMethod: selectedPayment,
+    promoCode: currentPromoCode,
+    discount: discountAmount || 0,
+    finalTotal: parseFloat(document.getElementById('final-total').textContent.replace('€', '').replace(',', '.')), // <-- AJOUTER
+    subtotal: calculateSubtotal(),
+    total: calculateSubtotal() - (discountAmount || 0),
+    comments: document.getElementById('order-comments')?.value || '',
+    orderDate: new Date().toISOString()
         };
         
         console.log('Sending order data:', orderData);

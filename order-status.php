@@ -201,39 +201,92 @@ $total_unique_files = count($unique_files);
                     <?php endif; ?>
 
                     <!-- Order Progress -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Progreso del Pedido</h3>
-                        <div class="flex items-center">
-                            <?php
-                            $all_statuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'PRINTING', 'READY', 'COMPLETED'];
-                            $current_index = array_search($order['status'], $all_statuses);
-                            
-                            foreach ($all_statuses as $index => $status) {
-                                $is_current = ($status === $order['status']);
-                                $is_completed = ($index < $current_index || $order['status'] === 'COMPLETED');
-                                $is_active = $is_current || $is_completed;
-                                
-                                $circle_class = $is_active ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600';
-                                $line_class = $is_completed ? 'bg-blue-600' : 'bg-gray-300';
-                            ?>
-                                <div class="flex items-center">
-                                    <div class="flex items-center justify-center w-8 h-8 rounded-full <?= $circle_class ?> text-sm font-medium">
-                                        <?php if ($is_completed): ?>
-                                            <i class="fas fa-check text-xs"></i>
-                                        <?php else: ?>
-                                            <?= $index + 1 ?>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="ml-2 text-xs text-gray-600 hidden md:block">
-                                        <?= $status_labels[$status] ?>
-                                    </div>
-                                    <?php if ($index < count($all_statuses) - 1): ?>
-                                        <div class="w-12 h-1 mx-2 <?= $line_class ?> rounded"></div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php } ?>
-                        </div>
+               <!-- Order Progress -->
+<!-- Order Progress -->
+<div class="mb-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Progreso del Pedido</h3>
+    
+    <div class="relative">
+        <!-- Progress Bar Background -->
+        <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 rounded-full"></div>
+        
+        <!-- Progress Bar Fill -->
+        <?php
+        $all_statuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'READY', 'COMPLETED'];
+        $current_index = array_search($order['status'], $all_statuses);
+        $progress_percentage = ($current_index / (count($all_statuses) - 1)) * 100;
+        ?>
+        <div class="absolute top-5 left-0 h-1 bg-blue-600 rounded-full transition-all duration-500" style="width: <?= $progress_percentage ?>%"></div>
+        
+        <!-- Steps -->
+        <div class="relative flex justify-between">
+            <?php foreach ($all_statuses as $index => $status): ?>
+                <?php
+                $is_current = ($status === $order['status']);
+                $is_completed = ($index <= $current_index);
+                
+                $circle_class = $is_completed ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-400';
+                $label_class = $is_current ? 'text-blue-600 font-semibold' : ($is_completed ? 'text-gray-700' : 'text-gray-400');
+                ?>
+                
+                <div class="flex flex-col items-center">
+                    <!-- Circle -->
+                    <div class="w-10 h-10 rounded-full border-2 <?= $circle_class ?> flex items-center justify-center mb-3 transition-all duration-300 <?= $is_current ? 'ring-4 ring-blue-100 scale-110' : '' ?>">
+                        <?php if ($is_completed && !$is_current): ?>
+                            <i class="fas fa-check text-sm"></i>
+                        <?php elseif ($is_current): ?>
+                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        <?php else: ?>
+                            <span class="text-sm font-medium"><?= $index + 1 ?></span>
+                        <?php endif; ?>
                     </div>
+                    
+                    <!-- Label -->
+                    <div class="text-center">
+                        <div class="text-sm <?= $label_class ?> mb-1">
+                            <?= $status_labels[$status] ?>
+                        </div>
+                        <?php if ($is_current): ?>
+                            <div class="text-xs text-blue-500">
+                                <i class="fas fa-spinner fa-spin mr-1"></i>
+                                En proceso
+                            </div>
+                        <?php elseif ($is_completed): ?>
+                            <div class="text-xs text-green-600">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Completado
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <!-- Current Status Info -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-600 text-lg mr-3"></i>
+                <div>
+                    <div class="font-medium text-blue-900">
+                        Estado actual: <?= $status_labels[$order['status']] ?>
+                    </div>
+                    <div class="text-sm text-blue-700 mt-1">
+                        <?php
+                        $status_messages = [
+                            'PENDING' => 'Tu pedido está siendo revisado por nuestro equipo',
+                            'CONFIRMED' => 'Pedido confirmado y en cola de producción',
+                            'PROCESSING' => 'Estamos preparando tus documentos',
+                            'READY' => '¡Tu pedido está listo para recoger!',
+                            'COMPLETED' => 'Pedido entregado y finalizado'
+                        ];
+                        echo $status_messages[$order['status']] ?? 'Procesando tu solicitud';
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <!-- Order Summary -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -246,8 +299,8 @@ $total_unique_files = count($unique_files);
                             <div class="text-xs text-gray-600">Páginas</div>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="text-2xl font-bold text-blue-600"><?= number_format($order['total_price'], 2) ?>€</div>
-                            <div class="text-xs text-gray-600">Total</div>
+                           <div class="text-2xl font-bold text-blue-600"><?= number_format($order['total_price'] * $order['total_pages'], 2) ?>€</div>
+<div class="text-xs text-gray-600">Total</div>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
                             <div class="text-2xl font-bold text-gray-900"><?= ucfirst(str_replace('_', ' ', strtolower($order['payment_method']))) ?></div>
@@ -321,12 +374,76 @@ $total_unique_files = count($unique_files);
                 </div>
 
                 <!-- Configuration Details -->
-                <?php if (!empty($print_config)): ?>
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración Original</h3>
-                    <pre class="bg-gray-100 rounded-lg p-4 text-sm overflow-x-auto"><?= htmlspecialchars(json_encode($print_config, JSON_PRETTY_PRINT)) ?></pre>
+             <!-- Configuration Details -->
+<?php if (!empty($print_config)): ?>
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración del Pedido</h3>
+    
+    <?php if (isset($print_config['folders']) && is_array($print_config['folders'])): ?>
+        <?php foreach ($print_config['folders'] as $index => $folder): ?>
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+            <h4 class="font-medium text-gray-800 mb-3">
+                <?= htmlspecialchars($folder['name'] ?? "Carpeta " . ($index + 1)) ?>
+                <span class="text-sm text-gray-500 ml-2">(<?= $folder['copies'] ?? 1 ?> copias)</span>
+            </h4>
+            
+            <?php if (isset($folder['configuration'])): ?>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="text-gray-600">Color:</span>
+                    <span class="font-medium"><?= $folder['configuration']['colorMode'] === 'bw' ? 'Blanco y Negro' : 'Color' ?></span>
                 </div>
-                <?php endif; ?>
+                <div>
+                    <span class="text-gray-600">Papel:</span>
+                    <span class="font-medium"><?= htmlspecialchars($folder['configuration']['paperSize'] ?? 'A4') ?></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Grosor:</span>
+                    <span class="font-medium"><?= htmlspecialchars($folder['configuration']['paperWeight'] ?? '80g') ?></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Caras:</span>
+                    <span class="font-medium"><?= $folder['configuration']['sides'] === 'single' ? 'Una cara' : 'Doble cara' ?></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Orientación:</span>
+                    <span class="font-medium"><?= $folder['configuration']['orientation'] === 'portrait' ? 'Vertical' : 'Horizontal' ?></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Acabado:</span>
+                    <span class="font-medium">
+                        <?php
+                        $finishing = $folder['configuration']['finishing'] ?? 'none';
+                        $finishingLabels = [
+                            'individual' => 'Individual',
+                            'grouped' => 'Agrupado', 
+                            'none' => 'Sin acabado',
+                            'spiral' => 'Encuadernado',
+                            'staple' => 'Grapado',
+                            'laminated' => 'Plastificado',
+                            'perforated2' => 'Perforado 2',
+                            'perforated4' => 'Perforado 4'
+                        ];
+                        echo $finishingLabels[$finishing] ?? ucfirst($finishing);
+                        ?>
+                    </span>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    
+    <?php if (isset($print_config['paymentMethod'])): ?>
+    <div class="border-t pt-4 mt-4">
+        <div class="text-sm">
+            <span class="text-gray-600">Método de pago:</span>
+            <span class="font-medium"><?= htmlspecialchars($print_config['paymentMethod']['title'] ?? 'No especificado') ?></span>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 
             </div>
 
@@ -395,10 +512,10 @@ $total_unique_files = count($unique_files);
                                 <?= $payment_label ?>
                             </span>
                         </div>
-                        <div class="flex justify-between border-t pt-3">
-                            <span class="text-gray-900 font-medium">Total:</span>
-                            <span class="font-bold text-lg"><?= number_format($order['total_price'], 2) ?>€</span>
-                        </div>
+                     <div class="flex justify-between border-t pt-3">
+    <span class="text-gray-900 font-medium">Total:</span>
+    <span class="font-bold text-lg"><?= number_format($order['total_price'] * $order['total_pages'], 2) ?>€</span>
+</div>
                     </div>
                 </div>
 

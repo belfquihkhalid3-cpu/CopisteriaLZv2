@@ -59,18 +59,17 @@ try {
     // Générer code de récupération
     $pickup_code = generatePickupCode();
     
-    // Calculer totaux
-    $total_files = 0;
-    $total_pages = 0;
-    $total_price = 0;
-    
-    foreach ($data['folders'] as $folder) {
-        $total_files += count($folder['files'] ?? []);
-        foreach ($folder['files'] as $file) {
-            $total_pages += ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
-        }
-        $total_price += $folder['total'] ?? 0;
+// Utiliser le prix du résumé commande
+$total_price = $data['finalTotal'] ?? $data['total'] ?? 0;
+$total_files = 0;
+$total_pages = 0;
+
+foreach ($data['folders'] as $folder) {
+    $total_files += count($folder['files'] ?? []);
+    foreach ($folder['files'] as $file) {
+        $total_pages += ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
     }
+}
     
     // Appliquer remise si code promo
     $discount_amount = $data['discount'] ?? 0;
