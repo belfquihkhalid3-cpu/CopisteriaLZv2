@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Inclure la configuration
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/security_headers.php';
 
 try {
     // Récupérer les données JSON

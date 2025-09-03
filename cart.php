@@ -3,6 +3,7 @@ session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/user_functions.php';
+require_once 'includes/security_headers.php';
 
 if (!isLoggedIn()) {
     header('Location: index.php');

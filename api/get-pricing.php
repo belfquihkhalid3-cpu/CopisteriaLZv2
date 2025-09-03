@@ -14,9 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once '../config/database.php';
+require_once '../includes/security_headers.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+           require_once 'includes/csrf.php';
+    
+    // Vérifier token AVANT tout traitement
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Token CSRF invalide - Action bloquée');
+    }
         // Récupérer un tarif spécifique
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);

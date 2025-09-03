@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'auth.php';
+require_once '../includes/csrf.php';
+require_once '../includes/security_headers.php';
 requireAdmin();
 
 require_once '../config/database.php';
@@ -10,6 +12,12 @@ $admin = getAdminUser();
 
 // --- POST Actions ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+       require_once 'includes/csrf.php';
+    
+    // Vérifier token AVANT tout traitement
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Token CSRF invalide - Action bloquée');
+    }
     if (isset($_POST['toggle_active'])) {
         $user_id_to_toggle = $_POST['user_id'];
         $current_status = $_POST['current_status'];
@@ -218,6 +226,7 @@ $users = $users_result ?: [];
                     <div class="flex space-x-2">
                         <!-- Toggle Estado -->
                         <form method="post" class="flex-1">
+                            <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                             <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                             <input type="hidden" name="current_status" value="<?= $user['is_active'] ?>">
                             <button type="submit" name="toggle_active" 
@@ -237,6 +246,7 @@ $users = $users_result ?: [];
 
                         <!-- Eliminar -->
                         <form method="post" onsubmit="return confirm('¿Eliminar usuario?')">
+                            <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                             <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                             <button type="submit" name="delete_user" 
                                     class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition-colors border-2 border-red-200">

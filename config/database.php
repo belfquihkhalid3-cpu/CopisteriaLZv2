@@ -4,6 +4,16 @@
  * Connexion PDO avec gestion d'erreurs
  */
 
+// Dans config/database.php, ajouter
+
+if (file_exists(__DIR__ . '/../.env')) {
+    $env = parse_ini_file(__DIR__ . '/../.env');
+    foreach ($env as $key => $value) {
+        if (!isset($_ENV[$key])) {
+            $_ENV[$key] = $value;
+        }
+    }
+}
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'copisteria_db');
@@ -140,7 +150,8 @@ function getDatabaseInfo() {
         'connected' => testConnection()
     ];
 }
-
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+$pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 // Fermer la connexion à la fin du script (optionnel)
 // register_shutdown_function(function() {
 //     global $pdo;

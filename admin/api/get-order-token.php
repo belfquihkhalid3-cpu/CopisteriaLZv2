@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../includes/functions.php';
+require_once '../../includes/functions.php';
 header('Content-Type: application/json');
 
 $input = json_decode(file_get_contents('php://input'), true);

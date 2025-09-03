@@ -26,6 +26,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/security_headers.php';
 
 try {
     // Récupérer les données JSON

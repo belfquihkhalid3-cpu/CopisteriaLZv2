@@ -10,7 +10,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
+// Validation sécurisée fichier
+function secureFileValidation($file) {
+    $allowed_types = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain'
+    ];
+    
+    $allowed_extensions = ['pdf', 'doc', 'docx', 'txt'];
+    $max_size = 50 * 1024 * 1024;
+    
+    // Vérifier extension
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($extension, $allowed_extensions)) {
+        return false;
+    }
+    
+    // Vérifier MIME type
+    if (!in_array($file['type'], $allowed_types)) {
+        return false;
+    }
+    
+    // Vérifier taille
+    if ($file['size'] > $max_size) {
+        return false;
+    }
+    
+    // Vérifier signature fichier (magic bytes)
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $detected_type = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    return in_array($detected_type, $allowed_types);
+}
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Método no permitido']);
@@ -25,6 +59,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once '../config/database.php';
+require_once '../includes/security_headers.php';
 
 try {
     // Configuration upload

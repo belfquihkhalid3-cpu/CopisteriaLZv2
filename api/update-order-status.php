@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once '../../config/database.php';
+require_once '../includes/security_headers.php';
 
 try {
     $input = json_decode(file_get_contents('php://input'), true);

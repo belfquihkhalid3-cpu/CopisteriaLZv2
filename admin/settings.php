@@ -1,10 +1,12 @@
 <?php
 session_start();
 require_once 'auth.php';
+require_once '../includes/security_headers.php';
 requireAdmin();
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/csrf.php';
 
 $admin = getAdminUser();
 
@@ -183,6 +185,7 @@ function updateFinishingCosts($data) {
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -292,6 +295,7 @@ function updateFinishingCosts($data) {
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
                         <?php foreach ($finishing_costs as $cost): ?>

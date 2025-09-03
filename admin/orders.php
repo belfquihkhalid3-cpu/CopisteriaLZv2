@@ -5,6 +5,7 @@ requireAdmin();
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/security_headers.php';
 
 $admin = getAdminUser();
 
@@ -224,7 +225,7 @@ $orders = fetchAll($orders_sql, $params);
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex space-x-2">
-                                    <button onclick="viewOrder(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+                                    <button onclick="openOrderDetails(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button onclick="downloadFiles(<?= $order['id'] ?>)" class="text-green-600 hover:text-green-900" title="Descargar archivos">
@@ -301,7 +302,7 @@ $orders = fetchAll($orders_sql, $params);
 
         // Voir détails commande
         function viewOrder(orderId) {
-          openOrderDetails(orderId);
+window.open('order-details.php?id=' + orderId + '&token=' + result.token, '_blank');
         }
 
         // Télécharger fichiers

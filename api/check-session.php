@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+require_once '../includes/security_headers.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');

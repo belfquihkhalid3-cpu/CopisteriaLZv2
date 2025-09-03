@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+require_once '../includes/csrf.php';
 // Rediriger si déjà connecté
 if (isset($_SESSION['admin_id'])) {
     header('Location: dashboard.php');
@@ -68,6 +68,7 @@ if ($_POST) {
 
         <!-- Login Form -->
         <form method="POST" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
             
             <!-- Email -->
             <div class="space-y-2">

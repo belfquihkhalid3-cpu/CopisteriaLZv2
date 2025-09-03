@@ -14,13 +14,18 @@ if (!$order_id || !$token) {
     exit();
 }
 
-if (!validateOrderAccess($order_id, $token, $_SESSION['user_id'])) {
+if (!$order_id) {
     error_log("Accès non autorisé - User: {$_SESSION['user_id']}, Order: {$order_id}");
     header('Location: orders?error=access_denied');
     exit();
 }
 
-$order = fetchOne("SELECT * FROM orders WHERE id = ? AND user_id = ?", [$order_id, $_SESSION['user_id']]);
+$order = fetchOne("
+    SELECT o.*, u.first_name, u.last_name, u.email, u.phone 
+    FROM orders o 
+    JOIN users u ON o.user_id = u.id 
+    WHERE o.id = ?
+", [$order_id]);
 if (!$order) {
     header('Location: orders.php');
     exit();
@@ -356,7 +361,7 @@ $print_config = json_decode($order['print_config'], true) ?: [];
 
         async function changeOrderStatus(orderId, newStatus) {
             try {
-                const response = await fetch('api/update-order-status.php', {
+          const response = await fetch(window.location.origin + '/copisteria/admin/api/update-order-status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ order_id: orderId, status: newStatus })

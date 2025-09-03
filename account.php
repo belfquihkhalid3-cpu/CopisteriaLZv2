@@ -3,6 +3,8 @@ session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/user_functions.php';
+require_once 'includes/csrf.php';
+require_once 'includes/security_headers.php';
 
 // Vérifier si l'utilisateur est connecté
 if (!isLoggedIn()) {
@@ -29,6 +31,12 @@ $message = '';
 $message_type = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      require_once 'includes/csrf.php';
+    
+    // Vérifier token AVANT tout traitement
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Token CSRF invalide - Action bloquée');
+    }
     if (isset($_POST['update_profile'])) {
         $first_name = trim($_POST['first_name']);
         $last_name = trim($_POST['last_name']);
@@ -215,6 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Información personal</h2>
                     <form method="POST" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
@@ -253,6 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Cambiar contraseña</h2>
                     <form method="POST" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
                             <input type="password" name="current_password" required

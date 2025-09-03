@@ -2,6 +2,7 @@
 session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+require_once 'includes/security_headers.php';
 
 // Vérifier si l'utilisateur est connecté
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;

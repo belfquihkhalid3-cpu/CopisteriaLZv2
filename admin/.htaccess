@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# URLs sécurisées avec token pour admin
+RewriteRule ^pedido/([0-9]+)/([a-f0-9]{64})/?$ order-details.php?id=$1&token=$2 [NC,L]
+
+# Retirer .php pour pages admin
+RewriteCond %{REQUEST_URI} !^/admin/api/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^.]+)$ $1.php [NC,L]
+
+
