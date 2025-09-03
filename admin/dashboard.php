@@ -48,93 +48,23 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Estilo para el indicador de la barra de navegación activa */
-        .nav-active {
-            position: relative;
-        }
-        .nav-active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 60%;
-            width: 4px;
-            background-color: white;
-            border-radius: 0 4px 4px 0;
-        }
+    .nav-active { position: relative; }
+.nav-active::before { 
+    content: ''; 
+    position: absolute; 
+    left: 0; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    height: 60%; 
+    width: 4px; 
+    background-color: white; 
+    border-radius: 0 4px 4px 0; 
+}
     </style>
 </head>
 <body class="bg-gray-100">
-
-    <aside class="fixed inset-y-0 left-0 w-64 bg-slate-800 text-slate-300 flex flex-col z-30">
-        
-        <div class="flex items-center justify-center h-20 border-b border-slate-700">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-print text-white text-2xl"></i>
-                <span class="text-xl font-bold text-white">Admin Panel</span>
-            </div>
-        </div>
-
-        <nav class="flex-1 mt-6">
-            <ul class="space-y-2 px-4">
-                <li>
-                    <a href="dashboard.php" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
-                              <?= ($current_page == 'dashboard.php') 
-                                  ? 'nav-active bg-slate-900 text-white font-semibold' 
-                                  : 'hover:bg-slate-700 hover:text-white' ?>">
-                        <i class="fas fa-tachometer-alt w-6 text-center"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="orders.php" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
-                              <?= ($current_page == 'orders.php') 
-                                  ? 'nav-active bg-slate-900 text-white font-semibold' 
-                                  : 'hover:bg-slate-700 hover:text-white' ?>">
-                        <i class="fas fa-shopping-cart w-6 text-center"></i>
-                        <span>Pedidos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="users.php"
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
-                              <?= ($current_page == 'users.php') 
-                                  ? 'nav-active bg-slate-900 text-white font-semibold' 
-                                  : 'hover:bg-slate-700 hover:text-white' ?>">
-                        <i class="fas fa-users w-6 text-center"></i>
-                        <span>Usuarios</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="settings.php" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
-                              <?= ($current_page == 'settings.php') 
-                                  ? 'nav-active bg-slate-900 text-white font-semibold' 
-                                  : 'hover:bg-slate-700 hover:text-white' ?>">
-                        <i class="fas fa-cog w-6 text-center"></i>
-                        <span>Configuración</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="p-4 border-t border-slate-700">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full border-2 border-slate-600 flex items-center justify-center bg-slate-900">
-                    <span class="font-semibold text-white"><?= strtoupper(substr($admin['first_name'], 0, 1)) ?></span>
-                </div>
-                <div class="flex-1">
-                    <div class="font-medium text-white"><?= htmlspecialchars($admin['first_name']) ?></div>
-                    <div class="text-xs text-slate-400">Administrador</div>
-                </div>
-                <a href="logout.php" title="Cerrar sesión" class="text-slate-400 hover:text-white">
-                    <i class="fas fa-sign-out-alt text-lg"></i>
-                </a>
-            </div>
-        </div>
-    </aside>
+<?php include 'includes/sidebar.php'; ?>
+  
 
     <div class="ml-64 min-h-screen">
         

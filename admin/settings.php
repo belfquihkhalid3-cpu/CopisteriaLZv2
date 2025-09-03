@@ -54,43 +54,32 @@ if (isset($_GET['msg'])) {
 
 function updatePricing($data) {
     try {
-        beginTransaction();
-        
         $updated_count = 0;
         
-        // Parcourir tous les prix soumis
         foreach ($data as $key => $value) {
             if (strpos($key, 'price_') === 0) {
-                // Extraire les paramètres du nom du champ
-                $parts = explode('_', $key); // price_A4_80g_BW
+                $parts = explode('_', $key);
                 if (count($parts) === 4) {
                     $paper_size = $parts[1];
-                    $paper_weight = $parts[2];
+                    $paper_weight = $parts[2]; 
                     $color_mode = $parts[3];
                     $new_price = floatval($value);
                     
-                    if ($new_price >= 0) {
-                        // Mettre à jour le prix
-                        $sql = "UPDATE pricing 
-                                SET price_per_page = ?, updated_at = NOW() 
-                                WHERE paper_size = ? AND paper_weight = ? AND color_mode = ? AND is_active = 1";
-                        
-                        $stmt = executeQuery($sql, [$new_price, $paper_size, $paper_weight, $color_mode]);
-                        if ($stmt && $stmt->rowCount() > 0) {
-                            $updated_count++;
-                        }
+                    // UPDATE DIRECT sans transaction
+                    $sql = "UPDATE pricing SET price_per_page = ? WHERE paper_size = ? AND paper_weight = ? AND color_mode = ?";
+                    $stmt = executeQuery($sql, [$new_price, $paper_size, $paper_weight, $color_mode]);
+                    
+                    if ($stmt && $stmt->rowCount() > 0) {
+                        $updated_count++;
                     }
                 }
             }
         }
         
-        commit();
-        return "Precios actualizados correctamente ($updated_count cambios)";
+        return "Actualizados: $updated_count cambios";
         
     } catch (Exception $e) {
-        rollback();
-        error_log("Error updating pricing: " . $e->getMessage());
-        return "Error al actualizar precios: " . $e->getMessage();
+        return "Error: " . $e->getMessage();
     }
 }
 
@@ -131,6 +120,21 @@ function updateFinishingCosts($data) {
     <title>Configuración - Admin Copisteria</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        /* Estilo para el indicador de la barra de navegación activa */
+    .nav-active { position: relative; }
+.nav-active::before { 
+    content: ''; 
+    position: absolute; 
+    left: 0; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    height: 60%; 
+    width: 4px; 
+    background-color: white; 
+    border-radius: 0 4px 4px 0; 
+}
+    </style>
 </head>
 <body class="bg-gray-100">
 

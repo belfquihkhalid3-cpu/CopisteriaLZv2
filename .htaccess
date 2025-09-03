@@ -1,0 +1,37 @@
+RewriteEngine On
+
+# Exclure les dossiers API, admin, assets
+RewriteCond %{REQUEST_URI} !^/(api|admin|assets|uploads)/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Retirer .php seulement pour les pages principales
+RewriteRule ^([^.]+)$ $1.php [NC,L]
+
+# Redirection .php vers sans extension (pages principales seulement)
+RewriteCond %{THE_REQUEST} \s/+([^/\s?]*).php[\s?] [NC]
+RewriteCond %{REQUEST_URI} !^/(api|admin|assets|uploads)/
+RewriteRule ^ /%1? [R=301,L]
+
+# URLs sécurisées avec token
+RewriteRule ^pedido/([0-9]+)/([a-f0-9]{64})/?$ order-details.php?id=$1&token=$2 [NC,L]
+RewriteRule ^admin/pedido/([0-9]+)/([a-f0-9]{64})/?$ admin/order-details.php?id=$1&token=$2 [NC,L]
+
+# Protection fichiers
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.env">
+    Order allow,deny  
+    Deny from all
+</Files>
+
+# Headers sécurité
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options SAMEORIGIN
+
+# URL sécurisée avec token
+RewriteRule ^pedido/([0-9]+)/([a-f0-9]{64})/?$ order-details.php?id=$1&token=$2 [NC,L]
+RewriteRule ^admin/pedido/([0-9]+)/([a-f0-9]{64})/?$ admin/order-details.php?id=$1&token=$2 [NC,L]

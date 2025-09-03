@@ -762,4 +762,77 @@ input[type="checkbox"] {
     animation: slideOutRight 0.3s ease-in;
 }
 
+/* ============================================
+   MODIFICATIONS SIMPLES POUR RÉDUIRE LE SCROLL
+   À ajouter dans votre assets/css/style.css
+   ============================================ */
 
+/* 1. Réduire le padding des sections */
+.config-section {
+    padding: 14px;           /* était 20px */
+    margin-bottom: 14px;     /* était 20px */
+}
+
+/* 2. Réduire la hauteur des boutons d'options */
+.option-btn {
+    min-height: 55px;        /* était 70px */
+    padding: 8px 12px;       /* était 12px 16px */
+}
+
+/* 3. Réduire les marges des titres */
+.section-title {
+    margin-bottom: 12px;     /* était 16px */
+    font-size: 15px;         /* était 16px */
+}
+
+.section-subtitle {
+    margin-bottom: 12px;     /* était 16px */
+    margin-top: -6px;        /* était -8px */
+}
+
+/* 4. Réduire les espaces entre boutons */
+.option-grid-2 {
+    gap: 8px;                /* était 12px */
+}
+
+.option-grid-3 {
+    gap: 6px;                /* était 8px */
+}
+
+.finishing-grid {
+    gap: 8px;                /* était 12px */
+    margin-bottom: 8px;      /* était 12px */
+}
+
+/* 5. Compacter les contrôles de quantité */
+.quantity-btn {
+    width: 42px;             /* était 48px */
+    height: 42px;            /* était 48px */
+    font-size: 16px;         /* était 18px */
+}
+
+/* 6. Optimiser la zone d'upload */
+.upload-zone {
+    min-height: 100px;       /* Ajouter cette ligne pour limiter la hauteur */
+    padding: 16px;           /* Réduire le padding interne */
+}
+
+/* 7. Sidebar scroll optimisé */
+.sidebar-scroll {
+    max-height: calc(100vh - 80px);  /* était 100px */
+    padding: 16px;                   /* était probablement plus grand */
+    padding-right: 6px;              /* était 8px */
+}
+
+/* 8. Optionnel: Réduire l'espacement mobile aussi */
+@media (max-width: 768px) {
+    .config-section {
+        padding: 12px;           /* était 16px */
+        margin-bottom: 12px;     /* était 16px */
+    }
+    
+    .option-btn {
+        min-height: 50px;        /* était 60px */
+        padding: 8px 10px;       /* était 10px 12px */
+    }
+}

@@ -62,9 +62,25 @@ $orders = fetchAll($orders_sql, $params);
     <title>Gestión de Pedidos - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilo para el indicador de la barra de navegación activa */
+    .nav-active { position: relative; }
+.nav-active::before { 
+    content: ''; 
+    position: absolute; 
+    left: 0; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    height: 60%; 
+    width: 4px; 
+    background-color: white; 
+    border-radius: 0 4px 4px 0; 
+}
+    </style>
 </head>
 <body class="bg-gray-100">
 
+  
     <!-- Include Sidebar (même que dashboard) -->
     <?php include 'includes/sidebar.php'; ?>
 <!-- Ajouter après les filtres, avant la table -->
@@ -285,7 +301,7 @@ $orders = fetchAll($orders_sql, $params);
 
         // Voir détails commande
         function viewOrder(orderId) {
-            window.open('order-details.php?id=' + orderId, '_blank');
+          openOrderDetails(orderId);
         }
 
         // Télécharger fichiers
@@ -415,6 +431,23 @@ setInterval(() => {
         location.reload();
     }
 }, 30000);
+
+async function openOrderDetails(orderId) {
+    try {
+        const response = await fetch('api/get-order-token.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({order_id: orderId})
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            window.open('pedido/' + orderId + '/' + result.token, '_blank');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
     </script>
 
 </body>

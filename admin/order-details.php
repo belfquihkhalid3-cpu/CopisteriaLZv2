@@ -7,20 +7,20 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 $order_id = $_GET['id'] ?? 0;
+$token = $_GET['token'] ?? '';
 
-if (!$order_id) {
-    header('Location: orders.php');
+if (!$order_id || !$token) {
+    header('Location: orders');
     exit();
 }
 
-// Récupérer détails complets
-$order = fetchOne("
-    SELECT o.*, u.first_name, u.last_name, u.email, u.phone, u.address 
-    FROM orders o 
-    JOIN users u ON o.user_id = u.id 
-    WHERE o.id = ?
-", [$order_id]);
+if (!validateOrderAccess($order_id, $token, $_SESSION['user_id'])) {
+    error_log("Accès non autorisé - User: {$_SESSION['user_id']}, Order: {$order_id}");
+    header('Location: orders?error=access_denied');
+    exit();
+}
 
+$order = fetchOne("SELECT * FROM orders WHERE id = ? AND user_id = ?", [$order_id, $_SESSION['user_id']]);
 if (!$order) {
     header('Location: orders.php');
     exit();

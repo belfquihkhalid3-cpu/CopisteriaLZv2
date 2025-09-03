@@ -41,17 +41,20 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                 </button>
                 
                 <!-- Total carrito -->
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                    <div class="text-center">
-                        <div class="text-sm text-gray-600">Total carrito</div>
-                        <div class="font-bold text-blue-600">
-                            <span class="bg-blue-500 text-white text-xs px-1 rounded">0</span>
-                            <span id="total-price">0,00 €</span>
-                        </div>
-                        <div class="text-xs text-gray-500">(Envío incluido)</div>
-                    </div>
-                </div>
+             <!-- Remplacez cette section dans votre index.php : -->
+
+<!-- Total carrito avec lien -->
+<a href="cart.php" class="flex items-center space-x-2 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors">
+    <i class="fas fa-shopping-cart text-blue-500"></i>
+    <div class="text-center">
+        <div class="text-sm text-gray-600">Total carrito</div>
+        <div class="font-bold text-blue-600">
+            <span class="bg-blue-500 text-white text-xs px-1 rounded" id="cart-count">0</span>
+            <span id="total-price">0,00 €</span>
+        </div>
+        <div class="text-xs text-gray-500">(Envío incluido)</div>
+    </div>
+</a>
                 
                 <!-- Menu Utilisateur -->
              <!-- Menu Utilisateur -->
