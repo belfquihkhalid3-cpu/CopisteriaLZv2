@@ -14,11 +14,27 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/termin
     require_once 'terminal/config.php';
     $terminal_info = getTerminalInfo();
 }
-if (!isLoggedIn()) {
+// Remplacer la vérification ligne 17
+$is_guest_mode = isset($_GET['guest']) || sessionStorage_getItem('terminal_mode') === 'guest';
+
+// Permettre les invités des terminaux
+$is_guest_terminal = sessionStorage_getItem('terminal_mode') === 'guest' || isset($_GET['guest']);
+
+if (!isLoggedIn() && !$is_guest_terminal) {
     header('Location: index.php');
     exit();
 }
 
+// Pour les invités, créer un user factice
+if (!isLoggedIn() && $is_guest_terminal) {
+    $user = [
+        'first_name' => 'Cliente',
+        'last_name' => 'Invitado',
+        'email' => 'invitado@terminal.local'
+    ];
+} else {
+    $user = getCurrentUser();
+}
 $user = getCurrentUser();
 ?>
 <!DOCTYPE html>
