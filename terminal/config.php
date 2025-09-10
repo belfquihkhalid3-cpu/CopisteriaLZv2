@@ -30,7 +30,9 @@ $terminals = [
     ],
     // ... autres terminaux
 ];
-
+// Configuration spécifique terminaux
+define('TERMINAL_ORDER_PREFIX', 'T');
+define('TERMINAL_PAYMENT_METHOD', 'STORE_PAYMENT');
 function getTerminalInfo() {
     global $terminals;
     $ip = $_SERVER['REMOTE_ADDR'];

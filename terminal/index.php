@@ -416,27 +416,37 @@ h1:hover {
                     <p class="text-gray-600 mb-6">Sube tus documentos y empieza a imprimir con la mejor calidad al mejor precio</p>
                     
                    <!-- Choix utilisateur (seulement si pas connecté) -->
+<!-- Section choix utilisateur (seulement si pas connecté) -->
 <?php if (!$user_id): ?>
-<div class="bg-blue-50 border-b border-blue-200 p-6">
-    <div class="container mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+<div id="user-choice-section" class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 py-8">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">¿Cómo deseas continuar?</h2>
+            <p class="text-gray-600">Elige una opción para empezar a imprimir</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             
-            <!-- Invité -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <i class="fas fa-user-slash text-2xl text-blue-600 mb-3"></i>
-                <h3 class="text-lg font-bold mb-2">Continuar sin cuenta</h3>
-                <p class="text-gray-600 text-sm mb-4">Sube tus documentos directamente</p>
-                <button onclick="startGuestMode()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg w-full">
+            <!-- Opción Invitado -->
+            <div class="bg-white rounded-xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-slash text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Continuar sin cuenta</h3>
+                <p class="text-gray-600 mb-6">Sube tus documentos directamente sin necesidad de registrarte</p>
+                <button onclick="startGuestMode()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg w-full transition-colors">
                     <i class="fas fa-upload mr-2"></i>Subir como Invitado
                 </button>
             </div>
 
-            <!-- Cuenta -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <i class="fas fa-user text-2xl text-green-600 mb-3"></i>
-                <h3 class="text-lg font-bold mb-2">Tengo una cuenta</h3>
-                <p class="text-gray-600 text-sm mb-4">Accede a tu historial</p>
-                <button onclick="openLogin()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full">
+            <!-- Opción Cuenta -->
+            <div class="bg-white rounded-xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Tengo una cuenta</h3>
+                <p class="text-gray-600 mb-6">Accede para ver tu historial y configuraciones guardadas</p>
+                <button onclick="openLogin()" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg w-full transition-colors">
                     <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
                 </button>
             </div>
@@ -918,14 +928,27 @@ document.getElementById('trackingModal').addEventListener('click', function(e) {
     }
 });
 function startGuestMode() {
+    // Marquer mode invité
     sessionStorage.setItem('terminal_mode', 'guest');
     sessionStorage.setItem('terminal_info', JSON.stringify(<?= json_encode($terminal_info) ?>));
-    // Masquer la section de choix
-    document.querySelector('.bg-blue-50').style.display = 'none';
+    
+    // Masquer section choix
+    document.getElementById('user-choice-section').style.display = 'none';
+    
+    // Afficher notification
+    showNotification('Modo invitado activado. Puedes subir tus documentos ahora.', 'success');
 }
 
 function openLogin() {
     window.location.href = '../index.php?terminal=<?= $terminal_info['id'] ?>';
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
 }
 
 </script>

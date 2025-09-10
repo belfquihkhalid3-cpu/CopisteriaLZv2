@@ -48,6 +48,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <span class="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">12</span>
                 </div>
             </a>
+            <!-- Ajouter après le lien "Pedidos" existant -->
+<a href="orders-local.php" class="nav-item group <?= ($current_page == 'orders-local.php') ? 'nav-active' : '' ?>">
+    <div class="nav-icon-wrapper">
+        <i class="fas fa-desktop"></i>
+    </div>
+    <div class="nav-content">
+        <span class="nav-title">Pedidos Locales</span>
+        <span class="nav-subtitle">Terminales en tienda</span>
+    </div>
+    <div class="nav-badge">
+        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">T</span>
+    </div>
+</a>
 
             <!-- Usuarios -->
             <a href="users.php" class="nav-item group <?= ($current_page == 'users.php') ? 'nav-active' : '' ?>">

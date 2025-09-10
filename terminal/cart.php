@@ -5,10 +5,12 @@ require_once '../includes/functions.php';
 require_once '../includes/user_functions.php';
 require_once '../includes/security_headers.php';
 // Détecter mode terminal
-$is_terminal = isset($_GET['terminal']) || sessionStorage_getItem('terminal_mode') === 'guest';
+$is_terminal = false;
 $terminal_info = null;
 
-if ($is_terminal) {
+// Vérifier si vient d'un terminal
+if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/terminal/') !== false) {
+    $is_terminal = true;
     require_once 'terminal/config.php';
     $terminal_info = getTerminalInfo();
 }
@@ -77,10 +79,11 @@ h1:hover {
                 </div>
                 
                 <div class="flex items-center space-x-4">
-                    <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                        <i class="fas fa-print"></i>
-                        <span>Imprimir</span>
-                    </button>
+                    <div class="flex items-center justify-center space-x-4">
+        <i class="fas fa-desktop text-lg"></i>
+        <span class="font-semibold">Terminal: <?= $terminal_info['name'] ?> - <?= $terminal_info['location'] ?></span>
+        <span class="text-blue-200 text-sm">(ID: <?= $terminal_info['id'] ?>)</span>
+    </div>
                     
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-shopping-cart text-blue-500"></i>
@@ -819,17 +822,27 @@ if (selectedPayment.type !== 'transfer') {
     comments: document.getElementById('order-comments')?.value || '',
     orderDate: new Date().toISOString()
         };
-        
+        // Ajouter infos terminal si mode terminal
+if (sessionStorage.getItem('terminal_mode') === 'guest') {
+    orderData.source_type = 'TERMINAL';
+    orderData.terminal_info = JSON.parse(sessionStorage.getItem('terminal_info') || '{}');
+    orderData.is_guest = true;
+} else {
+    orderData.source_type = 'ONLINE';
+    orderData.is_guest = false;
+}
         console.log('Sending order data:', orderData);
         
         // Envoyer à l'API
-        const response = await fetch('api/create-order.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(orderData)
-        });
+       const apiUrl = sessionStorage.getItem('terminal_mode') === 'guest' 
+    ? 'terminal/api/create-order.php' 
+    : 'api/create-order.php';
+
+const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(orderData)
+});
         
         const result = await response.json();
         console.log('Order result:', result);
@@ -845,9 +858,12 @@ if (selectedPayment.type !== 'transfer') {
             showNotification('¡Pedido creado correctamente!', 'success');
             
             // Rediriger vers page confirmation
-            setTimeout(() => {
-                window.location.href = 'order-confirmation.php';
-            }, 2000);
+           // Redirection selon le mode
+    if (sessionStorage.getItem('terminal_mode') === 'guest') {
+        window.location.href = 'terminal/order-confirmation.php?order_id=' + result.order_id;
+    } else {
+        window.location.href = 'order-confirmation.php?order_id=' + result.order_id;
+    }
             
         } else {
             throw new Error(result.error || 'Error desconocido');
