@@ -52,10 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Vérifier si l'utilisateur est connecté
+// Vérifier si l'utilisateur est connecté OU en mode invité terminal
+$is_guest_terminal = false;
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);
-    exit();
+    // Vérifier si c'est un terminal en mode invité
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (strpos($referer, '/terminal/') !== false) {
+        $is_guest_terminal = true;
+    } else {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);
+        exit();
+    }
 }
 
 require_once '../config/database.php';
@@ -170,19 +178,21 @@ if ($existing) {
 }
         
         // Sauvegarder en BDD
-        $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
-        
-        $stmt = executeQuery($sql, [
-            $_SESSION['user_id'],
-            $file['name'],
-            $unique_name,
-            $file_path,
-            $file['size'],
-            $mime_type,
-            $page_count,
-            $file_hash
-        ]);
+       $user_id_for_db = $is_guest_terminal ? null : $_SESSION['user_id'];
+
+$sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
+
+$stmt = executeQuery($sql, [
+    $user_id_for_db,  // null pour invités
+    $file['name'],
+    $unique_name,
+    $file_path,
+    $file['size'],
+    $mime_type,
+    $page_count,
+    $file_hash
+]);
         
         if ($stmt) {
             $file_id = getLastInsertId();
