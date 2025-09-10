@@ -47,9 +47,10 @@ try {
     }
     
     // Désactiver temporairement les autres modes de paiement
-    if ($data['paymentMethod']['type'] !== 'store') {
-        throw new Exception('Solo está disponible el pago en tienda actualmente');
-    }
+  // Désactiver temporairement les autres modes de paiement
+if ($data['paymentMethod']['type'] !== 'transfer') {
+    throw new Exception('Solo está disponible la transferencia bancaria actualmente');
+}
     
     // Commencer transaction
     beginTransaction();
@@ -77,11 +78,12 @@ foreach ($data['folders'] as $folder) {
     $final_total = $total_price - $discount_amount;
     
     // Créer la commande
-    $order_sql = "INSERT INTO orders (
-        user_id, order_number, status, payment_method, payment_status,
-        total_price, total_pages, total_files, pickup_code,
-        print_config, customer_notes, created_at
-    ) VALUES (?, ?, 'PENDING', 'ON_SITE', 'PENDING', ?, ?, ?, ?, ?, ?, NOW())";
+// Créer la commande
+$order_sql = "INSERT INTO orders (
+    user_id, order_number, status, payment_method, payment_status,
+    total_price, total_pages, total_files, pickup_code,
+    print_config, customer_notes, created_at
+) VALUES (?, ?, 'PENDING', 'BANK_TRANSFER', 'PENDING', ?, ?, ?, ?, ?, ?, NOW())";
     
     $print_config = json_encode([
         'folders' => $data['folders'],

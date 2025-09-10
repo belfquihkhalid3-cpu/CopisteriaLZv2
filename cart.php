@@ -17,7 +17,7 @@ $user = getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito - Copisteria</title>
+    <title>Carrito - Tinta Expres LZ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -29,10 +29,44 @@ $user = getCurrentUser();
         <div class="max-w-full px-6 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-4">
-                    <a href="index.php" class="flex items-center space-x-2">
-                        <i class="fas fa-print text-blue-500 text-xl"></i>
-                        <h1 class="text-xl font-bold text-gray-800">Copisteria</h1>
-                    </a>
+                    <a href="index" target="_blank">
+  <img src="assets/img/1.jpeg" alt="Copisteria Logo" class="h-20 w-20 object-contain">
+</a>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 bg-clip-text text-transparent animate-pulse hover:animate-bounce transition-all duration-300" 
+   style="
+       background: linear-gradient(45deg, #ff6b35, #f7931e, #ff8c42, #ff6b35);
+       background-size: 300% 300%;
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       animation: gradientShift 3s ease-in-out infinite, textGlow 2s ease-in-out infinite alternate;
+       text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+       font-family: 'Arial Black', sans-serif;
+       letter-spacing: 1px;
+   ">
+   Tinta Expres LZ
+</h1>
+<style>
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes textGlow {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4)); }
+    100% { filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8)); }
+}
+
+h1:hover {
+    transform: scale(1.05);
+    animation: gradientShift 1s ease-in-out infinite, textPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(1.1); }
+}
+</style>
                 </div>
                 
                 <div class="flex items-center space-x-4">
@@ -103,50 +137,60 @@ $user = getCurrentUser();
             <div class="col-span-4 space-y-6">
                 
                 <!-- Forma de entrega -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Forma de entrega</h3>
-                    
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <button class="delivery-option active flex flex-col items-center p-3 border-2 border-blue-500 bg-blue-50 rounded-lg text-center">
-                            <i class="fas fa-home text-blue-500 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Envío a domicilio</div>
-                        </button>
-                        <button class="delivery-option flex flex-col items-center p-3 border-2 border-gray-300 rounded-lg text-center hover:border-gray-400">
-                            <i class="fas fa-clock text-gray-400 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Punto de recogida</div>
-                        </button>
-                        <button class="delivery-option flex flex-col items-center p-3 border-2 border-gray-300 rounded-lg text-center hover:border-gray-400">
-                            <i class="fas fa-store text-gray-400 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Recoger en tienda</div>
-                        </button>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-medium text-gray-700 mb-2">Dirección de envío</h4>
-                            <div class="text-sm text-gray-500 mb-2">No proporcionada</div>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                                Añadir
-                            </button>
-                        </div>
-
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-truck text-blue-500"></i>
-                                    <span class="font-medium">Envío <strong>Low-Cost</strong></span>
-                                    <span class="text-sm text-gray-500">(+ 1,99 €)</span>
-                                </div>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
-                            </div>
-                            <div class="text-sm text-gray-600">¡Te faltan <strong>48,98 €</strong> para el envío gratis!</div>
-                            <div class="text-sm text-green-600 mt-1">
-                                <strong>Entrega prevista el jueves, 4 de septiembre</strong>
-                            </div>
-                        </div>
-                    </div>
+               
+<!-- Forma de entrega -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="font-semibold text-gray-800 mb-4">Modo de entrega</h3>
+    
+    <div class="grid grid-cols-1 gap-3 mb-4">
+        <button class="delivery-option active flex items-center justify-between p-4 border-2 border-blue-500 bg-blue-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-store text-blue-500 text-xl"></i>
+                <div class="text-left">
+                    <div class="font-medium">Recoger en tienda</div>
+                    <div class="text-sm text-gray-500">Gratis : 24H - 48H</div>
                 </div>
-
+            </div>
+            <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                <i class="fas fa-check text-white text-xs"></i>
+            </div>
+        </button>
+    </div>
+    
+    <!-- Información de la tienda -->
+    <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-map-marker-alt text-red-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Tinta Expres LZ</div>
+                <div class="text-gray-600 text-sm">Carrer de les Tres Creus, 142</div>
+                <div class="text-gray-600 text-sm">08202 Sabadell, Barcelona, Spain</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-clock text-blue-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Horarios</div>
+                <div class="text-gray-600 text-sm">Lun-Vie: 8:30 - 20:30</div>
+                <div class="text-gray-600 text-sm">Sáb: 08:00 - 15:00</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-phone text-green-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Teléfono</div>
+                <div class="text-gray-600 text-sm">+34 932 52 05 70</div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="https://maps.app.goo.gl/9y5Mey5Uw1PpVL3q6" target="_blank" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm flex items-center justify-center">
+        <i class="fas fa-map-marker-alt mr-2"></i>
+        Ver ubicación en Google Maps
+    </a>
+</div>
                 <!-- Datos de facturación -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="font-semibold text-gray-800 mb-4">Datos de facturación</h3>
@@ -274,63 +318,49 @@ $user = getCurrentUser();
             <!-- Payment options -->
             <div class="space-y-3">
                 
-                <!-- Pagar con tarjeta -->
-                <div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('card', 'Pagar con tarjeta', 'Pago seguro cifrado con certificado de seguridad SSL')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-credit-card text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pagar con tarjeta</div>
-                                <div class="text-sm text-gray-500">Pago seguro cifrado con certificado de seguridad SSL</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
-                            <i class="fas fa-check text-white text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Pago con Bizum -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('bizum', 'Pago con Bizum', 'Se requiere tener activado Bizum para compras online')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-mobile-alt text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pago con Bizum</div>
-                                <div class="text-sm text-gray-500">Se requiere tener activado Bizum para compras online</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
-                
-                <!-- Transferencia bancaria -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-university text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Transferencia bancaria</div>
-                                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
-                
-                <!-- Pago en tienda -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('store', 'Pago en tienda', 'Realiza el pago en nuestra tienda física seleccionada')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-store text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pago en tienda</div>
-                                <div class="text-sm text-gray-500">Realiza el pago en nuestra tienda física seleccionada</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
+               <!-- Pago con tarjeta -->
+<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-500">Pago con tarjeta</div>
+                <div class="text-sm text-gray-400">Temporalmente no disponible</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+    </div>
+</div>
+
+<!-- Transferencia bancaria -->
+<div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-university text-blue-600 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-800">Transferencia bancaria</div>
+                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+            <i class="fas fa-check text-white text-xs"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Pago en tienda -->
+<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-store text-gray-400 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-500">Pago en tienda</div>
+                <div class="text-sm text-gray-400">Temporalmente no disponible</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+    </div>
+</div>
                 
             </div>
         </div>
@@ -386,7 +416,7 @@ $user = getCurrentUser();
                 window.location.href = 'index.php';
                 return;
             }
-            
+                document.getElementById('selected-payment-method').textContent = 'Transferencia bancaria';
             console.log('Final cart data:', currentCartData);
             
             if (currentCartData.folders && currentCartData.folders.length > 0) {
@@ -679,9 +709,9 @@ let currentPromoCode = null;
 let discountAmount = 0;
         // Variables pour le paiement
 let selectedPayment = {
- type: 'store',
-    title: 'Pago en tienda',
-    description: 'Realiza el pago en nuestra tienda física seleccionada'
+    type: 'transfer',
+    title: 'Transferencia bancaria',
+    description: 'Recibirás las instrucciones para realizar la transferencia'
 };
 
 function openPaymentModal() {
@@ -757,11 +787,11 @@ async function processOrder() {
         return;
     }
     
-    // Vérifier mode de paiement sélectionné
-    if (selectedPayment.type !== 'store') {
-        showNotification('Solo está disponible el pago en tienda actualmente', 'warning');
-        return;
-    }
+   // Vérifier mode de paiement sélectionné
+if (selectedPayment.type !== 'transfer') {
+    showNotification('Solo está disponible la transferencia bancaria actualmente', 'warning');
+    return;
+}
     
     // Désactiver le bouton pendant le traitement
     const button = event.target;
@@ -841,6 +871,108 @@ function calculateSubtotal() {
     return total;
 }
     </script>
+<div class="fixed bottom-6 right-6 z-50">
+    <a href="https://wa.me/34932520570?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20de%20impresi%C3%B3n" 
+       target="_blank"
+       class="whatsapp-btn group relative flex items-center justify-center w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
+        
+        <!-- Icono WhatsApp -->
+        <i class="fab fa-whatsapp text-white text-2xl"></i>
+        
+        <!-- Efecto de ondas -->
+        <div class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20"></div>
+        <div class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20" style="animation-delay: 0.5s;"></div>
+        
+        <!-- Tooltip -->
+        <div class="absolute right-full mr-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            ¿Necesitas ayuda? ¡Escríbenos!
+            <div class="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
+        </div>
+    </a>
+</div>
 
+<!-- Styles pour le bouton WhatsApp -->
+<style>
+.whatsapp-btn {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.whatsapp-btn:hover {
+    animation: none;
+}
+
+/* Animation de pulsation */
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+    }
+}
+
+.whatsapp-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    animation: pulse-green 2s infinite;
+}
+
+/* Version mobile responsive */
+@media (max-width: 768px) {
+    .whatsapp-btn {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .whatsapp-btn i {
+        font-size: 1.5rem;
+    }
+    
+    .whatsapp-btn .tooltip {
+        display: none;
+    }
+}
+
+/* Notification badge (optionnel) */
+.whatsapp-btn::after {
+    content: '!';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
 </body>
 </html>

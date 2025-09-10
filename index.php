@@ -12,7 +12,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copisteria - Impresión Online</title>
+    <title>Tinta Express LZ</title>
     
     <!-- External CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,17 +29,54 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
         <div class="flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2">
-                    <i class="fas fa-print text-blue-500 text-xl"></i>
-                    <h1 class="text-xl font-bold text-gray-800">Copisteria</h1>
+          <img src="assets/img/1.jpeg" alt="Copisteria Logo" class="h-20 w-20 object-contain">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 bg-clip-text text-transparent animate-pulse hover:animate-bounce transition-all duration-300" 
+   style="
+       background: linear-gradient(45deg, #ff6b35, #f7931e, #ff8c42, #ff6b35);
+       background-size: 300% 300%;
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       animation: gradientShift 3s ease-in-out infinite, textGlow 2s ease-in-out infinite alternate;
+       text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+       font-family: 'Arial Black', sans-serif;
+       letter-spacing: 1px;
+   ">
+   Tinta Expres LZ
+</h1>
+
+<style>
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes textGlow {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4)); }
+    100% { filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8)); }
+}
+
+h1:hover {
+    transform: scale(1.05);
+    animation: gradientShift 1s ease-in-out infinite, textPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(1.1); }
+}
+</style>
                 </div>
             </div>
             
+            
             <div class="flex items-center space-x-4">
                 <!-- Bouton Imprimir -->
-                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                    <i class="fas fa-print"></i>
-                    <span>Imprimir</span>
-                </button>
+                <button onclick="openTrackingModal()" 
+                class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-xl hover:from-orange-600 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg">
+            <i class="fas fa-search mr-3 text-lg"></i>
+            Rastrear mi Pedido
+        </button>
                 
                 <!-- Total carrito -->
              <!-- Remplacez cette section dans votre index.php : -->
@@ -104,7 +141,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                         </button>
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-copy text-blue-500 text-2xl"></i>
-                            <span class="text-3xl font-bold text-gray-800" id="copies-count">5</span>
+                            <span class="text-3xl font-bold text-gray-800" id="copies-count">1</span>
                             <i class="fas fa-plus text-blue-500 text-xl"></i>
                         </div>
                         <button class="quantity-btn bg-blue-500 text-white hover:bg-blue-600" onclick="changeQuantity(1)">
@@ -373,7 +410,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                     
                     <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-3 rounded-lg flex items-center space-x-2 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Subir documentos</span>
+                        <span>Subir documentos ( pdf )</span>
                     </button>
                     
                     <!-- Cloud service icons -->
@@ -390,7 +427,72 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
           
         </main>
     </div>
-<!-- Modal d'inscription -->
+
+    <!-- Modal de Rastreo -->
+<div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="trackingModalContent">
+        
+        <!-- Header del Modal -->
+        <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-orange-400 to-red-500 mb-4">
+                <i class="fas fa-search text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Rastrear Pedido</h3>
+            <p class="text-gray-600">Ingresa tu email y número de pedido</p>
+        </div>
+
+        <!-- Formulario -->
+      <!-- Formulario -->
+        <form id="trackingForm" onsubmit="trackOrder(event)" class="space-y-6">
+            
+            <!-- Email Input -->
+            <div class="relative">
+                <label for="tracking-email" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-envelope mr-2 text-orange-500"></i>Email
+                </label>
+                <input type="email" 
+                       id="tracking-email" 
+                       name="email"
+                       required
+                       placeholder="tu@email.com"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+            </div>
+
+            <!-- Order Number Input -->
+            <div class="relative">
+                <label for="tracking-order" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-hashtag mr-2 text-orange-500"></i>Número de Pedido
+                </label>
+                <input type="text" 
+                       id="tracking-order" 
+                       name="order_number"
+                       required
+                       placeholder="COP-2025-123456"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex space-x-4 pt-4">
+                <button type="button" 
+                        onclick="closeTrackingModal()"
+                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105">
+                    <span id="track-btn-text">Buscar</span>
+                    <i id="track-loading" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Resultado del Rastreo -->
+        <div id="trackingResult" class="hidden mt-6">
+            <!-- El contenido se cargará dinámicamente -->
+        </div>
+
+    </div>
+</div>
 <div id="registerModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center hidden">
     <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         
@@ -429,6 +531,16 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                         required
                     >
                 </div>
+                <div class="input-group">
+    <i class="fas fa-phone input-icon"></i>
+    <input 
+        type="tel" 
+        name="phone"
+        value="+34"
+        class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
+        placeholder="Teléfono"
+    >
+</div>
                 
                 <!-- Contraseña -->
                 <div class="input-group">
@@ -588,5 +700,302 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 </div>
     <!-- JavaScript -->
     <script src="assets/js/main.js"></script>
+    <script>
+function openTrackingModal() {
+    const modal = document.getElementById('trackingModal');
+    const content = document.getElementById('trackingModalContent');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeTrackingModal() {
+    const modal = document.getElementById('trackingModal');
+    const content = document.getElementById('trackingModalContent');
+    
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('trackingForm').reset();
+        document.getElementById('trackingResult').classList.add('hidden');
+    }, 300);
+}
+
+async function trackOrder(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const trackBtn = document.getElementById('track-btn-text');
+    const trackLoading = document.getElementById('track-loading');
+    
+    // Mostrar loading
+    trackBtn.textContent = 'Buscando...';
+    trackLoading.classList.remove('hidden');
+    
+    try {
+        const response = await fetch('api/track-order.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayTrackingResult(result.order, result.timeline);
+        } else {
+            showTrackingError(result.error);
+        }
+        
+    } catch (error) {
+        showTrackingError('Error de conexión. Inténtalo de nuevo.');
+    } finally {
+        // Restaurar botón
+        trackBtn.textContent = 'Buscar';
+        trackLoading.classList.add('hidden');
+    }
+}
+
+function displayTrackingResult(order, timeline) {
+    const resultDiv = document.getElementById('trackingResult');
+    
+    resultDiv.innerHTML = `
+        <div class="border-t border-gray-200 pt-6">
+            <!-- Información del Pedido -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-center mb-3">
+                    <i class="fas fa-check-circle text-green-500 text-2xl mr-2"></i>
+                    <h4 class="text-lg font-semibold text-green-800">¡Pedido Encontrado!</h4>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium text-gray-600">Cliente:</span>
+                        <div class="font-semibold">${order.customer_name}</div>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-600">Total:</span>
+                        <div class="font-semibold">€${parseFloat(order.total_price).toFixed(2)}</div>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-600">Archivos:</span>
+                        <div class="font-semibold">${order.total_files}</div>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-600">Páginas:</span>
+                        <div class="font-semibold">${order.total_pages}</div>
+                    </div>
+                </div>
+                
+                ${order.pickup_code ? `
+                    <div class="mt-4 text-center bg-white rounded-lg p-3">
+                        <span class="font-medium text-gray-600">Código de Recogida:</span>
+                        <div class="text-xl font-bold text-blue-600 font-mono">${order.pickup_code}</div>
+                    </div>
+                ` : ''}
+            </div>
+
+            <!-- Estado Actual -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-${order.status_info.color}-100 text-${order.status_info.color}-800">
+                    <i class="fas fa-${order.status_info.icon} mr-2"></i>
+                    ${order.status_info.label}
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="space-y-4">
+                <h5 class="font-semibold text-gray-800 text-center mb-4">Progreso del Pedido</h5>
+                <div class="relative">
+                    ${generateTimeline(order.current_step, timeline)}
+                </div>
+            </div>
+
+            <!-- Botón Cerrar -->
+            <div class="mt-6 text-center">
+                <button onclick="closeTrackingModal()" 
+                        class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    resultDiv.classList.remove('hidden');
+}
+
+function generateTimeline(currentStep, timeline) {
+    const steps = [
+        { step: 1, title: 'Pedido Recibido', icon: 'shopping-cart' },
+        { step: 2, title: 'Pago Confirmado', icon: 'credit-card' },
+        { step: 3, title: 'En Preparación', icon: 'cog' },
+        { step: 4, title: 'Imprimiendo', icon: 'print' },
+        { step: 5, title: 'Listo para Recoger', icon: 'box' },
+        { step: 6, title: 'Entregado', icon: 'check-double' }
+    ];
+    
+    return steps.map((step, index) => {
+        const isCompleted = step.step <= currentStep;
+        const isCurrent = step.step === currentStep;
+        const isLast = index === steps.length - 1;
+        
+        return `
+            <div class="flex items-center ${isLast ? '' : 'mb-4'}">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                    isCompleted 
+                        ? 'bg-green-500 border-green-500 text-white' 
+                        : 'bg-gray-200 border-gray-300 text-gray-400'
+                }">
+                    <i class="fas fa-${step.icon} text-sm"></i>
+                </div>
+                <div class="ml-4 flex-1">
+                    <div class="font-medium ${isCompleted ? 'text-green-600' : 'text-gray-400'}">${step.title}</div>
+                    ${isCurrent ? '<div class="text-xs text-blue-600 font-medium">Estado actual</div>' : ''}
+                </div>
+                ${!isLast ? `
+                    <div class="absolute left-5 w-0.5 h-8 ${isCompleted ? 'bg-green-500' : 'bg-gray-300'}" style="top: ${(index * 64) + 40}px;"></div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function showTrackingError(message) {
+    const resultDiv = document.getElementById('trackingResult');
+    
+    resultDiv.innerHTML = `
+        <div class="border-t border-gray-200 pt-6">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-2"></i>
+                <h4 class="font-semibold text-red-800 mb-2">Error</h4>
+                <p class="text-red-700">${message}</p>
+                <button onclick="document.getElementById('trackingResult').classList.add('hidden')" 
+                        class="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+    `;
+    
+    resultDiv.classList.remove('hidden');
+}
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('trackingModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTrackingModal();
+    }
+});
+</script>
+<!-- Bouton WhatsApp Flottant -->
+<div class="fixed bottom-6 right-6 z-50">
+    <a href="https://wa.me/34932520570?text=Hola%2C%20necesito%20ayuda%20con%20mi%20pedido%20de%20impresi%C3%B3n" 
+       target="_blank"
+       class="whatsapp-btn group relative flex items-center justify-center w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
+        
+        <!-- Icono WhatsApp -->
+        <i class="fab fa-whatsapp text-white text-2xl"></i>
+        
+        <!-- Efecto de ondas -->
+        <div class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20"></div>
+        <div class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20" style="animation-delay: 0.5s;"></div>
+        
+        <!-- Tooltip -->
+        <div class="absolute right-full mr-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            ¿Necesitas ayuda? ¡Escríbenos!
+            <div class="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
+        </div>
+    </a>
+</div>
+
+<!-- Styles pour le bouton WhatsApp -->
+<style>
+.whatsapp-btn {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.whatsapp-btn:hover {
+    animation: none;
+}
+
+/* Animation de pulsation */
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+    }
+}
+
+.whatsapp-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    animation: pulse-green 2s infinite;
+}
+
+/* Version mobile responsive */
+@media (max-width: 768px) {
+    .whatsapp-btn {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .whatsapp-btn i {
+        font-size: 1.5rem;
+    }
+    
+    .whatsapp-btn .tooltip {
+        display: none;
+    }
+}
+
+/* Notification badge (optionnel) */
+.whatsapp-btn::after {
+    content: '!';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+</style>
 </body>
 </html>

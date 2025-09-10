@@ -29,9 +29,9 @@ if ($status_filter && $status_filter !== 'ALL') {
 }
 
 if ($search) {
-    $where_conditions[] = '(o.order_number LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)';
+    $where_conditions[] = '(o.order_number LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
     $search_param = '%' . $search . '%';
-    $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param]);
+    $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param, $search_param]);
 }
 
 if ($date_from) {
@@ -179,16 +179,18 @@ $orders = fetchAll($orders_sql, $params);
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivos</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                        </tr>
-                    </thead>
+    <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivos</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vista Previa</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+    </tr>
+</thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($orders as $order): ?>
                         <tr class="hover:bg-gray-50">
@@ -201,6 +203,16 @@ $orders = fetchAll($orders_sql, $params);
                                 <div class="text-xs text-gray-500"><?= htmlspecialchars($order['email']) ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
+    <div class="text-sm text-gray-900">
+        <?php if (!empty($order['phone'])): ?>
+            <i class="fas fa-phone text-green-500 mr-1"></i>
+            <?= htmlspecialchars($order['phone']) ?>
+        <?php else: ?>
+            <span class="text-gray-400">No proporcionado</span>
+        <?php endif; ?>
+    </div>
+</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <select onchange="changeOrderStatus(<?= $order['id'] ?>, this.value)" 
                                         class="status-select text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500">
                                     <option value="PENDING" <?= $order['status'] === 'PENDING' ? 'selected' : '' ?>>Pendiente</option>
@@ -211,6 +223,12 @@ $orders = fetchAll($orders_sql, $params);
                                     <option value="CANCELLED" <?= $order['status'] === 'CANCELLED' ? 'selected' : '' ?>>Cancelado</option>
                                 </select>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+    <button onclick="viewOrderFiles(<?= $order['id'] ?>)" 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition-colors">
+        <i class="fas fa-eye mr-1"></i>Ver Archivos
+    </button>
+</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div><?= $order['total_files'] ?> archivos</div>
                                 <div class="text-xs text-gray-500"><?= $order['total_pages'] ?> páginas</div>
@@ -228,6 +246,9 @@ $orders = fetchAll($orders_sql, $params);
                                     <button onclick="openOrderDetails(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
                                         <i class="fas fa-eye"></i>
                                     </button>
+                                        <a href="generate-invoice.php?order_id=<?= $order['id'] ?>" 
+       target="_blank"
+       class="text-green-600 hover:text-green-900">Factura</a>
                                     <button onclick="downloadFiles(<?= $order['id'] ?>)" class="text-green-600 hover:text-green-900" title="Descargar archivos">
                                         <i class="fas fa-download"></i>
                                     </button>
@@ -449,6 +470,12 @@ async function openOrderDetails(orderId) {
         console.error('Error:', error);
     }
 }
+
+function viewOrderFiles(orderId) {
+    const url = `view-files.php?order_id=${orderId}`;
+    window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+}
+
     </script>
 
 </body>

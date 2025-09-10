@@ -1160,3 +1160,5 @@ function socialLogin(provider) {
     // Message de redirection
     showNotification(`Redirigiendo a ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`, 'info');
 }
+
+
