@@ -54,9 +54,9 @@
 }
 
 .option-btn.active {
-    background-color: #3b82f6;
+    background-color: #EF7834;
     color: white;
-    border-color: #3b82f6;
+    border-color: #EF7834;
     box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
 }
 
@@ -98,8 +98,8 @@
 }
 
 .quantity-btn:first-child {
-    border-color: #bfdbfe;
-    color: #3b82f6;
+    border-color: #f0c9a8;
+    color: #EF7834;
 }
 
 .quantity-btn:first-child:hover {
@@ -107,8 +107,8 @@
 }
 
 .quantity-btn:last-child {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: #EF7834;
+    border-color: #EF7834;
     color: white;
 }
 
@@ -660,7 +660,7 @@ textarea:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+background: linear-gradient(135deg, #EF7834 0%, #d96a3f 100%);
     transition: all 0.3s ease;
 }
 

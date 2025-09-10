@@ -103,50 +103,60 @@ $user = getCurrentUser();
             <div class="col-span-4 space-y-6">
                 
                 <!-- Forma de entrega -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Forma de entrega</h3>
-                    
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <button class="delivery-option active flex flex-col items-center p-3 border-2 border-blue-500 bg-blue-50 rounded-lg text-center">
-                            <i class="fas fa-home text-blue-500 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Envío a domicilio</div>
-                        </button>
-                        <button class="delivery-option flex flex-col items-center p-3 border-2 border-gray-300 rounded-lg text-center hover:border-gray-400">
-                            <i class="fas fa-clock text-gray-400 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Punto de recogida</div>
-                        </button>
-                        <button class="delivery-option flex flex-col items-center p-3 border-2 border-gray-300 rounded-lg text-center hover:border-gray-400">
-                            <i class="fas fa-store text-gray-400 text-xl mb-2"></i>
-                            <div class="text-sm font-medium">Recoger en tienda</div>
-                        </button>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-medium text-gray-700 mb-2">Dirección de envío</h4>
-                            <div class="text-sm text-gray-500 mb-2">No proporcionada</div>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                                Añadir
-                            </button>
-                        </div>
-
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-truck text-blue-500"></i>
-                                    <span class="font-medium">Envío <strong>Low-Cost</strong></span>
-                                    <span class="text-sm text-gray-500">(+ 1,99 €)</span>
-                                </div>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
-                            </div>
-                            <div class="text-sm text-gray-600">¡Te faltan <strong>48,98 €</strong> para el envío gratis!</div>
-                            <div class="text-sm text-green-600 mt-1">
-                                <strong>Entrega prevista el jueves, 4 de septiembre</strong>
-                            </div>
-                        </div>
-                    </div>
+               
+<!-- Forma de entrega -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="font-semibold text-gray-800 mb-4">Modo de entrega</h3>
+    
+    <div class="grid grid-cols-1 gap-3 mb-4">
+        <button class="delivery-option active flex items-center justify-between p-4 border-2 border-blue-500 bg-blue-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-store text-blue-500 text-xl"></i>
+                <div class="text-left">
+                    <div class="font-medium">Recoger en tienda</div>
+                    <div class="text-sm text-gray-500">Gratis - Listo en 2 horas</div>
                 </div>
-
+            </div>
+            <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                <i class="fas fa-check text-white text-xs"></i>
+            </div>
+        </button>
+    </div>
+    
+    <!-- Información de la tienda -->
+    <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-map-marker-alt text-red-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Tinta Expres LZ</div>
+                <div class="text-gray-600 text-sm">Carrer de les Tres Creus, 142</div>
+                <div class="text-gray-600 text-sm">08202 Sabadell, Barcelona, Spain</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-clock text-blue-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Horarios</div>
+                <div class="text-gray-600 text-sm">Lun-Vie: 9:00 - 19:00</div>
+                <div class="text-gray-600 text-sm">Sáb: 10:00 - 14:00</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-phone text-green-500 text-lg mt-1"></i>
+            <div>
+                <div class="font-medium text-gray-800">Teléfono</div>
+                <div class="text-gray-600 text-sm">+34 932 52 05 70</div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="https://maps.app.goo.gl/9y5Mey5Uw1PpVL3q6" target="_blank" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm flex items-center justify-center">
+        <i class="fas fa-map-marker-alt mr-2"></i>
+        Ver ubicación en Google Maps
+    </a>
+</div>
                 <!-- Datos de facturación -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="font-semibold text-gray-800 mb-4">Datos de facturación</h3>
@@ -274,63 +284,49 @@ $user = getCurrentUser();
             <!-- Payment options -->
             <div class="space-y-3">
                 
-                <!-- Pagar con tarjeta -->
-                <div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('card', 'Pagar con tarjeta', 'Pago seguro cifrado con certificado de seguridad SSL')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-credit-card text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pagar con tarjeta</div>
-                                <div class="text-sm text-gray-500">Pago seguro cifrado con certificado de seguridad SSL</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
-                            <i class="fas fa-check text-white text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Pago con Bizum -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('bizum', 'Pago con Bizum', 'Se requiere tener activado Bizum para compras online')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-mobile-alt text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pago con Bizum</div>
-                                <div class="text-sm text-gray-500">Se requiere tener activado Bizum para compras online</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
-                
-                <!-- Transferencia bancaria -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-university text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Transferencia bancaria</div>
-                                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
-                
-                <!-- Pago en tienda -->
-                <div class="payment-option border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-gray-400" onclick="selectPaymentMethod('store', 'Pago en tienda', 'Realiza el pago en nuestra tienda física seleccionada')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-store text-gray-600 text-xl"></i>
-                            <div>
-                                <div class="font-medium text-gray-800">Pago en tienda</div>
-                                <div class="text-sm text-gray-500">Realiza el pago en nuestra tienda física seleccionada</div>
-                            </div>
-                        </div>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                </div>
+               <!-- Pago con tarjeta -->
+<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-500">Pago con tarjeta</div>
+                <div class="text-sm text-gray-400">Temporalmente no disponible</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+    </div>
+</div>
+
+<!-- Transferencia bancaria -->
+<div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-university text-blue-600 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-800">Transferencia bancaria</div>
+                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+            <i class="fas fa-check text-white text-xs"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Pago en tienda -->
+<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-store text-gray-400 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-500">Pago en tienda</div>
+                <div class="text-sm text-gray-400">Temporalmente no disponible</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+    </div>
+</div>
                 
             </div>
         </div>
@@ -386,7 +382,7 @@ $user = getCurrentUser();
                 window.location.href = 'index.php';
                 return;
             }
-            
+                document.getElementById('selected-payment-method').textContent = 'Transferencia bancaria';
             console.log('Final cart data:', currentCartData);
             
             if (currentCartData.folders && currentCartData.folders.length > 0) {
@@ -679,9 +675,9 @@ let currentPromoCode = null;
 let discountAmount = 0;
         // Variables pour le paiement
 let selectedPayment = {
- type: 'store',
-    title: 'Pago en tienda',
-    description: 'Realiza el pago en nuestra tienda física seleccionada'
+    type: 'transfer',
+    title: 'Transferencia bancaria',
+    description: 'Recibirás las instrucciones para realizar la transferencia'
 };
 
 function openPaymentModal() {
@@ -757,11 +753,11 @@ async function processOrder() {
         return;
     }
     
-    // Vérifier mode de paiement sélectionné
-    if (selectedPayment.type !== 'store') {
-        showNotification('Solo está disponible el pago en tienda actualmente', 'warning');
-        return;
-    }
+   // Vérifier mode de paiement sélectionné
+if (selectedPayment.type !== 'transfer') {
+    showNotification('Solo está disponible la transferencia bancaria actualmente', 'warning');
+    return;
+}
     
     // Désactiver le bouton pendant le traitement
     const button = event.target;

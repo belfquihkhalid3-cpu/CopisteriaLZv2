@@ -42,211 +42,343 @@ if (!$order_info) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
+    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-4">
-                    <a href="index.php" class="flex items-center space-x-2">
-                        <i class="fas fa-print text-blue-500 text-xl"></i>
-                        <h1 class="text-xl font-bold text-gray-800">Copisteria</h1>
+                    <a href="index.php" class="flex items-center space-x-2 group">
+                        <div class="p-2 bg-blue-500 rounded-lg group-hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-print text-white text-lg"></i>
+                        </div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Copisteria</h1>
                     </a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="orders.php" class="text-blue-600 hover:text-blue-800">Mis pedidos</a>
-                    <a href="account.php" class="text-gray-600 hover:text-gray-800">Mi cuenta</a>
-                    <span class="text-gray-600">Hola, <?= htmlspecialchars($user['first_name']) ?></span>
-                    <a href="logout.php" class="text-red-600 hover:text-red-800">Salir</a>
+                <div class="flex items-center space-x-6">
+                    <a href="orders.php" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors">
+                        <i class="fas fa-list text-sm"></i>
+                        <span>Mis pedidos</span>
+                    </a>
+                    <a href="account.php" class="text-gray-600 hover:text-gray-800 transition-colors">Mi cuenta</a>
+                    <div class="flex items-center space-x-2 text-gray-600">
+                        <i class="fas fa-user-circle text-lg"></i>
+                        <span>Hola, <?= htmlspecialchars($user['first_name']) ?></span>
+                    </div>
+                    <a href="logout.php" class="text-red-600 hover:text-red-800 transition-colors">Salir</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- Success Message -->
-        <div class="text-center mb-12">
-            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-100 mb-6">
-                <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+        <!-- Success Hero Section -->
+        <div class="text-center mb-12 relative">
+            <div class="absolute inset-0 -z-10">
+                <div class="h-64 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 opacity-10 rounded-3xl blur-3xl"></div>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">¡Pedido Confirmado!</h1>
-            <p class="text-lg text-gray-600">Tu pedido ha sido procesado correctamente</p>
+            
+            <div class="relative">
+                <div class="mx-auto flex items-center justify-center h-32 w-32 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 mb-6 animate-bounce-slow shadow-2xl">
+                    <i class="fas fa-check-circle text-white text-5xl"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-4">
+                    ¡Pedido Confirmado!
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Tu pedido ha sido procesado correctamente y está en preparación
+                </p>
+                <div class="mt-6 flex items-center justify-center space-x-2 text-green-600">
+                    <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm font-medium">Estado: En procesamiento</span>
+                    <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Order Summary Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
             
-            <!-- Order Header -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">
-                            Pedido <span id="order-number">#<?= htmlspecialchars($order_info['order_number'] ?? '') ?></span>
-                        </h2>
-                        <p class="text-gray-600">
-                            <i class="fas fa-calendar-alt mr-2"></i>
-                            <span id="order-date"><?= date('d/m/Y H:i') ?></span>
-                        </p>
+            <!-- Left Column: Payment Instructions -->
+            <div class="xl:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                    <div class="text-center mb-6">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 mb-4 shadow-lg">
+                            <i class="fas fa-university text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Instrucciones de Pago</h3>
+                        <p class="text-gray-600">Completa tu transferencia bancaria</p>
                     </div>
-                    <div class="mt-4 md:mt-0">
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span id="order-status">Pendiente</span>
-                        </span>
+                    
+                    <!-- Datos Bancarios -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-bank text-blue-500 mr-3"></i>
+                            Datos Bancarios
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Titular</label>
+                                <div class="text-lg font-bold text-gray-900">Copistería España S.L.</div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Banco</label>
+                                <div class="text-lg font-bold text-gray-900">Banco Santander</div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">IBAN</label>
+                                <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 hover:border-blue-300 transition-colors">
+                                    <div class="font-mono text-lg font-bold text-gray-900 tracking-wider break-all">
+                                        ES91 2100 0418 4502 0005 1332
+                                    </div>
+                                    <button onclick="copyToClipboard('ES91 2100 0418 4502 0005 1332')" 
+                                            class="mt-3 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+                                        <i class="fas fa-copy mr-2"></i>Copiar IBAN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Datos Importantes -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-5">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                            Datos Importantes
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Importe a transferir</label>
+                                <div class="text-3xl font-bold text-green-600" id="transfer-amount">€<?= number_format($order_info['total_price'] ?? 0, 2) ?></div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Concepto obligatorio</label>
+                                <div class="bg-yellow-50 border-2 border-dashed border-yellow-300 rounded-lg p-3 hover:border-yellow-400 transition-colors">
+                                    <div class="font-mono text-lg font-bold text-gray-900">
+                                        Código de retrait: <span id="transfer-pickup-code" class="text-red-600"><?= htmlspecialchars($order_info['pickup_code'] ?? '') ?></span>
+                                    </div>
+                                    <button onclick="copyPickupCode()" 
+                                            class="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+                                        <i class="fas fa-copy mr-2"></i>Copiar concepto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-info-circle text-red-500 mt-0.5"></i>
+                                <p class="text-sm text-red-800">
+                                    <strong>Obligatorio:</strong> Incluye el código de retrait en el concepto para identificar tu pago automáticamente.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Pickup Code -->
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-6 mb-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-qrcode text-blue-400 text-2xl"></i>
+            <!-- Right Column: Order Summary -->
+            <div class="xl:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                    
+                    <!-- Order Header -->
+                    <div class="border-b border-gray-200 pb-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-1">
+                                    Pedido <span id="order-number" class="text-blue-600">#<?= htmlspecialchars($order_info['order_number'] ?? '') ?></span>
+                                </h2>
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    <?= date('d/m/Y H:i', strtotime($order_info['created_at'] ?? 'now')) ?>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                                    Pendiente
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-medium text-blue-900">Código de Recogida</h3>
-                        <p class="text-blue-700 mb-2">Presenta este código cuando recojas tu pedido</p>
-                        <div class="text-3xl font-mono font-bold text-blue-900 tracking-wider" id="pickup-code">
+
+                    <!-- Pickup Code Highlight -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 text-center mb-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2 flex items-center justify-center">
+                            <i class="fas fa-qrcode mr-2"></i>
+                            Código de Recogida
+                        </h3>
+                        <div class="text-4xl font-bold text-blue-600 font-mono mb-2" id="pickup-code">
                             <?= htmlspecialchars($order_info['pickup_code'] ?? '') ?>
                         </div>
+                        <p class="text-xs text-gray-500">Presenta este código en la tienda</p>
+                        <button onclick="copyPickupCode()" class="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            <i class="fas fa-copy mr-2"></i>Copiar código
+                        </button>
                     </div>
-                </div>
-            </div>
 
-            <!-- Order Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-3">Detalles del Pedido</h4>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Carpetas:</span>
-                            <span class="font-medium" id="total-folders">-</span>
+                    <!-- Order Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-900" id="order-files-count">-</div>
+                            <div class="text-sm text-gray-600">Archivos</div>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Archivos:</span>
-                            <span class="font-medium" id="total-files">-</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Páginas totales:</span>
-                            <span class="font-medium" id="total-pages">-</span>
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-900" id="order-pages-count">-</div>
+                            <div class="text-sm text-gray-600">Páginas</div>
                         </div>
                     </div>
-                </div>
 
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-3">Información de Pago</h4>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Método de pago:</span>
-                            <span class="font-medium" id="payment-method">Pago en tienda</span>
+                    <!-- Payment Info -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600 flex items-center">
+                                <i class="fas fa-credit-card mr-2"></i>
+                                Método de pago
+                            </span>
+                            <span class="font-medium text-blue-600" id="payment-method">Transferencia bancaria</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Estado del pago:</span>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600 flex items-center">
+                                <i class="fas fa-clock mr-2"></i>
+                                Estado del pago
+                            </span>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 Pendiente
                             </span>
                         </div>
                     </div>
-                </div>
 
-            </div>
-
-            <!-- Pricing -->
-            <div class="border-t border-gray-200 pt-6">
-                <div class="space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Subtotal:</span>
-                        <span id="order-subtotal">0,00 €</span>
-                    </div>
-                    <div class="flex justify-between text-sm" id="discount-row" style="display: none;">
-                        <span class="text-gray-600">Descuento (<span id="discount-code-display"></span>):</span>
-                        <span class="text-green-600" id="discount-amount-display">-0,00 €</span>
-                    </div>
-                    <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
-                        <span>Total:</span>
-                        <span id="order-total">0,00 €</span>
+                    <!-- Pricing -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-lg">
+                                <span class="text-gray-600">Subtotal:</span>
+                                <span class="font-semibold" id="order-subtotal">€<?= number_format($order_info['total_price'] ?? 0, 2) ?></span>
+                            </div>
+                            <div class="flex justify-between text-xl font-bold border-t border-gray-200 pt-3">
+                                <span>Total:</span>
+                                <span class="text-green-600" id="order-total">€<?= number_format($order_info['total_price'] ?? 0, 2) ?></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Files Details -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-6">Archivos del Pedido</h3>
+        <!-- Files Details Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-folder-open mr-3 text-blue-500"></i>
+                Archivos del Pedido
+            </h3>
             <div id="order-files" class="space-y-4">
                 <!-- Files will be loaded by JavaScript -->
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Cargando archivos...</p>
+                </div>
             </div>
         </div>
 
-        <!-- Next Steps -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-6">Próximos Pasos</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <div class="text-center">
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-                        <i class="fas fa-print text-blue-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-2">1. Procesamiento</h4>
-                    <p class="text-sm text-gray-600">Estamos preparando tu pedido para impresión</p>
+        <!-- Contact & Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Contact Info -->
+            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 text-center border border-gray-200">
+                <div class="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-headset text-white text-2xl"></i>
                 </div>
-
-                <div class="text-center">
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                        <i class="fas fa-bell text-green-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-2">2. Notificación</h4>
-                    <p class="text-sm text-gray-600">Te avisaremos cuando esté listo para recoger</p>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">¿Necesitas Ayuda?</h3>
+                <p class="text-gray-600 mb-6">Nuestro equipo está listo para asistirte</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="tel:+34900123456" class="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-phone mr-2"></i>
+                        Llamar Ahora
+                    </a>
+                    <a href="mailto:info@copisteria.com" class="inline-flex items-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Enviar Email
+                    </a>
                 </div>
-
-                <div class="text-center">
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 mb-4">
-                        <i class="fas fa-store text-purple-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-2">3. Recogida</h4>
-                    <p class="text-sm text-gray-600">Presenta tu código en nuestra tienda</p>
-                </div>
-
             </div>
-        </div>
 
-        <!-- Contact Info -->
-        <div class="bg-gray-100 rounded-2xl p-8 text-center">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">¿Necesitas Ayuda?</h3>
-            <p class="text-gray-600 mb-6">Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="tel:+34900123456" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <i class="fas fa-phone mr-2"></i>
-                    Llamar
-                </a>
-                <a href="mailto:info@copisteria.com" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    <i class="fas fa-envelope mr-2"></i>
-                    Email
-                </a>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="text-center mt-8">
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="orders.php" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <i class="fas fa-list mr-2"></i>
-                    Ver Mis Pedidos
-                </a>
-                <a href="index.php" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    <i class="fas fa-plus mr-2"></i>
-                    Nuevo Pedido
-                </a>
+            <!-- Action Buttons -->
+            <div class="bg-white rounded-2xl p-8 text-center shadow-xl border border-gray-100">
+                <div class="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-rocket text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">¿Qué quieres hacer ahora?</h3>
+                <p class="text-gray-600 mb-6">Gestiona tus pedidos o crea uno nuevo</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="orders.php" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-list mr-2"></i>
+                        Ver Mis Pedidos
+                    </a>
+                    <a href="index.php" class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nuevo Pedido
+                    </a>
+                </div>
             </div>
         </div>
 
     </div>
 
     <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('IBAN copiado al portapapeles', 'success');
+            });
+        }
+
+        function copyPickupCode() {
+            const pickupCode = document.getElementById('transfer-pickup-code').textContent || document.getElementById('pickup-code').textContent;
+            const concept = `Código de retrait: ${pickupCode}`;
+            navigator.clipboard.writeText(concept).then(() => {
+                showNotification('Concepto copiado al portapapeles', 'success');
+            });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-2xl transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+            } text-white border border-white/20`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
         // Charger les détails de la commande depuis sessionStorage
         document.addEventListener('DOMContentLoaded', function() {
             const orderConfirmation = sessionStorage.getItem('orderConfirmation');
@@ -262,11 +394,14 @@ if (!$order_info) {
                 
                 if (orderData.pickup_code) {
                     document.getElementById('pickup-code').textContent = orderData.pickup_code;
+                    document.getElementById('transfer-pickup-code').textContent = orderData.pickup_code;
                 }
                 
                 if (orderData.total_price) {
-                    document.getElementById('order-total').textContent = orderData.total_price.toFixed(2).replace('.', ',') + ' €';
-                    document.getElementById('order-subtotal').textContent = orderData.total_price.toFixed(2).replace('.', ',') + ' €';
+                    const formattedPrice = '€' + orderData.total_price.toFixed(2);
+                    document.getElementById('order-total').textContent = formattedPrice;
+                    document.getElementById('order-subtotal').textContent = formattedPrice;
+                    document.getElementById('transfer-amount').textContent = formattedPrice;
                 }
                 
                 // Si il y a des données de dossiers dans sessionStorage
@@ -293,9 +428,8 @@ if (!$order_info) {
             });
             
             // Mettre à jour les totaux
-            document.getElementById('total-folders').textContent = folders.length;
-            document.getElementById('total-files').textContent = totalFiles;
-            document.getElementById('total-pages').textContent = totalPages;
+            document.getElementById('order-files-count').textContent = totalFiles;
+            document.getElementById('order-pages-count').textContent = totalPages;
             
             // Afficher les fichiers
             const filesContainer = document.getElementById('order-files');

@@ -73,6 +73,7 @@ try {
     $name_parts = explode(' ', $full_name, 2);
     $first_name = $name_parts[0];
     $last_name = isset($name_parts[1]) ? $name_parts[1] : '';
+    $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '+34';
     
     // Vérifier si l'email existe déjà
     $stmt = executeQuery("SELECT id FROM users WHERE email = ?", [$email]);
@@ -88,11 +89,10 @@ try {
     // Générer un token de vérification
     $verification_token = bin2hex(random_bytes(32));
     
-    // Insérer l'utilisateur
-    $sql = "INSERT INTO users (email, password, first_name, last_name, verification_token, created_at) 
-            VALUES (?, ?, ?, ?, ?, NOW())";
-    
-    $stmt = executeQuery($sql, [$email, $password_hash, $first_name, $last_name, $verification_token]);
+  $sql = "INSERT INTO users (email, password, first_name, last_name, phone, verification_token, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, NOW())";
+
+$stmt = executeQuery($sql, [$email, $password_hash, $first_name, $last_name, $phone, $verification_token]);
     
     if (!$stmt) {
         throw new Exception('Erreur lors de la création du compte');

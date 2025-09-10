@@ -12,7 +12,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copisteria - Impresión Online</title>
+    <title>Tinta Express LZ</title>
     
     <!-- External CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,8 +29,43 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
         <div class="flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2">
-                    <i class="fas fa-print text-blue-500 text-xl"></i>
-                    <h1 class="text-xl font-bold text-gray-800">Copisteria</h1>
+          <img src="assets/img/1.jpeg" alt="Copisteria Logo" class="h-20 w-20 object-contain">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 bg-clip-text text-transparent animate-pulse hover:animate-bounce transition-all duration-300" 
+   style="
+       background: linear-gradient(45deg, #ff6b35, #f7931e, #ff8c42, #ff6b35);
+       background-size: 300% 300%;
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       animation: gradientShift 3s ease-in-out infinite, textGlow 2s ease-in-out infinite alternate;
+       text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+       font-family: 'Arial Black', sans-serif;
+       letter-spacing: 1px;
+   ">
+   Tinta Expres LZ
+</h1>
+
+<style>
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes textGlow {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4)); }
+    100% { filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8)); }
+}
+
+h1:hover {
+    transform: scale(1.05);
+    animation: gradientShift 1s ease-in-out infinite, textPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(1.1); }
+}
+</style>
                 </div>
             </div>
             
@@ -429,6 +464,16 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                         required
                     >
                 </div>
+                <div class="input-group">
+    <i class="fas fa-phone input-icon"></i>
+    <input 
+        type="tel" 
+        name="phone"
+        value="+34"
+        class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
+        placeholder="Teléfono"
+    >
+</div>
                 
                 <!-- Contraseña -->
                 <div class="input-group">
