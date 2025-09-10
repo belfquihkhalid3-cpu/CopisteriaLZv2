@@ -64,6 +64,18 @@ $orders = fetchAll($orders_sql, $params);
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        .orders-table {
+    font-size: 0.875rem;
+}
+.orders-table th, .orders-table td {
+    padding: 0.5rem;
+    white-space: nowrap;
+}
+@media (max-width: 768px) {
+    .orders-table {
+        font-size: 0.75rem;
+    }
+}
         /* Estilo para el indicador de la barra de navegación activa */
     .nav-active { position: relative; }
 .nav-active::before { 
@@ -177,8 +189,7 @@ $orders = fetchAll($orders_sql, $params);
 
             <!-- Orders Table -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+               <table class="orders-table min-w-full divide-y divide-gray-200">
     <tr>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
@@ -243,9 +254,9 @@ $orders = fetchAll($orders_sql, $params);
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex space-x-2">
-                                    <button onclick="openOrderDetails(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+            <button onclick="viewOrder(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+    <i class="fas fa-eye"></i>
+</button>
                                         <a href="generate-invoice.php?order_id=<?= $order['id'] ?>" 
        target="_blank"
        class="text-green-600 hover:text-green-900">Factura</a>
@@ -321,11 +332,7 @@ $orders = fetchAll($orders_sql, $params);
             }
         }
 
-        // Voir détails commande
-        function viewOrder(orderId) {
-window.open('order-details.php?id=' + orderId + '&token=' + result.token, '_blank');
-        }
-
+     
         // Télécharger fichiers
         function downloadFiles(orderId) {
             window.location.href = 'download-files.php?order=' + orderId;
@@ -475,7 +482,26 @@ function viewOrderFiles(orderId) {
     const url = `view-files.php?order_id=${orderId}`;
     window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
 }
-
+async function viewOrder(orderId) {
+    try {
+        const response = await fetch('./api/get-order-token.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({order_id: orderId})
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            window.open('order-details.php?id=' + orderId + '&token=' + result.token, '_blank');
+        } else {
+            console.log('Error:', result.error);
+            alert('Error al generar el token');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
     </script>
 
 </body>

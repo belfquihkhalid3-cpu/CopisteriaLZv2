@@ -8,7 +8,7 @@ AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi .exe
 </FilesMatch>
 
 # Autoriser seulement les documents
-<FilesMatch "\.(pdf|doc|docx|txt)$">
+<FilesMatch "\.(pdf)$">
     Allow from all
 </FilesMatch>
 
