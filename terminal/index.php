@@ -391,7 +391,7 @@ h1:hover {
             <div class="flex-1 flex items-center justify-center p-8">
                   <!-- File List (initially hidden) -->
             
-                <div class="upload-zone w-full max-w-2xl h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer" id="upload-zone">
+                <div class="upload-zone w-full max-w-2xl h-[500px] border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer" id="upload-zone">
                     <!-- Illustration -->
                     <div class="mb-6">
                         <svg width="120" height="120" viewBox="0 0 200 200" class="text-gray-400">
@@ -415,18 +415,37 @@ h1:hover {
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Selecciona los documentos a imprimir</h3>
                     <p class="text-gray-600 mb-6">Sube tus documentos y empieza a imprimir con la mejor calidad al mejor precio</p>
                     
-                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-3 rounded-lg flex items-center space-x-2 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Subir documentos ( pdf )</span>
-                    </button>
+                   <!-- Choix utilisateur (seulement si pas connecté) -->
+<?php if (!$user_id): ?>
+<div class="bg-blue-50 border-b border-blue-200 p-6">
+    <div class="container mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            
+            <!-- Invité -->
+            <div class="bg-white rounded-lg shadow p-6 text-center">
+                <i class="fas fa-user-slash text-2xl text-blue-600 mb-3"></i>
+                <h3 class="text-lg font-bold mb-2">Continuar sin cuenta</h3>
+                <p class="text-gray-600 text-sm mb-4">Sube tus documentos directamente</p>
+                <button onclick="startGuestMode()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg w-full">
+                    <i class="fas fa-upload mr-2"></i>Subir como Invitado
+                </button>
+            </div>
+
+            <!-- Cuenta -->
+            <div class="bg-white rounded-lg shadow p-6 text-center">
+                <i class="fas fa-user text-2xl text-green-600 mb-3"></i>
+                <h3 class="text-lg font-bold mb-2">Tengo una cuenta</h3>
+                <p class="text-gray-600 text-sm mb-4">Accede a tu historial</p>
+                <button onclick="openLogin()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
                     
-                    <!-- Cloud service icons -->
-                    <div class="flex items-center space-x-4 mt-6 opacity-70">
-                        <i class="fab fa-google-drive text-2xl text-blue-500"></i>
-                        <i class="fab fa-dropbox text-2xl text-blue-600"></i>
-                        <i class="fab fa-microsoft text-2xl text-blue-700"></i>
-                    </div>
-                    
+                  
                     <input type="file" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" id="file-input">
                 </div>
             </div>
@@ -898,6 +917,17 @@ document.getElementById('trackingModal').addEventListener('click', function(e) {
         closeTrackingModal();
     }
 });
+function startGuestMode() {
+    sessionStorage.setItem('terminal_mode', 'guest');
+    sessionStorage.setItem('terminal_info', JSON.stringify(<?= json_encode($terminal_info) ?>));
+    // Masquer la section de choix
+    document.querySelector('.bg-blue-50').style.display = 'none';
+}
+
+function openLogin() {
+    window.location.href = '../index.php?terminal=<?= $terminal_info['id'] ?>';
+}
+
 </script>
 <!-- Bouton WhatsApp Flottant -->
 <div class="fixed bottom-6 right-6 z-50">
