@@ -75,18 +75,21 @@ $folders = $print_config['folders'] ?? [];
                                         <?= htmlspecialchars($folder['name'] ?? "Carpeta " . ($folderIndex + 1)) ?>
                                     </h4>
                                     <?php foreach ($folder['files'] as $fileIndex => $file): ?>
-                                        <button onclick="viewFile('<?= htmlspecialchars($file['stored_name'] ?? $file['name']) ?>', '<?= htmlspecialchars($file['name']) ?>')"
-                                                class="w-full text-left p-3 rounded-lg hover:bg-blue-50 border border-gray-200 mb-2 transition-colors file-item">
-                                            <div class="flex items-center space-x-3">
-                                                <i class="fas fa-file-pdf text-red-500"></i>
-                                                <div class="flex-1">
-                                                    <div class="font-medium text-sm"><?= htmlspecialchars($file['name']) ?></div>
-                                                    <div class="text-xs text-gray-500">
-                                                        <?= $file['pages'] ?? 1 ?> páginas
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
+                                      <div class="border border-gray-200 rounded-lg mb-2 p-3">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-file-pdf text-red-500"></i>
+            <div>
+                <div class="font-medium text-sm"><?= htmlspecialchars($file['name']) ?></div>
+                <div class="text-xs text-gray-500"><?= $file['pages'] ?? 1 ?> páginas</div>
+            </div>
+        </div>
+        <button onclick="previewFile('<?= htmlspecialchars($file['stored_name'] ?? $file['name']) ?>')" 
+                class="text-blue-600 hover:text-blue-800 text-sm">
+            <i class="fas fa-eye mr-1"></i>Vista Previa
+        </button>
+    </div>
+</div>
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
@@ -160,7 +163,9 @@ $folders = $print_config['folders'] ?? [];
             link.click();
             document.body.removeChild(link);
         }
-        
+        function previewFile(fileName) {
+    window.open(`serve-file.php?file=${fileName}`, '_blank');
+}
         function openInNewTab(filePath) {
             window.open(filePath, '_blank');
         }

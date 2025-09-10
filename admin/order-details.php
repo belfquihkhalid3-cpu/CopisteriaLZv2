@@ -403,7 +403,11 @@ $print_config = json_decode($order['print_config'], true) ?: [];
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
+        function viewFiles() {
+    window.open(`view-files.php?order_id=<?= $order_id ?>`, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+}
     </script>
+    
 
 </body>
 </html>
