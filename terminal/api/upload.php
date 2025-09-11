@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+require_once '../../config/database.php';
+require_once '../../includes/functions.php'; // ← AJOUTER cette ligne
+require_once '../../includes/security_headers.php'; 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -24,7 +27,7 @@ require_once '../config.php';
 try {
     // Pour les terminaux, autoriser les invités
     $terminal_info = getTerminalInfo();
-    $is_guest_terminal = sessionStorage_getItem('terminal_mode') === 'guest' || isset($_POST['terminal_mode']);
+    $is_guest_terminal = isset($_POST['terminal_mode']) || isset($_GET['terminal_mode']);
     
     // Vérifier autorisation (utilisateur connecté OU mode invité terminal)
     if (!isset($_SESSION['user_id']) && !$is_guest_terminal) {
@@ -121,9 +124,9 @@ try {
             // Déterminer user_id (null pour invités)
             $user_id_for_db = $is_guest_terminal ? null : ($_SESSION['user_id'] ?? null);
             
-            // Sauvegarder en BDD
-            $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, terminal_id, created_at, expires_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
+            // Sauvegarder en BDD (sans terminal_id car colonne n'existe pas)
+            $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
             
             $stmt = executeQuery($sql, [
                 $user_id_for_db,
@@ -133,20 +136,17 @@ try {
                 $file['size'],
                 $file['type'],
                 $page_count,
-                $file_hash,
-                $terminal_info['id']
+                $file_hash
             ]);
             
             if ($stmt) {
-                $file_id = getLastInsertId();
                 $uploaded_files[] = [
-                    'id' => $file_id,
+                    'id' => getLastInsertId(),
                     'name' => $file['name'],
                     'size' => $file['size'],
                     'pages' => $page_count,
                     'type' => $file['type'],
-                    'stored_name' => $unique_name,
-                    'terminal_id' => $terminal_info['id']
+                    'stored_name' => $unique_name
                 ];
             } else {
                 unlink($file_path);
@@ -162,8 +162,7 @@ try {
         'success' => !empty($uploaded_files),
         'files' => $uploaded_files,
         'count' => count($uploaded_files),
-        'errors' => $errors,
-        'terminal_id' => $terminal_info['id']
+        'errors' => $errors
     ]);
     
 } catch (Exception $e) {

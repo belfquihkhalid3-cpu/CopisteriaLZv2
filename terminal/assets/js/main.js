@@ -330,47 +330,50 @@ function validateFile(file) {
 }
 
 // Upload vers le serveur
-
 async function uploadFileToServer(file) {
     const formData = new FormData();
     formData.append('files', file);
     formData.append('terminal_mode', 'guest');
     
     try {
+        console.log('=== UPLOAD DEBUG ===');
+        console.log('File:', file.name, file.size, file.type);
+        console.log('Terminal mode:', sessionStorage.getItem('terminal_mode'));
+        
         const response = await fetch('api/upload.php', {
             method: 'POST',
             body: formData
         });
         
-        // Vérifier le Content-Type avant de parser JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            console.error('Réponse HTML reçue au lieu de JSON:', text);
-            throw new Error('Erreur serveur - réponse invalide');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers.get('content-type'));
+        
+        const text = await response.text();
+        console.log('Raw response:', text);
+        
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON parse error:', e);
+            console.error('Raw text was:', text);
+            throw new Error('Réponse serveur invalide');
         }
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Upload result:', result);
+        console.log('Parsed result:', result);
         
         if (result.success && result.files && result.files.length > 0) {
             return result.files[0];
         } else {
-            throw new Error(result.error || 'Error al subir archivo');
+            // Afficher tous les détails d'erreur
+            const errorDetails = result.errors ? result.errors.join(', ') : result.error;
+            throw new Error(`Détails: ${errorDetails}`);
         }
         
     } catch (error) {
-        console.error('Upload error:', error);
-        
-        // Si c'est une erreur JSON, c'est probablement du HTML d'erreur PHP
-        if (error.message.includes('Unexpected token')) {
-            throw new Error('Error del servidor - verificar configuración');
-        }
-        
+        console.error('=== UPLOAD ERROR ===');
+        console.error('Error object:', error);
+        console.error('Error message:', error.message);
         throw error;
     }
 }
