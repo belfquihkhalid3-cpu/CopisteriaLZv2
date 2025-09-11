@@ -121,22 +121,23 @@ try {
             $file_hash = md5_file($file_path);
             
             // Déterminer user_id (null pour invités)
-            $user_id_for_db = $is_guest_terminal ? null : ($_SESSION['user_id'] ?? null);
-            
-            // Sauvegarder en BDD (sans terminal_id car colonne n'existe pas)
-            $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, created_at, expires_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
-            
-            $stmt = executeQuery($sql, [
-                $user_id_for_db,
-                $file['name'],
-                $unique_name,
-                $file_path,
-                $file['size'],
-                $file['type'],
-                $page_count,
-                $file_hash
-            ]);
+            // Gérer user_id pour invités - utiliser 0 au lieu de null
+$user_id_for_db = $is_guest_terminal ? 0 : ($_SESSION['user_id'] ?? 0);
+
+// SQL ajusté selon la vraie structure de la table
+$sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, status, created_at, expires_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'READY', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))";
+
+$stmt = executeQuery($sql, [
+    $user_id_for_db,
+    $file['name'],
+    $unique_name,
+    $file_path,
+    $file['size'],
+    $file['type'],
+    $page_count,
+    $file_hash
+]);
             
             if ($stmt) {
                 $uploaded_files[] = [

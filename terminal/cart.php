@@ -11,21 +11,15 @@ $terminal_info = null;
 // Vérifier si vient d'un terminal
 if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/terminal/') !== false) {
     $is_terminal = true;
-    require_once 'terminal/config.php';
+    require_once 'config.php';
     $terminal_info = getTerminalInfo();
 }
-// Remplacer la vérification ligne 17
-$is_guest_mode = isset($_GET['guest']) || sessionStorage_getItem('terminal_mode') === 'guest';
 
 // Permettre les invités des terminaux
-$is_guest_terminal = sessionStorage_getItem('terminal_mode') === 'guest' || isset($_GET['guest']);
+$is_guest_terminal = isset($_GET['guest']) || isset($_POST['guest']) || 
+                     (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/terminal/') !== false);
 
-if (!isLoggedIn() && !$is_guest_terminal) {
-    header('Location: index.php');
-    exit();
-}
 
-// Pour les invités, créer un user factice
 if (!isLoggedIn() && $is_guest_terminal) {
     $user = [
         'first_name' => 'Cliente',
@@ -851,18 +845,30 @@ if (sessionStorage.getItem('terminal_mode') === 'guest') {
         
         // Envoyer à l'API
        const apiUrl = sessionStorage.getItem('terminal_mode') === 'guest' 
-    ? 'terminal/api/create-order.php' 
+    ? 'api/create-order.php' 
     : 'api/create-order.php';
 
-const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(orderData)
-});
-        
-        const result = await response.json();
-        console.log('Order result:', result);
-        
+ const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(orderData)
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers.get('content-type'));
+    
+    const text = await response.text();
+    console.log('Raw response text:', text);
+    
+    // Vérifier si c'est du JSON valide
+    let result;
+    try {
+        result = JSON.parse(text);
+    } catch (jsonError) {
+        console.error('JSON Parse Error:', jsonError);
+        console.error('Response was:', text);
+        throw new Error('Réponse serveur invalide: ' + text.substring(0, 200));
+    }
         if (result.success) {
             // Succès - nettoyer le panier et rediriger
             sessionStorage.removeItem('currentCart');
