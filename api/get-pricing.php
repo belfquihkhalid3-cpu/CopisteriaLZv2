@@ -1,7 +1,5 @@
 <?php
-/**
- * API pour récupérer les tarifs d'impression - Copisteria
- */
+
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

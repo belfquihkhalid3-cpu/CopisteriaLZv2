@@ -334,11 +334,7 @@ function validateFile(file) {
 async function uploadFileToServer(file) {
     const formData = new FormData();
     formData.append('files', file);
-    
-    // Ajouter indicateur terminal pour les invités
-    if (sessionStorage.getItem('terminal_mode') === 'guest') {
-        formData.append('terminal_mode', 'guest');
-    }
+    formData.append('terminal_mode', 'guest');
     
     try {
         const response = await fetch('api/upload.php', {
@@ -346,10 +342,35 @@ async function uploadFileToServer(file) {
             body: formData
         });
         
+        // Vérifier le Content-Type avant de parser JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Réponse HTML reçue au lieu de JSON:', text);
+            throw new Error('Erreur serveur - réponse invalide');
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const result = await response.json();
-        // ... reste du code
+        console.log('Upload result:', result);
+        
+        if (result.success && result.files && result.files.length > 0) {
+            return result.files[0];
+        } else {
+            throw new Error(result.error || 'Error al subir archivo');
+        }
+        
     } catch (error) {
         console.error('Upload error:', error);
+        
+        // Si c'est une erreur JSON, c'est probablement du HTML d'erreur PHP
+        if (error.message.includes('Unexpected token')) {
+            throw new Error('Error del servidor - verificar configuración');
+        }
+        
         throw error;
     }
 }
@@ -739,12 +760,22 @@ function initializeApp() {
 // Charger les prix depuis l'API au démarrage
 async function loadPricingFromAPI() {
     try {
-      
+        const response = await fetch('../api/get-pricing.php');
         
-        const response = await fetch('api/get-pricing.php');
+        // Vérifier si la réponse est OK
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // Vérifier le Content-Type
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Réponse non-JSON reçue:', text);
+            throw new Error('Réponse invalide du serveur');
+        }
+        
         const data = await response.json();
-        
-     
         
         if (data.success && data.pricing) {
             // Convertir la structure BDD vers JS
@@ -760,30 +791,18 @@ async function loadPricingFromAPI() {
                     }
                 }
             }
+            console.log('Prix chargés depuis API:', pricing);
+        } else {
+            throw new Error('Données de prix invalides');
         }
-        
-     
-        
-        // Charger les coûts de finition
-        const finishingResponse = await fetch('api/get-finishing.php');
-        const finishingData = await finishingResponse.json();
-        
-        
-        
-        if (finishingData.success) {
-            Object.assign(finishingCosts, finishingData.finishing_costs);
-        }
-        
-       
-        
-        // Recalculer le prix maintenant que les données sont chargées
-        calculatePrice();
         
     } catch (error) {
-        console.error('Erreur chargement prix:', error);
-        // Utiliser les prix par défaut en cas d'erreur
-        calculatePrice();
+        console.warn('Impossible de charger les prix depuis l\'API:', error.message);
+        console.log('Utilisation des prix par défaut');
+        initializeDefaultPricing();
     }
+    
+    calculatePrice();
 }
 // Appeler au démarrage
 loadPricingFromAPI();
