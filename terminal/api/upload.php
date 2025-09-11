@@ -2,8 +2,10 @@
 session_start();
 
 require_once '../../config/database.php';
-require_once '../../includes/functions.php'; // ← AJOUTER cette ligne
-require_once '../../includes/security_headers.php'; 
+require_once '../../includes/functions.php';
+require_once '../../includes/security_headers.php';
+require_once '../config.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -20,15 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-require_once '../../config/database.php';
-require_once '../../includes/security_headers.php';
-require_once '../config.php';
-
 try {
     // Pour les terminaux, autoriser les invités
     $terminal_info = getTerminalInfo();
     $is_guest_terminal = isset($_POST['terminal_mode']) || isset($_GET['terminal_mode']);
     
+    // ... reste du code inchangé
     // Vérifier autorisation (utilisateur connecté OU mode invité terminal)
     if (!isset($_SESSION['user_id']) && !$is_guest_terminal) {
         http_response_code(401);
