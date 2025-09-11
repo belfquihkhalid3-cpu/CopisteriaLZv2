@@ -40,16 +40,21 @@ try {
         throw new Exception('Método de pago no seleccionado');
     }
     
-    // Pour les terminaux, seul le paiement en magasin est autorisé
-    if ($data['paymentMethod']['type'] !== 'store') {
-        throw new Exception('Solo está disponible el pago en tienda para terminales');
+    // Pour les terminaux, accepter transfer et store
+    if (!in_array($data['paymentMethod']['type'], ['transfer', 'store'])) {
+        throw new Exception('Método de pago no válido para terminales');
     }
     
     // Obtenir infos terminal
     $terminal_info = getTerminalInfo();
     
+    // Variables pour transaction
+    global $pdo;
+    $transaction_started = false;
+    
     // Commencer transaction
-    beginTransaction();
+    $pdo->beginTransaction();
+    $transaction_started = true;
     
     // Générer numéro de commande avec préfixe terminal
     $order_number = generateTerminalOrderNumber($terminal_info['id']);
@@ -73,8 +78,21 @@ try {
     $discount_amount = $data['discount'] ?? 0;
     $final_total = $total_price - $discount_amount;
     
-    // Déterminer user_id (null pour invités)
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+    // Déterminer user_id - utiliser 0 pour invités ou créer utilisateur invité
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+    } else {
+        // Créer ou récupérer utilisateur invité
+        $guest_user = fetchOne("SELECT id FROM users WHERE email = 'guest@terminal.local'");
+        if (!$guest_user) {
+            $sql_guest = "INSERT INTO users (email, first_name, last_name, password, is_admin, is_active, created_at) 
+                          VALUES ('guest@terminal.local', 'Cliente', 'Invitado', 'no_password', 0, 1, NOW())";
+            executeQuery($sql_guest);
+            $user_id = getLastInsertId();
+        } else {
+            $user_id = $guest_user['id'];
+        }
+    }
     
     // Créer la commande terminal
     $order_sql = "INSERT INTO orders (
@@ -82,7 +100,7 @@ try {
         total_price, total_pages, total_files, pickup_code,
         print_config, customer_notes, source_type, terminal_id, 
         terminal_ip, is_guest, created_at
-    ) VALUES (?, ?, 'PENDING', 'STORE_PAYMENT', 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
+    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
     
     $print_config = json_encode([
         'folders' => $data['folders'],
@@ -92,9 +110,13 @@ try {
         'discount' => $discount_amount
     ]);
     
+    // Déterminer le mode de paiement
+    $payment_method = $data['paymentMethod']['type'] === 'store' ? 'STORE_PAYMENT' : 'BANK_TRANSFER';
+    
     $stmt = executeQuery($order_sql, [
         $user_id,
         $order_number,
+        $payment_method,
         $final_total,
         $total_pages,
         $total_files,
@@ -103,7 +125,7 @@ try {
         $data['comments'] ?? '',
         $terminal_info['id'],
         $_SERVER['REMOTE_ADDR'],
-        $user_id === null ? 1 : 0
+        !isset($_SESSION['user_id']) ? 1 : 0
     ]);
     
     if (!$stmt) {
@@ -123,8 +145,8 @@ try {
                 binding, copies, unit_price, item_total, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
-            // Calculer prix unitaire
-            $unit_price = calculateUnitPrice($config);
+            // Calculer prix unitaire (fonction à créer si n'existe pas)
+            $unit_price = calculateUnitPriceSimple($config);
             $item_total = $unit_price * ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
             
             executeQuery($item_sql, [
@@ -140,7 +162,7 @@ try {
                 strtoupper($config['colorMode'] ?? 'BW'),
                 strtoupper($config['orientation'] ?? 'PORTRAIT'),
                 strtoupper($config['sides'] ?? 'DOUBLE'),
-                mapFinishing($config['finishing'] ?? 'none'),
+                mapFinishingSimple($config['finishing'] ?? 'none'),
                 $folder['copies'] ?? 1,
                 $unit_price,
                 $item_total
@@ -149,12 +171,12 @@ try {
     }
     
     // Créer notification seulement si utilisateur connecté
-    if ($user_id) {
+    if (isset($_SESSION['user_id'])) {
         $notif_sql = "INSERT INTO notifications (user_id, order_id, title, message, notification_type, created_at) 
                       VALUES (?, ?, ?, ?, 'ORDER_CREATED', NOW())";
         
         executeQuery($notif_sql, [
-            $user_id,
+            $_SESSION['user_id'],
             $order_id,
             'Pedido creado en terminal',
             "Tu pedido #{$order_number} ha sido creado en {$terminal_info['name']}."
@@ -162,7 +184,8 @@ try {
     }
     
     // Valider transaction
-    commitTransaction();
+    $pdo->commit();
+    $transaction_started = false;
     
     echo json_encode([
         'success' => true,
@@ -175,7 +198,11 @@ try {
     ]);
     
 } catch (Exception $e) {
-    rollbackTransaction();
+    // Rollback seulement si transaction active
+    if ($transaction_started && $pdo->inTransaction()) {
+        $pdo->rollback();
+    }
+    
     error_log("Erreur création commande terminal: " . $e->getMessage());
     echo json_encode([
         'success' => false,
@@ -188,5 +215,42 @@ function generateTerminalOrderNumber($terminal_id) {
     $prefix = "T{$terminal_id}-" . date('Ymd') . "-";
     $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
     return $prefix . $random;
+}
+
+// Fonction simple pour calculer prix unitaire
+function calculateUnitPriceSimple($config) {
+    $base_price = 0.05; // Prix de base par page
+    
+    // Ajuster selon le type de papier
+    if (($config['paperWeight'] ?? '80g') === '160g') $base_price *= 1.4;
+    if (($config['paperWeight'] ?? '80g') === '280g') $base_price *= 2.4;
+    
+    // Ajuster selon la couleur
+    if (($config['colorMode'] ?? 'bw') === 'color') $base_price *= 3;
+    
+    return $base_price;
+}
+
+// Fonction simple pour mapper le finishing
+function mapFinishingSimple($finishing) {
+    $map = [
+        'none' => 'NONE',
+        'individual' => 'NONE', 
+        'grouped' => 'NONE',
+        'spiral' => 'SPIRAL',
+        'staple' => 'STAPLE'
+    ];
+    
+    return $map[$finishing] ?? 'NONE';
+}
+// Fonctions manquantes
+function generatePickupCode() {
+    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+}
+
+function generateOrderNumber() {
+    $prefix = 'COP-' . date('Y') . '-';
+    $number = str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+    return $prefix . $number;
 }
 ?>
