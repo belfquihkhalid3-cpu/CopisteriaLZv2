@@ -168,7 +168,7 @@ h1:hover {
                 <i class="fas fa-store text-blue-500 text-xl"></i>
                 <div class="text-left">
                     <div class="font-medium">Recoger en tienda</div>
-                    <div class="text-sm text-gray-500">Gratis : 24H - 48H</div>
+                    <div class="text-sm text-gray-500">Gratis : 10 min</div>
                 </div>
             </div>
             <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
@@ -211,29 +211,28 @@ h1:hover {
         Ver ubicación en Google Maps
     </a>
 </div>
-                <!-- Datos de facturación -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Datos de facturación</h3>
-                    <div class="text-sm text-gray-500 mb-2">No proporcionado</div>
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                        Añadir
-                    </button>
-                </div>
+               
 
                 <!-- Método de pago -->
                <!-- Método de pago -->
-<div class="bg-white rounded-lg shadow-sm p-6">
-    <h3 class="font-semibold text-gray-800 mb-4">Método de pago</h3>
-    <button onclick="openPaymentModal()" class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+<!-- Section Método de pago -->
+<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+        <i class="fas fa-credit-card mr-2 text-blue-600"></i>Método de pago
+    </h3>
+    
+    <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <div class="flex items-center space-x-3">
-            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
+            <i class="fas fa-store text-blue-600 text-xl"></i>
             <div>
-                <div class="font-medium" id="selected-payment-method">Pagar con tarjeta</div>
-                <div class="text-sm text-gray-500">Pago seguro cifrado con certif...</div>
+                <div class="font-medium text-gray-800" id="selected-payment-method">Pago en tienda</div>
+                <div class="text-sm text-gray-600">Pagar directamente en el mostrador</div>
             </div>
         </div>
-        <i class="fas fa-chevron-right text-gray-400"></i>
-    </button>
+        <button onclick="openPaymentModal()" class="text-blue-600 hover:text-blue-700 font-medium">
+            Cambiar
+        </button>
+    </div>
 </div>
 
 
@@ -353,32 +352,32 @@ h1:hover {
 </div>
 
 <!-- Transferencia bancaria -->
-<div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('transfer', 'Transferencia bancaria', 'Recibirás las instrucciones para realizar la transferencia')">
+<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
     <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
-            <i class="fas fa-university text-blue-600 text-xl"></i>
+            <i class="fas fa-university text-gray-400 text-xl"></i>
             <div>
-                <div class="font-medium text-gray-800">Transferencia bancaria</div>
-                <div class="text-sm text-gray-500">Recibirás las instrucciones para realizar la transferencia</div>
+                <div class="font-medium text-gray-500">Transferencia bancaria</div>
+                <div class="text-sm text-gray-400">No disponible en terminal</div>
+            </div>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+    </div>
+</div>
+
+<!-- Pago en tienda -->
+<div class="payment-option border-2 border-blue-500 bg-blue-50 rounded-lg p-4 cursor-pointer" onclick="selectPaymentMethod('store', 'Pago en tienda', 'Pagar directamente en el mostrador')">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-store text-blue-600 text-xl"></i>
+            <div>
+                <div class="font-medium text-gray-800">Pago en tienda</div>
+                <div class="text-sm text-gray-500">Pagar directamente en el mostrador</div>
             </div>
         </div>
         <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
             <i class="fas fa-check text-white text-xs"></i>
         </div>
-    </div>
-</div>
-
-<!-- Pago en tienda -->
-<div class="payment-option border-2 border-gray-300 rounded-lg p-4 opacity-50 cursor-not-allowed">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <i class="fas fa-store text-gray-400 text-xl"></i>
-            <div>
-                <div class="font-medium text-gray-500">Pago en tienda</div>
-                <div class="text-sm text-gray-400">Temporalmente no disponible</div>
-            </div>
-        </div>
-        <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
     </div>
 </div>
                 
@@ -729,9 +728,9 @@ let currentPromoCode = null;
 let discountAmount = 0;
         // Variables pour le paiement
 let selectedPayment = {
-    type: 'transfer',
-    title: 'Transferencia bancaria',
-    description: 'Recibirás las instrucciones para realizar la transferencia'
+     type: 'store',
+    title: 'Pago en tienda',
+    description: 'Pagar directamente en el mostrador'
 };
 
 function openPaymentModal() {
@@ -808,8 +807,8 @@ async function processOrder() {
     }
     
    // Vérifier mode de paiement sélectionné
-if (selectedPayment.type !== 'transfer') {
-    showNotification('Solo está disponible la transferencia bancaria actualmente', 'warning');
+if (selectedPayment.type !== 'store') {
+    showNotification('Solo pago en tienda disponible en terminal', 'warning');
     return;
 }
     
@@ -876,13 +875,13 @@ if (sessionStorage.getItem('terminal_mode') === 'guest') {
             
             // Sauvegarder info commande pour page confirmation
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
-            
+             window.location.href = result.redirect_url;
             showNotification('¡Pedido creado correctamente!', 'success');
             
             // Rediriger vers page confirmation
            // Redirection selon le mode
     if (sessionStorage.getItem('terminal_mode') === 'guest') {
-        window.location.href = 'terminal/order-confirmation.php?order_id=' + result.order_id;
+        window.location.href = 'order-confirmation.php?order_id=' + result.order_id;
     } else {
         window.location.href = 'order-confirmation.php?order_id=' + result.order_id;
     }

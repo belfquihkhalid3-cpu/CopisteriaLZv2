@@ -940,7 +940,7 @@ function startGuestMode() {
 }
 
 function openLogin() {
-    window.location.href = '../index.php?terminal=<?= $terminal_info['id'] ?>';
+    document.getElementById('loginModal').classList.remove('hidden');
 }
 
 function showNotification(message, type) {

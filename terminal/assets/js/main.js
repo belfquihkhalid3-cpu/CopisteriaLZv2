@@ -1019,9 +1019,11 @@ async function handleLogin(event) {
         const result = await response.json();
         
         if (result.success) {
-            showNotification('Conexión exitosa', 'success');
-            closeLoginModal();
-            
+           closeLoginModal();
+    sessionStorage.setItem('user_logged_in', 'true');
+    showNotification('Conexión exitosa', 'success');
+    // Masquer section choix et afficher upload
+    document.getElementById('user-choice-section').style.display = 'none';
             // Recharger la page pour mettre à jour le header
             setTimeout(() => {
                 window.location.reload();

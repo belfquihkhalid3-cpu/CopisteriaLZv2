@@ -194,7 +194,8 @@ try {
         'pickup_code' => $pickup_code,
         'total_price' => $final_total,
         'terminal_info' => $terminal_info,
-        'message' => 'Pedido creado exitosamente en terminal'
+        'message' => 'Pedido creado exitosamente en terminal',
+          'redirect_url' => "order-confirmation.php?id=" . $order_id
     ]);
     
 } catch (Exception $e) {
