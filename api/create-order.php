@@ -62,7 +62,7 @@ if ($data['paymentMethod']['type'] !== 'transfer') {
     $pickup_code = generatePickupCode();
     
 // Utiliser le prix du résumé commande
-$total_price = $data['finalTotal'] ?? $data['total'] ?? 0;
+$total_price = floatval(str_replace(',', '.', $data['finalTotal'] ?? $data['total'] ?? 0));
 $total_files = 0;
 $total_pages = 0;
 
@@ -121,7 +121,7 @@ $order_sql = "INSERT INTO orders (
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
             // Calculer prix unitaire
-            $unit_price = calculateUnitPrice($config);
+    
             $item_total = $unit_price * ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
             
             executeQuery($item_sql, [
@@ -190,27 +190,20 @@ function generatePickupCode() {
     $numbers = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
     return $letters . $numbers;
 }
-
 function calculateUnitPrice($config) {
-    // Grille de prix (même que dans main.js)
-    $prices = [
-        'A4' => [
-            '80g' => ['bw' => 0.05, 'color' => 0.15],
-            '160g' => ['bw' => 0.07, 'color' => 0.20],
-            '280g' => ['bw' => 0.12, 'color' => 0.30]
-        ],
-        'A3' => [
-            '80g' => ['bw' => 0.10, 'color' => 0.25],
-            '160g' => ['bw' => 0.15, 'color' => 0.35],
-            '280g' => ['bw' => 0.20, 'color' => 0.40]
-        ]
-    ];
+    $sql = "SELECT price_per_page FROM pricing 
+            WHERE paper_size = ? AND paper_weight = ? AND color_mode = ? AND is_active = 1
+            ORDER BY valid_from DESC LIMIT 1";
     
-    $size = $config['paperSize'] ?? 'A4';
-    $weight = $config['paperWeight'] ?? '80g';
-    $color = $config['colorMode'] ?? 'bw';
+    $colorMode = ($config['colorMode'] === 'color') ? 'COLOR' : 'BW';
     
-    return $prices[$size][$weight][$color] ?? 0.05;
+    $result = fetchOne($sql, [
+        $config['paperSize'] ?? 'A4',
+        $config['paperWeight'] ?? '80g',
+        $colorMode
+    ]);
+    
+    return $result ? floatval($result['price_per_page']) : 0.05;
 }
 
 function mapFinishing($finishing) {

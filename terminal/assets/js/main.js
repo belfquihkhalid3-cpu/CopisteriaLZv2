@@ -5,7 +5,7 @@
 
 // Configuration object (starting with 5 copies like the image)
 let config = {
-    copies: 5,
+    copies: 1,
     colorMode: 'bw',
     paperSize: 'A4',
     paperWeight: '80g',

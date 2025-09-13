@@ -5,7 +5,7 @@
 
 // Configuration object (starting with 5 copies like the image)
 let config = {
-    copies: 5,
+    copies: 1,
     colorMode: 'bw',
     paperSize: 'A4',
     paperWeight: '80g',
@@ -28,34 +28,9 @@ function initializeDefaultPricing() {
 
 
 // Pricing data (corresponds to your SQL table)
-const pricing = {
-    'A4': {
-        '80g': { 'bw': 0.05, 'color': 0.15 },
-        '160g': { 'bw': 0.07, 'color': 0.20 },
-        '280g': { 'bw': 0.12, 'color': 0.30 }
-    },
-    'A3': {
-        '80g': { 'bw': 0.10, 'color': 0.25 },
-        '160g': { 'bw': 0.15, 'color': 0.35 },
-        '280g': { 'bw': 0.20, 'color': 0.40 }
-    },
-    'A5': {
-        '80g': { 'bw': 0.03, 'color': 0.12 },
-        '160g': { 'bw': 0.05, 'color': 0.18 },
-        '280g': { 'bw': 0.08, 'color': 0.25 }
-    }
-};
+let pricing = {}; // Vide au début
 
-const finishingCosts = {
-    'individual': 0,
-    'grouped': 0,
-    'none': 0,
-    'spiral': 2.50,
-    'staple': 0.50,
-    'laminated': 5.00,
-    'perforated2': 1.00,
-    'perforated4': 1.50
-};
+let finishingCosts = {};
 
 /**
  * Utility Functions
@@ -757,50 +732,28 @@ function initializeApp() {
 // Charger les prix depuis l'API au démarrage
 async function loadPricingFromAPI() {
     try {
-      
-        
         const response = await fetch('api/get-pricing.php');
         const data = await response.json();
         
-     
-        
         if (data.success && data.pricing) {
-            // Convertir la structure BDD vers JS
+            pricing = {};
+            
             for (let size in data.pricing) {
+                pricing[size] = {};
                 for (let weight in data.pricing[size]) {
+                    pricing[size][weight] = {};
                     for (let color in data.pricing[size][weight]) {
-                        if (!pricing[size]) pricing[size] = {};
-                        if (!pricing[size][weight]) pricing[size][weight] = {};
-                        
-                        // Mapper BW/COLOR vers bw/color
                         const colorKey = color === 'BW' ? 'bw' : 'color';
                         pricing[size][weight][colorKey] = data.pricing[size][weight][color];
                     }
                 }
             }
+            
+            calculatePrice(); // Recalculer après chargement
         }
-        
-     
-        
-        // Charger les coûts de finition
-        const finishingResponse = await fetch('api/get-finishing.php');
-        const finishingData = await finishingResponse.json();
-        
-        
-        
-        if (finishingData.success) {
-            Object.assign(finishingCosts, finishingData.finishing_costs);
-        }
-        
-       
-        
-        // Recalculer le prix maintenant que les données sont chargées
-        calculatePrice();
-        
     } catch (error) {
         console.error('Erreur chargement prix:', error);
-        // Utiliser les prix par défaut en cas d'erreur
-        calculatePrice();
+        showNotification('Erreur chargement des prix', 'error');
     }
 }
 // Appeler au démarrage
