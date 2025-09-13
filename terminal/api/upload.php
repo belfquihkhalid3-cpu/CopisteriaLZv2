@@ -122,7 +122,20 @@ try {
             
             // Déterminer user_id (null pour invités)
             // Gérer user_id pour invités - utiliser 0 au lieu de null
-$user_id_for_db = $is_guest_terminal ? 0 : ($_SESSION['user_id'] ?? 0);
+if ($is_guest_terminal) {
+    // Créer ou récupérer utilisateur invité
+    $guest_user = fetchOne("SELECT id FROM users WHERE email = 'guest@terminal.local'");
+    if (!$guest_user) {
+        $sql_guest = "INSERT INTO users (email, first_name, last_name, password, is_admin, is_active, created_at) 
+                      VALUES ('guest@terminal.local', 'Cliente', 'Invitado', 'no_password', 0, 1, NOW())";
+        executeQuery($sql_guest);
+        $user_id_for_db = getLastInsertId();
+    } else {
+        $user_id_for_db = $guest_user['id'];
+    }
+} else {
+    $user_id_for_db = $_SESSION['user_id'];
+}
 
 // SQL ajusté selon la vraie structure de la table
 $sql = "INSERT INTO files (user_id, original_name, stored_name, file_path, file_size, mime_type, page_count, file_hash, status, created_at, expires_at) 
