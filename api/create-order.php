@@ -62,7 +62,11 @@ if ($data['paymentMethod']['type'] !== 'transfer') {
     $pickup_code = generatePickupCode();
     
 // Utiliser le prix du résumé commande
-$total_price = floatval(str_replace(',', '.', $data['finalTotal'] ?? $data['total'] ?? 0));
+// Par :
+$total_price = 0;
+foreach ($data['folders'] as $folder) {
+    $total_price += floatval($folder['total'] ?? 0);
+}
 $total_files = 0;
 $total_pages = 0;
 
