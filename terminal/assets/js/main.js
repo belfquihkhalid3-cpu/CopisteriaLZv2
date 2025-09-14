@@ -1027,11 +1027,7 @@ async function handleLogin(event) {
     document.getElementById('config-section').style.display = 'block';
     
     showNotification('Conectado correctamente', 'success');
-            // Recharger la page pour mettre à jour le header
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-            
+         
         } else {
             showLoginError(result.error || 'Error al iniciar sesión');
         }
