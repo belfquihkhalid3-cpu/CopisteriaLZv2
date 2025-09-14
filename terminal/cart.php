@@ -168,7 +168,6 @@ h1:hover {
                 <i class="fas fa-store text-blue-500 text-xl"></i>
                 <div class="text-left">
                     <div class="font-medium">Recoger en tienda</div>
-                    <div class="text-sm text-gray-500">Gratis : 10 min</div>
                 </div>
             </div>
             <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
@@ -295,20 +294,10 @@ h1:hover {
         
         <!-- Bouton Acheter -->
         <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg mb-3 transition-colors">
-            Comprar ahora
+          Pasar por caja
         </button>
         
-        <!-- Sécurité -->
-        <div class="flex items-center justify-center space-x-2 text-sm text-gray-600 mb-3">
-            <i class="fas fa-lock text-green-500"></i>
-            <span>Pago seguro en línea</span>
-        </div>
-        
-        <!-- Conditions -->
-        <div class="text-xs text-gray-500 text-center">
-            Al hacer clic en « <strong>Comprar ahora</strong> », indica que acepta las 
-            <a href="#" class="text-blue-500 hover:underline">condiciones generales de venta</a>.
-        </div>
+     
     </div>
 </div>
 

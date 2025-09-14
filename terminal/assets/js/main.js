@@ -233,12 +233,7 @@ async function handleFiles(files) {
     const fileArray = Array.from(files);
     
     // Vérifier connexion
-    const isGuestMode = sessionStorage.getItem('terminal_mode') === 'guest';
-    if (!isUserLoggedIn() && !isGuestMode) {
-        showNotification('Debes iniciar sesión para subir archivos', 'error');
-        openLoginModal();
-        return;
-    }
+
     
     // Afficher indicateur de chargement
     showUploadProgress(true);

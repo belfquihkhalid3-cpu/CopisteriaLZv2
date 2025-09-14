@@ -41,11 +41,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="fas fa-shopping-cart"></i>
                 </div>
                 <div class="nav-content">
-                    <span class="nav-title">Pedidos</span>
+                    <span class="nav-title">Pedidos Online</span>
                     <span class="nav-subtitle">Gestión de órdenes</span>
                 </div>
                 <div class="nav-badge">
-                    <span class="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">12</span>
+                    <span class="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">O</span>
                 </div>
             </a>
             <!-- Ajouter après le lien "Pedidos" existant -->
@@ -54,11 +54,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <i class="fas fa-desktop"></i>
     </div>
     <div class="nav-content">
-        <span class="nav-title">Pedidos Locales</span>
+        <span class="nav-title">Auto Services</span>
         <span class="nav-subtitle">Terminales en tienda</span>
     </div>
     <div class="nav-badge">
-        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">T</span>
+        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">A</span>
     </div>
 </a>
 
