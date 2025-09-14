@@ -806,7 +806,7 @@ if (selectedPayment.type !== 'transfer') {
     paymentMethod: selectedPayment,
     promoCode: currentPromoCode,
     discount: discountAmount || 0,
-finalTotal: parseFloat(document.getElementById('final-total').textContent.replace(/[€\s,]/g, '').replace(',', '.')),
+    total: parseFloat(document.getElementById('price-display')?.textContent || 0), // CETTE LIGNE
     subtotal: calculateSubtotal(),
     total: calculateSubtotal() - (discountAmount || 0),
     comments: document.getElementById('order-comments')?.value || '',

@@ -1,7 +1,15 @@
 <?php
+// Nettoyer tout output précédent
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
+
 session_start();
 
-header('Content-Type: application/json');
+// Vider le buffer
+ob_clean();
+
+header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -13,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+    ob_clean();
     echo json_encode(['success' => false, 'error' => 'Método no permitido']);
     exit();
 }
@@ -20,13 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Vérifier authentification
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
+    ob_clean();
     echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);
     exit();
 }
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
-require_once '../includes/security_headers.php';
 
 try {
     // Récupérer les données JSON
@@ -47,13 +56,13 @@ try {
     }
     
     // Désactiver temporairement les autres modes de paiement
-  // Désactiver temporairement les autres modes de paiement
-if ($data['paymentMethod']['type'] !== 'transfer') {
-    throw new Exception('Solo está disponible la transferencia bancaria actualmente');
-}
+    if ($data['paymentMethod']['type'] !== 'transfer') {
+        throw new Exception('Solo está disponible la transferencia bancaria actualmente');
+    }
     
     // Commencer transaction
-    beginTransaction();
+    global $pdo;
+    $pdo->beginTransaction();
     
     // Générer numéro de commande
     $order_number = generateOrderNumber();
@@ -61,33 +70,32 @@ if ($data['paymentMethod']['type'] !== 'transfer') {
     // Générer code de récupération
     $pickup_code = generatePickupCode();
     
-// Utiliser le prix du résumé commande
-// Par :
-$total_price = 0;
-foreach ($data['folders'] as $folder) {
-    $total_price += floatval($folder['total'] ?? 0);
-}
-$total_files = 0;
-$total_pages = 0;
-
-foreach ($data['folders'] as $folder) {
-    $total_files += count($folder['files'] ?? []);
-    foreach ($folder['files'] as $file) {
-        $total_pages += ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
+    // Calculer le prix total depuis les folders
+    $total_price = 0;
+    foreach ($data['folders'] as $folder) {
+        $total_price += floatval($folder['total'] ?? 0);
     }
-}
+    
+    $total_files = 0;
+    $total_pages = 0;
+
+    foreach ($data['folders'] as $folder) {
+        $total_files += count($folder['files'] ?? []);
+        foreach ($folder['files'] as $file) {
+            $total_pages += ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
+        }
+    }
     
     // Appliquer remise si code promo
     $discount_amount = $data['discount'] ?? 0;
     $final_total = $total_price - $discount_amount;
     
     // Créer la commande
-// Créer la commande
-$order_sql = "INSERT INTO orders (
-    user_id, order_number, status, payment_method, payment_status,
-    total_price, total_pages, total_files, pickup_code,
-    print_config, customer_notes, created_at
-) VALUES (?, ?, 'PENDING', 'BANK_TRANSFER', 'PENDING', ?, ?, ?, ?, ?, ?, NOW())";
+    $order_sql = "INSERT INTO orders (
+        user_id, order_number, status, payment_method, payment_status,
+        total_price, total_pages, total_files, pickup_code,
+        print_config, customer_notes, created_at
+    ) VALUES (?, ?, 'PENDING', 'BANK_TRANSFER', 'PENDING', ?, ?, ?, ?, ?, ?, NOW())";
     
     $print_config = json_encode([
         'folders' => $data['folders'],
@@ -111,7 +119,7 @@ $order_sql = "INSERT INTO orders (
         throw new Exception('Error al crear el pedido');
     }
     
-    $order_id = getLastInsertId();
+    $order_id = $pdo->lastInsertId();
     
     // Créer les items de commande
     foreach ($data['folders'] as $folder) {
@@ -124,9 +132,9 @@ $order_sql = "INSERT INTO orders (
                 binding, copies, unit_price, item_total, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
-            // Calculer prix unitaire
-    
-            $item_total = $unit_price * ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
+            // Utiliser le prix du folder divisé par le nombre de fichiers
+            $unit_price = count($folder['files']) > 0 ? ($folder['total'] ?? 0) / count($folder['files']) : 0;
+            $item_total = $unit_price;
             
             executeQuery($item_sql, [
                 $order_id,
@@ -161,27 +169,35 @@ $order_sql = "INSERT INTO orders (
     ]);
     
     // Valider transaction
-    commit();
+    $pdo->commit();
     
     // Réponse de succès
-    echo json_encode([
+    $response = [
         'success' => true,
         'order_id' => $order_id,
         'order_number' => $order_number,
         'pickup_code' => $pickup_code,
         'total_price' => $final_total,
         'message' => 'Pedido creado correctamente'
-    ]);
+    ];
+    
+    ob_clean();
+    echo json_encode($response);
     
 } catch (Exception $e) {
-    rollback();
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log("Error creación pedido: " . $e->getMessage());
     
     http_response_code(400);
-    echo json_encode([
+    $response = [
         'success' => false,
         'error' => $e->getMessage()
-    ]);
+    ];
+    
+    ob_clean();
+    echo json_encode($response);
 }
 
 // Fonctions utilitaires
@@ -193,21 +209,6 @@ function generatePickupCode() {
     $letters = chr(rand(65, 90)) . chr(rand(65, 90)) . chr(rand(65, 90));
     $numbers = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
     return $letters . $numbers;
-}
-function calculateUnitPrice($config) {
-    $sql = "SELECT price_per_page FROM pricing 
-            WHERE paper_size = ? AND paper_weight = ? AND color_mode = ? AND is_active = 1
-            ORDER BY valid_from DESC LIMIT 1";
-    
-    $colorMode = ($config['colorMode'] === 'color') ? 'COLOR' : 'BW';
-    
-    $result = fetchOne($sql, [
-        $config['paperSize'] ?? 'A4',
-        $config['paperWeight'] ?? '80g',
-        $colorMode
-    ]);
-    
-    return $result ? floatval($result['price_per_page']) : 0.05;
 }
 
 function mapFinishing($finishing) {

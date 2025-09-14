@@ -1024,6 +1024,8 @@ async function handleLogin(event) {
     showNotification('Conexión exitosa', 'success');
     // Masquer section choix et afficher upload
     document.getElementById('user-choice-section').style.display = 'none';
+       document.getElementById('upload-section').style.display = 'block';
+          document.getElementById('config-section').style.display = 'block';
             // Recharger la page pour mettre à jour le header
             setTimeout(() => {
                 window.location.reload();

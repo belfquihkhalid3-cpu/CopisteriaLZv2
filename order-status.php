@@ -299,7 +299,7 @@ $total_unique_files = count($unique_files);
                             <div class="text-xs text-gray-600">Páginas</div>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
-                           <div class="text-2xl font-bold text-blue-600"><?= number_format($order['total_price'] * $order['total_pages'], 2) ?>€</div>
+                           <div class="font-medium text-gray-900">€<?= number_format($order['total_price'], 2) ?></div>
 <div class="text-xs text-gray-600">Total</div>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
@@ -514,7 +514,7 @@ $total_unique_files = count($unique_files);
                         </div>
                      <div class="flex justify-between border-t pt-3">
     <span class="text-gray-900 font-medium">Total:</span>
-    <span class="font-bold text-lg"><?= number_format($order['total_price'] * $order['total_pages'], 2) ?>€</span>
+   <div class="font-medium text-gray-900">€<?= number_format($order['total_price'], 2) ?></div>
 </div>
                     </div>
                 </div>

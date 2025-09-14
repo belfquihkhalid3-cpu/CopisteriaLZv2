@@ -940,7 +940,27 @@ function startGuestMode() {
 }
 
 function openLogin() {
+        // Ouvrir SEULEMENT le modal
     document.getElementById('loginModal').classList.remove('hidden');
+    // Masquer TOUTES les sections sauf le modal
+    document.getElementById('user-choice-section').style.display = 'none';
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('config-section').style.display = 'none';
+    
+
+    document.body.style.overflow = 'hidden';
+}
+// Après connexion réussie
+function onLoginSuccess() {
+    // Fermer le modal
+    document.getElementById('loginModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    
+    // Afficher la section upload
+    document.getElementById('upload-section').style.display = 'block';
+    
+    // Masquer le choix utilisateur
+    document.getElementById('user-choice-section').style.display = 'none';
 }
 
 function showNotification(message, type) {
