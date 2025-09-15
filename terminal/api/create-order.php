@@ -93,7 +93,7 @@ try {
             $user_id = $guest_user['id'];
         }
     }
-    
+    $terminal_info = getTerminalInfo();
     // Créer la commande terminal
     $order_sql = "INSERT INTO orders (
         user_id, order_number, status, payment_method, payment_status,

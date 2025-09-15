@@ -787,108 +787,51 @@ document.addEventListener('keydown', function(e) {
 });
 
 async function processOrder() {
-    console.log('=== PROCESSING ORDER ===');
-    
-    // Vérifier que tout est prêt
-    if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
-        showNotification('Tu carrito está vacío', 'error');
-        return;
-    }
-    
-   // Vérifier mode de paiement sélectionné
-if (selectedPayment.type !== 'store') {
-    showNotification('Solo pago en tienda disponible en terminal', 'warning');
-    return;
-}
-    
-    // Désactiver le bouton pendant le traitement
-    const button = event.target;
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
-    
     try {
-        // Préparer les données de commande
+        // Validation des données
+        if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
+            showNotification('No hay productos en el carrito', 'error');
+            return;
+        }
+        
+        // Préparer les données pour l'API
         const orderData = {
-           folders: currentCartData.folders,
-    paymentMethod: selectedPayment,
-    promoCode: currentPromoCode,
-    discount: discountAmount || 0,
-    finalTotal: parseFloat(document.getElementById('final-total').textContent.replace('€', '').replace(',', '.')), // <-- AJOUTER
-    subtotal: calculateSubtotal(),
-    total: calculateSubtotal() - (discountAmount || 0),
-    comments: document.getElementById('order-comments')?.value || '',
-    orderDate: new Date().toISOString()
+            folders: currentCartData.folders,
+            paymentMethod: selectedPayment,
+            comments: document.getElementById('order-comments')?.value || '',
+            promoCode: currentPromoCode,
+            discount: discountAmount,
+            finalTotal: currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0)
         };
-        // Ajouter infos terminal si mode terminal
-if (sessionStorage.getItem('terminal_mode') === 'guest') {
-    orderData.source_type = 'TERMINAL';
-    orderData.terminal_info = JSON.parse(sessionStorage.getItem('terminal_info') || '{}');
-    orderData.is_guest = true;
-} else {
-    orderData.source_type = 'ONLINE';
-    orderData.is_guest = false;
-}
-        console.log('Sending order data:', orderData);
+        
+        console.log('Données commande:', orderData);
         
         // Envoyer à l'API
-       const apiUrl = sessionStorage.getItem('terminal_mode') === 'guest' 
-    ? 'api/create-order.php' 
-    : 'api/create-order.php';
-
- const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(orderData)
-    });
-    
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers.get('content-type'));
-    
-    const text = await response.text();
-    console.log('Raw response text:', text);
-    
-    // Vérifier si c'est du JSON valide
-    let result;
-    try {
-        result = JSON.parse(text);
-    } catch (jsonError) {
-        console.error('JSON Parse Error:', jsonError);
-        console.error('Response was:', text);
-        throw new Error('Réponse serveur invalide: ' + text.substring(0, 200));
-    }
+        const response = await fetch('api/create-order.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        console.log('Résultat API:', result);
+        
         if (result.success) {
-            // Succès - nettoyer le panier et rediriger
-            sessionStorage.removeItem('currentCart');
-            sessionStorage.removeItem('cartData');
-            
-            // Sauvegarder info commande pour page confirmation
+            // Sauvegarder pour la page de confirmation
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
-             window.location.href = result.redirect_url;
-            showNotification('¡Pedido creado correctamente!', 'success');
+            sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));
             
-            // Rediriger vers page confirmation
-           // Redirection selon le mode
-    if (sessionStorage.getItem('terminal_mode') === 'guest') {
-        window.location.href = 'order-confirmation.php?order_id=' + result.order_id;
-    } else {
-        window.location.href = 'order-confirmation.php?order_id=' + result.order_id;
-    }
-            
+            // Rediriger vers confirmation
+            window.location.href = result.redirect_url || 'order-confirmation.php';
         } else {
-            throw new Error(result.error || 'Error desconocido');
+            showNotification('Error: ' + result.error, 'error');
         }
         
     } catch (error) {
-        console.error('Order error:', error);
+        console.error('Erreur processOrder:', error);
         showNotification('Error al procesar el pedido: ' + error.message, 'error');
-    } finally {
-        // Restaurer le bouton
-        button.disabled = false;
-        button.textContent = originalText;
     }
 }
-
 // Version simple qui utilise les totaux déjà calculés
 function calculateSubtotal() {
     if (!currentCartData || !currentCartData.folders) {
