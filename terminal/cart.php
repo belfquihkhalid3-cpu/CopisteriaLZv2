@@ -219,25 +219,63 @@ h1:hover {
                 <!-- Método de pago -->
                <!-- Método de pago -->
 <!-- Section Método de pago -->
-<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-        <i class="fas fa-credit-card mr-2 text-blue-600"></i>Método de pago
-    </h3>
+<!-- Datos del Cliente -->
+<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+    <div class="flex items-center mb-6">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+            <i class="fas fa-user text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Datos del Cliente</h3>
+    </div>
     
-    <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div class="flex items-center space-x-3">
-            <i class="fas fa-store text-blue-600 text-xl"></i>
-            <div>
-                <div class="font-medium text-gray-800" id="selected-payment-method">Pago en tienda</div>
-                <div class="text-sm text-gray-600">Pagar directamente en el mostrador</div>
+    <div class="space-y-5">
+        <!-- Nombre completo -->
+        <div class="group">
+            <label class="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-blue-600 transition-colors">
+                <i class="fas fa-user-circle mr-1"></i>Nombre completo *
+            </label>
+            <div class="relative">
+                <input type="text" id="customer-name" required 
+                       placeholder="Ej: Juan Pérez García"
+                       class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white">
+                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
         </div>
-        <button onclick="openPaymentModal()" class="text-blue-600 hover:text-blue-700 font-medium">
-            Cambiar
-        </button>
+        
+        <!-- Teléfono -->
+        <div class="group">
+            <label class="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-blue-600 transition-colors">
+                <i class="fas fa-phone mr-1"></i>Teléfono *
+            </label>
+            <div class="relative">
+                <input type="tel" id="customer-phone" required 
+                       placeholder="Ej: +34 600 123 456"
+                       class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white">
+                <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+        
+        <!-- Consentimiento -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+            <label class="flex items-start space-x-3 cursor-pointer group">
+                <div class="relative">
+                    <input type="checkbox" id="data-consent" required 
+                           class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200">
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-20 bg-blue-500 rounded transition-opacity duration-200"></div>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-700 leading-relaxed">
+                        <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
+                        Autorizo a <span class="font-semibold text-blue-800">Tinta Expres LZ</span> al tratamiento de mis datos personales
+                    </span>
+                    <div class="text-xs text-gray-500 mt-1">
+                        Tus datos se utilizarán únicamente para gestionar tu pedido
+                    </div>
+                </div>
+            </label>
+        </div>
     </div>
 </div>
-
 
 
    <div class="bg-white rounded-lg shadow-sm p-6">

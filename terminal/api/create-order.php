@@ -91,20 +91,8 @@ try {
             $user_id = $guest_user['id'];
         }
     }
-<<<<<<< HEAD
     
     // Préparer les données pour la commande
-=======
-    $terminal_info = getTerminalInfo();
-    // Créer la commande terminal
-    $order_sql = "INSERT INTO orders (
-        user_id, order_number, status, payment_method, payment_status,
-        total_price, total_pages, total_files, pickup_code,
-        print_config, customer_notes, source_type, terminal_id, 
-        terminal_ip, is_guest, created_at
-    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
-    
->>>>>>> e2b0e54c53dd611fdc7485e7c43341cd79e07aaf
     $print_config = json_encode([
         'folders' => $data['folders'],
         'paymentMethod' => $data['paymentMethod'],
