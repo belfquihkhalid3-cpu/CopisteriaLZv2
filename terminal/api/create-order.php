@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once '../../config/database.php';
 require_once '../../includes/functions.php';
-require_once '../../includes/security_headers.php';
 require_once '../config.php';
 
 try {
@@ -48,13 +47,9 @@ try {
     // Obtenir infos terminal
     $terminal_info = getTerminalInfo();
     
-    // Variables pour transaction
-    global $pdo;
-    $transaction_started = false;
-    
     // Commencer transaction
+    global $pdo;
     $pdo->beginTransaction();
-    $transaction_started = true;
     
     // Générer numéro de commande avec préfixe terminal
     $order_number = generateTerminalOrderNumber($terminal_info['id']);
@@ -62,11 +57,14 @@ try {
     // Générer code de récupération
     $pickup_code = generatePickupCode();
     
-    // Calculer totaux
-    $total_price = $data['finalTotal'] ?? $data['total'] ?? 0;
+    // Calculer totaux depuis les folders
+    $total_price = 0;
+    foreach ($data['folders'] as $folder) {
+        $total_price += floatval($folder['total'] ?? 0);
+    }
+    
     $total_files = 0;
     $total_pages = 0;
-
     foreach ($data['folders'] as $folder) {
         $total_files += count($folder['files'] ?? []);
         foreach ($folder['files'] as $file) {
@@ -78,7 +76,7 @@ try {
     $discount_amount = $data['discount'] ?? 0;
     $final_total = $total_price - $discount_amount;
     
-    // Déterminer user_id - utiliser 0 pour invités ou créer utilisateur invité
+    // Déterminer user_id
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
     } else {
@@ -88,20 +86,13 @@ try {
             $sql_guest = "INSERT INTO users (email, first_name, last_name, password, is_admin, is_active, created_at) 
                           VALUES ('guest@terminal.local', 'Cliente', 'Invitado', 'no_password', 0, 1, NOW())";
             executeQuery($sql_guest);
-            $user_id = getLastInsertId();
+            $user_id = $pdo->lastInsertId();
         } else {
             $user_id = $guest_user['id'];
         }
     }
     
-    // Créer la commande terminal
-    $order_sql = "INSERT INTO orders (
-        user_id, order_number, status, payment_method, payment_status,
-        total_price, total_pages, total_files, pickup_code,
-        print_config, customer_notes, source_type, terminal_id, 
-        terminal_ip, is_guest, created_at
-    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
-    
+    // Préparer les données pour la commande
     $print_config = json_encode([
         'folders' => $data['folders'],
         'paymentMethod' => $data['paymentMethod'],
@@ -110,8 +101,15 @@ try {
         'discount' => $discount_amount
     ]);
     
-    // Déterminer le mode de paiement
     $payment_method = $data['paymentMethod']['type'] === 'store' ? 'STORE_PAYMENT' : 'BANK_TRANSFER';
+    
+    // Créer la commande
+    $order_sql = "INSERT INTO orders (
+        user_id, order_number, status, payment_method, payment_status,
+        total_price, total_pages, total_files, pickup_code,
+        print_config, customer_notes, source_type, terminal_id, 
+        terminal_ip, is_guest, created_at
+    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
     
     $stmt = executeQuery($order_sql, [
         $user_id,
@@ -132,7 +130,7 @@ try {
         throw new Exception('Error al crear el pedido');
     }
     
-    $order_id = getLastInsertId();
+    $order_id = $pdo->lastInsertId();
     
     // Créer les items de commande
     foreach ($data['folders'] as $folder) {
@@ -145,9 +143,9 @@ try {
                 binding, copies, unit_price, item_total, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
-            // Calculer prix unitaire (fonction à créer si n'existe pas)
-            $unit_price = calculateUnitPriceSimple($config);
-            $item_total = $unit_price * ($file['pages'] ?? 1) * ($folder['copies'] ?? 1);
+            // Utiliser prix du folder divisé par nombre de fichiers
+            $unit_price = count($folder['files']) > 0 ? ($folder['total'] ?? 0) / count($folder['files']) : 0;
+            $item_total = $unit_price;
             
             executeQuery($item_sql, [
                 $order_id,
@@ -162,7 +160,7 @@ try {
                 strtoupper($config['colorMode'] ?? 'BW'),
                 strtoupper($config['orientation'] ?? 'PORTRAIT'),
                 strtoupper($config['sides'] ?? 'DOUBLE'),
-                mapFinishingSimple($config['finishing'] ?? 'none'),
+                mapFinishing($config['finishing'] ?? 'none'),
                 $folder['copies'] ?? 1,
                 $unit_price,
                 $item_total
@@ -179,14 +177,14 @@ try {
             $_SESSION['user_id'],
             $order_id,
             'Pedido creado en terminal',
-            "Tu pedido #{$order_number} ha sido creado en {$terminal_info['name']}."
+            "Tu pedido #{$order_number} ha sido creado en {$terminal_info['name']}. Código: {$pickup_code}"
         ]);
     }
     
     // Valider transaction
     $pdo->commit();
-    $transaction_started = false;
     
+    // Réponse de succès
     echo json_encode([
         'success' => true,
         'order_id' => $order_id,
@@ -194,64 +192,50 @@ try {
         'pickup_code' => $pickup_code,
         'total_price' => $final_total,
         'terminal_info' => $terminal_info,
-        'message' => 'Pedido creado exitosamente en terminal',
-          'redirect_url' => "order-confirmation.php?id=" . $order_id
+        'message' => 'Pedido creado exitosamente',
+        'redirect_url' => "order-confirmation.php?id=" . $order_id
     ]);
     
 } catch (Exception $e) {
-    // Rollback seulement si transaction active
-    if ($transaction_started && $pdo->inTransaction()) {
+    // Rollback si transaction active
+    if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollback();
     }
     
-    error_log("Erreur création commande terminal: " . $e->getMessage());
+    error_log("Error creación pedido terminal: " . $e->getMessage());
+    
+    http_response_code(400);
     echo json_encode([
         'success' => false,
         'error' => $e->getMessage()
     ]);
 }
 
-// Fonction pour générer numéro commande terminal
+// Fonctions utilitaires
 function generateTerminalOrderNumber($terminal_id) {
     $prefix = "T{$terminal_id}-" . date('Ymd') . "-";
     $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
     return $prefix . $random;
 }
 
-// Fonction simple pour calculer prix unitaire
-function calculateUnitPriceSimple($config) {
-    $base_price = 0.05; // Prix de base par page
-    
-    // Ajuster selon le type de papier
-    if (($config['paperWeight'] ?? '80g') === '160g') $base_price *= 1.4;
-    if (($config['paperWeight'] ?? '80g') === '280g') $base_price *= 2.4;
-    
-    // Ajuster selon la couleur
-    if (($config['colorMode'] ?? 'bw') === 'color') $base_price *= 3;
-    
-    return $base_price;
+function generatePickupCode() {
+    $letters = chr(rand(65, 90)) . chr(rand(65, 90)) . chr(rand(65, 90));
+    $numbers = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+    return $letters . $numbers;
 }
 
-// Fonction simple pour mapper le finishing
-function mapFinishingSimple($finishing) {
+function mapFinishing($finishing) {
     $map = [
+        'individual' => 'NONE',
+        'grouped' => 'NONE', 
         'none' => 'NONE',
-        'individual' => 'NONE', 
-        'grouped' => 'NONE',
         'spiral' => 'SPIRAL',
-        'staple' => 'STAPLE'
+        'staple' => 'STAPLE',
+        'laminated' => 'THERMAL',
+        'perforated2' => 'NONE',
+        'perforated4' => 'NONE'
     ];
     
     return $map[$finishing] ?? 'NONE';
-}
-// Fonctions manquantes
-function generatePickupCode() {
-    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
-}
-
-function generateOrderNumber() {
-    $prefix = 'COP-' . date('Y') . '-';
-    $number = str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
-    return $prefix . $number;
 }
 ?>

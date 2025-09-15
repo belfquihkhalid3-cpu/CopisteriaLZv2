@@ -25,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 try {
     // Pour les terminaux, autoriser les invités
     $terminal_info = getTerminalInfo();
-    $is_guest_terminal = isset($_POST['terminal_mode']) || isset($_GET['terminal_mode']);
+    $is_guest_terminal = isset($_POST['terminal_mode']) || 
+                         isset($_GET['terminal_mode']) ||
+                         $terminal_info['status'] === 'active'; // AJOUTER CETTE LIGNE
     
-    // ... reste du code inchangé
-    // Vérifier autorisation (utilisateur connecté OU mode invité terminal)
+    // Vérifier autorisation (utilisateur connecté OU mode invité terminal OU terminal autorisé)
     if (!isset($_SESSION['user_id']) && !$is_guest_terminal) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);

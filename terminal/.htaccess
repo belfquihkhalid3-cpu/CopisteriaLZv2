@@ -1,8 +1,0 @@
-# Headers MIME corrects
-<Files "*.js">
-    Header set Content-Type "application/javascript"
-</Files>
-
-<Files "*.css">
-    Header set Content-Type "text/css"
-</Files>
