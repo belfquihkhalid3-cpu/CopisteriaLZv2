@@ -1,4 +1,9 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+ob_clean(); // Nettoie tout output précédent
+
+header('Content-Type: application/json');
 session_start();
 
 header('Content-Type: application/json');
@@ -101,20 +106,23 @@ $customer_phone = $data['customerPhone'] ?? '';
         'paymentMethod' => $data['paymentMethod'],
         'terminal_info' => $terminal_info,
         'promoCode' => $data['promoCode'] ?? null,
-        'discount' => $discount_amount
+        'discount' => $discount_amount,
+           'customer_data' => [
+        'name' => $customer_name,
+        'phone' => $customer_phone
+    ]
     ]);
     
     $payment_method = $data['paymentMethod']['type'] === 'store' ? 'STORE_PAYMENT' : 'BANK_TRANSFER';
-    
-    /$order_sql = "INSERT INTO orders (
+$order_sql = "INSERT INTO orders (
     user_id, order_number, status, payment_method, payment_status,
     total_price, total_pages, total_files, pickup_code,
-    print_config, customer_notes, customer_name, customer_phone,
-    source_type, terminal_id, terminal_ip, is_guest, created_at
-) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, 1, NOW())";
+    print_config, customer_notes, source_type, terminal_id, 
+    terminal_ip, is_guest, created_at
+) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, 1, NOW())";
 
 executeQuery($order_sql, [
-    $user_id , // user_id système
+    $user_id,
     $order_number,
     $payment_method,
     $final_total,
@@ -123,8 +131,6 @@ executeQuery($order_sql, [
     $pickup_code,
     $print_config,
     $data['comments'] ?? '',
-    $customer_name,
-    $customer_phone,
     $terminal_info['id'],
     $_SERVER['REMOTE_ADDR']
 ]);

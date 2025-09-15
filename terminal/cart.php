@@ -850,29 +850,23 @@ async function processOrder() {
         
         // Envoyer à l'API
         const response = await fetch('api/create-order.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(orderData)
-        });
-        
-        const result = await response.json();
-        console.log('Résultat API:', result);
-        
-        if (result.success) {
-            // Sauvegarder pour la page de confirmation
-            sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
-            sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));
-            
-            // Rediriger vers confirmation
-            window.location.href = result.redirect_url || 'order-confirmation.php';
-        } else {
-            showNotification('Error: ' + result.error, 'error');
-        }
-        
-    } catch (error) {
-        console.error('Erreur processOrder:', error);
-        showNotification('Error al procesar el pedido: ' + error.message, 'error');
-    }
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(orderData)
+});
+
+const responseText = await response.text();
+console.log('Raw response:', responseText); // Debug
+
+try {
+    const result = JSON.parse(responseText);
+    // ton code existant
+} catch (e) {
+    console.error('Parse error:', e);
+    console.error('Response was:', responseText);
+    showNotification('Error al procesar el pedido: ' + responseText.substring(0, 100), 'error');
+    return;
+}
 }
 // Version simple qui utilise les totaux déjà calculés
 function calculateSubtotal() {
