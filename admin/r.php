@@ -1,4 +1,5 @@
 <?php
+<<<<<<< HEAD
 session_start();
 require_once '../auth.php';
 requireAdmin();
@@ -31,5 +32,26 @@ if ($order_id) {
 } else {
     error_log("Invalid order ID");
     echo json_encode(['success' => false, 'error' => 'ID invalide']);
+=======
+echo "Test fonctions:<br>";
+
+if (function_exists('generateOrderToken')) {
+    echo "✅ generateOrderToken existe<br>";
+} else {
+    echo "❌ generateOrderToken manquante<br>";
+}
+
+if (file_exists('../includes/functions.php')) {
+    echo "✅ functions.php existe<br>";
+    require_once '../includes/functions.php';
+} else {
+    echo "❌ functions.php manquant<br>";
+}
+
+if (file_exists('../../includes/functions.php')) {
+    echo "✅ functions.php niveau 2 existe<br>";
+} else {
+    echo "❌ functions.php niveau 2 manquant<br>";
+>>>>>>> e2b0e54c53dd611fdc7485e7c43341cd79e07aaf
 }
 ?>
