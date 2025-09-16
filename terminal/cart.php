@@ -830,17 +830,29 @@ document.addEventListener('keydown', function(e) {
 
 async function processOrder() {
     try {
+        // Récupérer données client
+        const customerName = document.getElementById('customer-name')?.value.trim();
+        const customerPhone = document.getElementById('customer-phone')?.value.trim();
+        const dataConsent = document.getElementById('data-consent')?.checked;
+
+        // Validation
+        if (!customerName || !customerPhone || !dataConsent) {
+            showNotification('Complete todos los campos obligatorios', 'error');
+            return;
+        }
+
         // Validation des données
         if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
             showNotification('No hay productos en el carrito', 'error');
             return;
         }
         
-        // Préparer les données pour l'API
         const orderData = {
             folders: currentCartData.folders,
             paymentMethod: selectedPayment,
             comments: document.getElementById('order-comments')?.value || '',
+            customerName: customerName,
+            customerPhone: customerPhone,
             promoCode: currentPromoCode,
             discount: discountAmount,
             finalTotal: currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0)
@@ -848,25 +860,28 @@ async function processOrder() {
         
         console.log('Données commande:', orderData);
         
-        // Envoyer à l'API
         const response = await fetch('api/create-order.php', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(orderData)
-});
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderData)
+        });
 
-const responseText = await response.text();
-console.log('Raw response:', responseText); // Debug
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);
 
-try {
-    const result = JSON.parse(responseText);
-    // ton code existant
-} catch (e) {
-    console.error('Parse error:', e);
-    console.error('Response was:', responseText);
-    showNotification('Error al procesar el pedido: ' + responseText.substring(0, 100), 'error');
-    return;
-}
+        const result = JSON.parse(responseText);
+        
+        if (result.success) {
+            sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
+            window.location.href = result.redirect_url;
+        } else {
+            showNotification('Error: ' + result.error, 'error');
+        }
+        
+    } catch (error) {  // ← Ce catch était manquant
+        console.error('Erreur processOrder:', error);
+        showNotification('Error al procesar el pedido: ' + error.message, 'error');
+    }
 }
 // Version simple qui utilise les totaux déjà calculés
 function calculateSubtotal() {

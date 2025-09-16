@@ -1,9 +1,4 @@
 <?php
-error_reporting(0);
-ini_set('display_errors', 0);
-ob_clean(); // Nettoie tout output précédent
-
-header('Content-Type: application/json');
 session_start();
 
 header('Content-Type: application/json');
@@ -30,9 +25,6 @@ try {
     // Récupérer les données JSON
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
-    // Récupérer données client
-$customer_name = $data['customerName'] ?? '';
-$customer_phone = $data['customerPhone'] ?? '';
     
     if (!$data) {
         throw new Exception('Datos de pedido no válidos');
@@ -106,34 +98,33 @@ $customer_phone = $data['customerPhone'] ?? '';
         'paymentMethod' => $data['paymentMethod'],
         'terminal_info' => $terminal_info,
         'promoCode' => $data['promoCode'] ?? null,
-        'discount' => $discount_amount,
-           'customer_data' => [
-        'name' => $customer_name,
-        'phone' => $customer_phone
-    ]
+        'discount' => $discount_amount
     ]);
     
     $payment_method = $data['paymentMethod']['type'] === 'store' ? 'STORE_PAYMENT' : 'BANK_TRANSFER';
-$order_sql = "INSERT INTO orders (
-    user_id, order_number, status, payment_method, payment_status,
-    total_price, total_pages, total_files, pickup_code,
-    print_config, customer_notes, source_type, terminal_id, 
-    terminal_ip, is_guest, created_at
-) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, 1, NOW())";
-
-executeQuery($order_sql, [
-    $user_id,
-    $order_number,
-    $payment_method,
-    $final_total,
-    $total_pages,
-    $total_files,
-    $pickup_code,
-    $print_config,
-    $data['comments'] ?? '',
-    $terminal_info['id'],
-    $_SERVER['REMOTE_ADDR']
-]);
+    
+    // Créer la commande
+    $order_sql = "INSERT INTO orders (
+        user_id, order_number, status, payment_method, payment_status,
+        total_price, total_pages, total_files, pickup_code,
+        print_config, customer_notes, source_type, terminal_id, 
+        terminal_ip, is_guest, created_at
+    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
+    
+    $stmt = executeQuery($order_sql, [
+        $user_id,
+        $order_number,
+        $payment_method,
+        $final_total,
+        $total_pages,
+        $total_files,
+        $pickup_code,
+        $print_config,
+        $data['comments'] ?? '',
+        $terminal_info['id'],
+        $_SERVER['REMOTE_ADDR'],
+        !isset($_SESSION['user_id']) ? 1 : 0
+    ]);
     
     if (!$stmt) {
         throw new Exception('Error al crear el pedido');
