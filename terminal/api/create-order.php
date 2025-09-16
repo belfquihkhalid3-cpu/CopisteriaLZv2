@@ -25,7 +25,7 @@ try {
     // Récupérer les données JSON
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
-    
+
     if (!$data) {
         throw new Exception('Datos de pedido no válidos');
     }
@@ -43,7 +43,8 @@ try {
     if (!in_array($data['paymentMethod']['type'], ['transfer', 'store'])) {
         throw new Exception('Método de pago no válido para terminales');
     }
-    
+        $customer_name = $data['customerName'] ?? '';
+$customer_phone = $data['customerPhone'] ?? '';
     // Obtenir infos terminal
     $terminal_info = getTerminalInfo();
     
@@ -104,31 +105,29 @@ try {
     $payment_method = $data['paymentMethod']['type'] === 'store' ? 'STORE_PAYMENT' : 'BANK_TRANSFER';
     
     // Créer la commande
-    $order_sql = "INSERT INTO orders (
-        user_id, order_number, status, payment_method, payment_status,
-        total_price, total_pages, total_files, pickup_code,
-        print_config, customer_notes, source_type, terminal_id, 
-        terminal_ip, is_guest, created_at
-    ) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, ?, NOW())";
+$order_sql = "INSERT INTO orders (
+    user_id, order_number, status, payment_method, payment_status,
+    total_price, total_pages, total_files, pickup_code,
+    print_config, customer_notes, customer_name, customer_phone,
+    source_type, terminal_id, terminal_ip, is_guest, created_at
+) VALUES (?, ?, 'PENDING', ?, 'PENDING', ?, ?, ?, ?, ?, ?, ?, ?, 'TERMINAL', ?, ?, 1, NOW())";
+executeQuery($order_sql, [
+    $user_id,
+    $order_number,
+    $payment_method,
+    $final_total,
+    $total_pages,
+    $total_files,
+    $pickup_code,
+    $print_config,
+    $data['comments'] ?? '',
+    $customer_name,    // Nouveau
+    $customer_phone,   // Nouveau
+    $terminal_info['id'],
+    $_SERVER['REMOTE_ADDR']
+]);
     
-    $stmt = executeQuery($order_sql, [
-        $user_id,
-        $order_number,
-        $payment_method,
-        $final_total,
-        $total_pages,
-        $total_files,
-        $pickup_code,
-        $print_config,
-        $data['comments'] ?? '',
-        $terminal_info['id'],
-        $_SERVER['REMOTE_ADDR'],
-        !isset($_SESSION['user_id']) ? 1 : 0
-    ]);
-    
-    if (!$stmt) {
-        throw new Exception('Error al crear el pedido');
-    }
+  
     
     $order_id = $pdo->lastInsertId();
     

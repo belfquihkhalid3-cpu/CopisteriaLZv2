@@ -535,18 +535,20 @@ function syncPriceToSummary() {
 }
 
 
-        function displayFolders() {
-            const dynamicContainer = document.getElementById('dynamic-folders');
-            dynamicContainer.innerHTML = '';
-            
-            currentCartData.folders.forEach((folder, index) => {
-                const folderElement = createFolderHTML(folder);
-                dynamicContainer.appendChild(folderElement);
-            });
-            
-            // Ajouter bouton "Crear nueva carpeta" à la fin
-            addCreateFolderButton(dynamicContainer);
-        }
+   function displayFolders() {
+    const dynamicContainer = document.getElementById('dynamic-folders');
+    dynamicContainer.innerHTML = '';
+    
+    currentCartData.folders.forEach((folder, index) => {
+        const folderElement = createFolderHTML(folder);
+        dynamicContainer.appendChild(folderElement);
+    });
+    
+    // AJOUTER CETTE LIGNE :
+    document.getElementById('folder-count').textContent = currentCartData.folders.length;
+    
+    addCreateFolderButton(dynamicContainer);
+}
 
         function createFolderHTML(folder) {
             const folderDiv = document.createElement('div');
@@ -614,25 +616,18 @@ function syncPriceToSummary() {
             return folderDiv;
         }
 
-        function generateConfigBadges(config) {
-            if (!config) return '';
-            
-            const finishingCodes = {
-                'individual': 'IN', 'grouped': 'AG', 'none': 'SA',
-                'spiral': 'EN', 'staple': 'GR', 'laminated': 'PL',
-                'perforated2': 'P2', 'perforated4': 'P4'
-            };
-            
-            return `
-                <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
-                <span class="badge badge-green">${config.paperSize || 'A4'}</span>
-                <span class="badge badge-orange">${(config.paperWeight || '80g').replace('g', '')}</span>
-                <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
-                <span class="badge badge-teal">${finishingCodes[config.finishing] || 'IN'}</span>
-                <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
-                <span class="badge badge-pink">${config.copies || 1}</span>
-            `;
-        }
+       function generateConfigBadges(config) {
+    if (!config) return '';
+    
+    return `
+        <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
+        <span class="badge badge-green">${config.paperSize || 'A4'}</span>
+        <span class="badge badge-orange">${(config.paperWeight || '80g').replace('g', '')}</span>
+        <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
+        <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
+        <span class="badge badge-pink">${config.copies || 1}</span>
+    `;
+}
 
         function generateFilesTable(files) {
             if (!files || files.length === 0) return '<tr><td colspan="4" class="text-center py-4 text-gray-500">Sin archivos</td></tr>';
@@ -645,7 +640,7 @@ function syncPriceToSummary() {
                             <i class="fas fa-file-pdf text-red-500"></i>
                             <div>
                                 <div class="font-medium text-gray-800">${file.name}</div>
-                                <div class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full inline-block">Sin acabado</div>
+                                <div class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full inline-block">PDF</div>
                             </div>
                         </div>
                     </td>
