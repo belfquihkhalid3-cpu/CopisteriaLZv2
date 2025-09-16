@@ -534,9 +534,13 @@ function syncPriceToSummary() {
     }
 }
 
-
-   function displayFolders() {
+function displayFolders() {
     const dynamicContainer = document.getElementById('dynamic-folders');
+    if (!dynamicContainer) {
+        console.error('Element dynamic-folders not found');
+        return;
+    }
+    
     dynamicContainer.innerHTML = '';
     
     currentCartData.folders.forEach((folder, index) => {
@@ -544,8 +548,11 @@ function syncPriceToSummary() {
         dynamicContainer.appendChild(folderElement);
     });
     
-    // AJOUTER CETTE LIGNE :
-    document.getElementById('folder-count').textContent = currentCartData.folders.length;
+    // Mettre à jour compteur avec vérification
+    const folderCountElement = document.getElementById('folder-count');
+    if (folderCountElement) {
+        folderCountElement.textContent = currentCartData.folders.length;
+    }
     
     addCreateFolderButton(dynamicContainer);
 }
