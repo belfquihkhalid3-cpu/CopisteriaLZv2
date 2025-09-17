@@ -826,30 +826,7 @@ document.addEventListener('keydown', function(e) {
 
 async function processOrder() {
     try {
-        // Récupérer données client
-        const customerName = document.getElementById('customer-name')?.value.trim();
-        const customerPhone = document.getElementById('customer-phone')?.value.trim();
-        const dataConsent = document.getElementById('data-consent')?.checked;
-
-          if (!customerName) {
-            showNotification('Por favor, introduce tu nombre completo', 'error');
-            document.getElementById('customer-name')?.focus();
-            return;
-        }
-
-        if (!customerPhone) {
-            showNotification('Por favor, introduce tu número de teléfono', 'error');
-            document.getElementById('customer-phone')?.focus();
-            return;
-        }
-
-        if (!dataConsent) {
-            showNotification('Debes autorizar el tratamiento de datos personales para continuar', 'error');
-            document.getElementById('data-consent')?.focus();
-            return;
-        }
-
-        // Validation des données du panier
+        // Validation des données
         if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
             showNotification('No hay productos en el carrito', 'error');
             return;
@@ -881,10 +858,10 @@ async function processOrder() {
         
         if (result.success) {
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
-            // VIDER LE PANIER APRÈS LA COMMANDE :
-            sessionStorage.removeItem('currentCart');
-            sessionStorage.removeItem('cartData');
-            window.location.href = result.redirect_url;
+            sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));
+            
+            // Rediriger vers confirmation
+            window.location.href = result.redirect_url || 'order-confirmation.php';
         } else {
             showNotification('Error: ' + result.error, 'error');
         }
