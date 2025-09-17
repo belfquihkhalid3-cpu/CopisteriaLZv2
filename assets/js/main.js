@@ -46,7 +46,7 @@ function updateActiveButton(container, activeData, value) {
 }
 
 function calculatePrice() {
-    // Afficher 0 s'il n'y a pas de fichiers
+
     if (config.files.length === 0) {
         updatePriceDisplay(0);
         return;
@@ -55,7 +55,7 @@ function calculatePrice() {
     console.log('Calcul prix avec config:', config);
     console.log('Pricing disponible:', pricing);
     
-    // Vérifier que les données pricing existent
+
     if (!pricing[config.paperSize]) {
         console.error('Pas de pricing pour', config.paperSize);
         updatePriceDisplay(0);
@@ -78,8 +78,7 @@ function calculatePrice() {
     let basePrice = pricing[config.paperSize][config.paperWeight][config.colorMode];
     let totalPrice = basePrice * totalPages * config.copies;
     
-    // Ajouter coût de finition
-   // Dans calculatePrice(), remplacer la section finition par :
+   
 let finishingCost = finishingCosts[config.finishing] || 0;
     totalPrice += finishingCost * config.copies;
     
@@ -161,10 +160,18 @@ function selectOrientation(orientation) {
 
 function selectFinishing(finishing) {
     config.finishing = finishing;
-    const container = document.querySelector('[data-finishing]').closest('.config-section');
-    updateActiveButton(container, 'finishing', finishing);
+    
+    // Mettre à jour les boutons actifs
+    const finishingButtons = document.querySelectorAll('[data-finishing]');
+    finishingButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.finishing === finishing) {
+            btn.classList.add('active');
+        }
+    });
+    
     calculatePrice();
-     updateConfigBadges();
+    updateConfigBadges();
     saveConfiguration();
 }
 
@@ -713,7 +720,7 @@ function initializeApp() {
     initializeKeyboardShortcuts();
     initializeMobileToggle();
     initializeRealTimeUpdates();
-    loadFinishingCosts();
+   
     
     
     // Setup add to cart button
@@ -727,6 +734,7 @@ function initializeApp() {
     }
     // Load pricing AFTER everything is initialized
     loadPricingFromAPI();
+     loadFinishingCosts();
        updateAddToCartButton();
 
 }
