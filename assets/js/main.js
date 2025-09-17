@@ -79,7 +79,8 @@ function calculatePrice() {
     let totalPrice = basePrice * totalPages * config.copies;
     
     // Ajouter coût de finition
-    let finishingCost = finishingCosts[config.finishing] || 0;
+   // Dans calculatePrice(), remplacer la section finition par :
+let finishingCost = finishingCosts[config.finishing] || 0;
     totalPrice += finishingCost * config.copies;
     
     updatePriceDisplay(totalPrice);
@@ -712,6 +713,7 @@ function initializeApp() {
     initializeKeyboardShortcuts();
     initializeMobileToggle();
     initializeRealTimeUpdates();
+    loadFinishingCosts();
     
     
     // Setup add to cart button
@@ -1114,5 +1116,24 @@ function socialLogin(provider) {
     // Message de redirection
     showNotification(`Redirigiendo a ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`, 'info');
 }
+
+// Charger les coûts de finition depuis l'API
+async function loadFinishingCosts() {
+    try {
+        const response = await fetch('api/get-finishing.php');
+        const data = await response.json();
+        
+        if (data.success && data.finishing_costs) {
+            // Mettre à jour les coûts de finition globaux
+            finishingCosts = data.finishing_costs;
+            calculatePrice(); // Recalculer le prix
+        }
+    } catch (error) {
+        console.error('Erreur chargement coûts finition:', error);
+    }
+}
+
+
+
 
 
