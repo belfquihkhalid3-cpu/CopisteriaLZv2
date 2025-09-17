@@ -20,7 +20,7 @@ $per_page = 15;
 $offset = ($page - 1) * $per_page;
 
 // Construction requête
-$where_conditions = [];
+$where_conditions = ["o.source_type = 'ONLINE'"];
 $params = [];
 
 if ($status_filter && $status_filter !== 'ALL') {

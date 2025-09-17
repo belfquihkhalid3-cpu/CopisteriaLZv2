@@ -55,7 +55,16 @@ $total_pages = ceil($total_orders / $per_page);
 
 // Récupérer commandes
 $orders_sql = "SELECT o.*, u.first_name, u.last_name, u.email, u.phone,
-               CASE WHEN o.is_guest = 1 THEN 'Invitado' ELSE CONCAT(u.first_name, ' ', u.last_name) END as customer_name
+               CASE 
+                   WHEN o.is_guest = 1 AND o.customer_name IS NOT NULL THEN o.customer_name
+                   WHEN o.is_guest = 1 THEN 'Cliente Invitado' 
+                   ELSE CONCAT(u.first_name, ' ', u.last_name) 
+               END as customer_name,
+               CASE 
+                   WHEN o.is_guest = 1 AND o.customer_phone IS NOT NULL THEN o.customer_phone
+                   WHEN o.is_guest = 1 THEN 'Sin teléfono'
+                   ELSE u.phone 
+               END as customer_phone_display
                FROM orders o 
                LEFT JOIN users u ON o.user_id = u.id 
                $where_clause 
@@ -74,6 +83,179 @@ global $terminals;
     <title>Pedidos Locales - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      
+/* Badges de configuration */
+.config-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Conteneur configuration compact */
+.config-container {
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.config-folder {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-left: 3px solid #3b82f6;
+    transition: all 0.2s ease;
+}
+
+.config-folder:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Style pour le select de statut */
+.status-select {
+    
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-select:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Couleurs par statut */
+.status-select option[value="PENDING"] {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    color: #92400e;
+}
+
+.status-select option[value="CONFIRMED"] {
+    background: linear-gradient(135deg, #dbeafe, #3b82f6);
+    color: #1e40af;
+}
+
+.status-select option[value="PROCESSING"] {
+    background: linear-gradient(135deg, #fed7aa, #f97316);
+    color: #c2410c;
+}
+
+.status-select option[value="PRINTING"] {
+    background: linear-gradient(135deg, #e0e7ff, #6366f1);
+    color: #4338ca;
+}
+
+.status-select option[value="READY"] {
+    background: linear-gradient(135deg, #d1fae5, #10b981);
+    color: #059669;
+}
+
+.status-select option[value="COMPLETED"] {
+    background: linear-gradient(135deg, #dcfce7, #22c55e);
+    color: #16a34a;
+}
+
+.status-select option[value="CANCELLED"] {
+    background: linear-gradient(135deg, #fecaca, #ef4444);
+    color: #dc2626;
+}
+
+/* Style dynamique basé sur la valeur sélectionnée */
+.status-select[data-status="PENDING"] {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    color: #92400e;
+    border-color: #f59e0b;
+}
+
+.status-select[data-status="CONFIRMED"] {
+    background: linear-gradient(135deg, #dbeafe, #3b82f6);
+    color: #1e40af;
+    border-color: #3b82f6;
+}
+
+.status-select[data-status="PROCESSING"] {
+    background: linear-gradient(135deg, #fed7aa, #f97316);
+    color: #c2410c;
+    border-color: #f97316;
+}
+
+.status-select[data-status="PRINTING"] {
+    background: linear-gradient(135deg, #e0e7ff, #6366f1);
+    color: #4338ca;
+    border-color: #6366f1;
+}
+
+.status-select[data-status="READY"] {
+    background: linear-gradient(135deg, #d1fae5, #10b981);
+    color: #059669;
+    border-color: #10b981;
+}
+
+.status-select[data-status="COMPLETED"] {
+    background: linear-gradient(135deg, #dcfce7, #22c55e);
+    color: #16a34a;
+    border-color: #22c55e;
+}
+
+.status-select[data-status="CANCELLED"] {
+    background: linear-gradient(135deg, #fecaca, #ef4444);
+    color: #dc2626;
+    border-color: #ef4444;
+}
+
+/* Animation de hover */
+.status-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Style pour les notifications */
+.notification {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Amélioration de l'apparence du tableau */
+.orders-table tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+/* Badge pour les terminaux */
+.terminal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: linear-gradient(135deg, #e0f2fe, #0284c7);
+    color: #0369a1;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
 </head>
 <body class="bg-gray-100">
 
@@ -161,19 +343,23 @@ global $terminals;
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Terminal</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivos</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Configuración</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <?php foreach ($orders as $order): ?>
                         <tr class="hover:bg-gray-50">
+                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <?= date('d/m/Y', strtotime($order['created_at'])) ?><br>
+                                <span class="text-xs"><?= date('H:i', strtotime($order['created_at'])) ?></span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-blue-600">#<?= htmlspecialchars($order['order_number']) ?></div>
                                 <div class="text-sm text-gray-500">Código: <?= htmlspecialchars($order['pickup_code']) ?></div>
@@ -199,51 +385,98 @@ global $terminals;
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <?php if ($order['is_guest']): ?>
-                                        <i class="fas fa-user-slash text-orange-500 mr-2"></i>
-                                        <div>
-                                            <div class="font-medium text-orange-600">Cliente Invitado</div>
-                                            <div class="text-sm text-gray-500">Sin cuenta</div>
-                                        </div>
-                                    <?php else: ?>
-                                        <i class="fas fa-user text-green-500 mr-2"></i>
-                                        <div>
-                                            <div class="font-medium text-gray-900"><?= htmlspecialchars($order['customer_name']) ?></div>
-                                            <div class="text-sm text-gray-500"><?= htmlspecialchars($order['email']) ?></div>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full
-                                    <?php
-                                    switch($order['status']) {
-                                        case 'PENDING': echo 'bg-yellow-100 text-yellow-800'; break;
-                                        case 'CONFIRMED': echo 'bg-blue-100 text-blue-800'; break;
-                                        case 'PROCESSING': echo 'bg-purple-100 text-purple-800'; break;
-                                        case 'READY': echo 'bg-green-100 text-green-800'; break;
-                                        case 'COMPLETED': echo 'bg-gray-100 text-gray-800'; break;
-                                        default: echo 'bg-gray-100 text-gray-800';
-                                    }
-                                    ?>">
-                                    <?= htmlspecialchars($order['status']) ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div><?= $order['total_files'] ?> archivos</div>
-                                <div class="text-xs text-gray-500"><?= $order['total_pages'] ?> páginas</div>
-                            </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+    <div class="flex items-center">
+        <?php if ($order['is_guest']): ?>
+            <i class="fas fa-user-slash text-orange-500 mr-2"></i>
+            <div>
+                <div class="font-medium text-blue-600"><?= htmlspecialchars($order['customer_name']) ?></div>
+                <div class="text-sm text-green-500"><?= htmlspecialchars($order['customer_phone_display']) ?></div>
+            </div>
+        <?php else: ?>
+            <i class="fas fa-user text-green-500 mr-2"></i>
+            <div>
+                <div class="font-medium text-gray-900"><?= htmlspecialchars($order['customer_name']) ?></div>
+                <div class="text-sm text-gray-500"><?= htmlspecialchars($order['email']) ?></div>
+            </div>
+        <?php endif; ?>
+    </div>
+</td>
+                         <td class="px-6 py-4 whitespace-nowrap">
+    <select onchange="changeOrderStatus(<?= $order['id'] ?>, this.value)" 
+            class="status-select"
+            data-status="<?= $order['status'] ?>">
+        <option value="PENDING" <?= $order['status'] === 'PENDING' ? 'selected' : '' ?>>Pendiente</option>
+        <option value="CONFIRMED" <?= $order['status'] === 'CONFIRMED' ? 'selected' : '' ?>>Confirmado</option>
+        <option value="PROCESSING" <?= $order['status'] === 'PROCESSING' ? 'selected' : '' ?>>En Proceso</option>
+        <option value="PRINTING" <?= $order['status'] === 'PRINTING' ? 'selected' : '' ?>>Imprimiendo</option>
+        <option value="READY" <?= $order['status'] === 'READY' ? 'selected' : '' ?>>Listo</option>
+        <option value="COMPLETED" <?= $order['status'] === 'COMPLETED' ? 'selected' : '' ?>>Completado</option>
+        <option value="CANCELLED" <?= $order['status'] === 'CANCELLED' ? 'selected' : '' ?>>Cancelado</option>
+    </select>
+</td>
+                           
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">€<?= number_format($order['total_price'], 2) ?></div>
                                 <div class="text-xs text-gray-500">Pago en tienda</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <?= date('d/m/Y', strtotime($order['created_at'])) ?><br>
-                                <span class="text-xs"><?= date('H:i', strtotime($order['created_at'])) ?></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                           
+                     
+                            <td class="px-6 py-4 whitespace-nowrap">
+    <?php 
+    $print_config = json_decode($order['print_config'], true) ?: [];
+    $folders = $print_config['folders'] ?? [];
+    ?>
+    
+    <?php if (!empty($folders)): ?>
+        <div class="space-y-2">
+            <?php foreach ($folders as $index => $folder): ?>
+                <?php $config = $folder['configuration'] ?? []; ?>
+                <div class="bg-gray-50 p-2 rounded-lg text-xs">
+                    <div class="font-medium text-gray-800 mb-1">
+                        <?= htmlspecialchars($folder['name'] ?? "Carpeta " . ($index + 1)) ?>
+                        <span class="text-blue-600">(x<?= $folder['copies'] ?? 1 ?>)</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-1">
+                        <!-- Color -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-<?= ($config['colorMode'] ?? 'bw') === 'bw' ? 'gray' : 'purple' ?>-100 text-<?= ($config['colorMode'] ?? 'bw') === 'bw' ? 'gray' : 'purple' ?>-800">
+                            <i class="fas fa-<?= ($config['colorMode'] ?? 'bw') === 'bw' ? 'circle' : 'palette' ?> mr-1"></i>
+                            <?= ($config['colorMode'] ?? 'bw') === 'bw' ? 'B/N' : 'Color' ?>
+                        </span>
+                        
+                        <!-- Papel -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <i class="fas fa-file mr-1"></i>
+                            <?= $config['paperSize'] ?? 'A4' ?>
+                        </span>
+                        
+                        <!-- Gramaje -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-weight-hanging mr-1"></i>
+                            <?= $config['paperWeight'] ?? '80g' ?>
+                        </span>
+                        
+                        <!-- Caras -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            <i class="fas fa-clone mr-1"></i>
+                            <?= ($config['sides'] ?? 'double') === 'single' ? '1 cara' : '2 caras' ?>
+                        </span>
+                        
+                        <!-- Orientación -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            <i class="fas fa-compass mr-1"></i>
+                            <?= ($config['orientation'] ?? 'portrait') === 'portrait' ? 'Vertical' : 'Horizontal' ?>
+                        </span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <span class="text-gray-400 text-xs">Sin configuración</span>
+    <?php endif; ?>
+</td>
+       <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex space-x-2">
                                     <button onclick="viewOrder(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
                                         <i class="fas fa-eye"></i>
@@ -251,9 +484,12 @@ global $terminals;
                                     <button onclick="downloadFiles(<?= $order['id'] ?>)" class="text-green-600 hover:text-green-900" title="Descargar archivos">
                                         <i class="fas fa-download"></i>
                                     </button>
-                                    <button onclick="printOrder(<?= $order['id'] ?>)" class="text-purple-600 hover:text-purple-900" title="Imprimir">
-                                        <i class="fas fa-print"></i>
-                                    </button>
+                                   <!-- Dans la colonne Actions -->
+<button onclick="selectPrinterAndPrint(<?= $order['id'] ?>)" 
+        class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-lg text-sm transition-all duration-200" 
+        title="Seleccionar impresora e imprimir">
+    <i class="fas fa-print mr-1"></i>Imprimir
+</button>
                                 </div>
                             </td>
                         </tr>
@@ -320,6 +556,120 @@ global $terminals;
             params.set('export', 'terminal');
             window.location.href = 'export-orders.php?' + params.toString();
         }
+
+      
+async function changeOrderStatus(orderId, newStatus) {
+    const selectElement = event.target;
+    selectElement.setAttribute('data-status', newStatus);
+    
+    try {
+        const response = await fetch('api/update-order-status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId, status: newStatus })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Estado actualizado correctamente', 'success');
+        } else {
+            showNotification('Error: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl ${type === 'success' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-red-600'} text-white font-medium`;
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function directPrint(orderId) {
+    // Confirmación antes de imprimir
+    if (confirm('¿Enviar este pedido directamente a la impresora?')) {
+        // Abrir ventana de impresión
+        const printWindow = window.open(
+            `direct-print-terminal.php?order_id=${orderId}&auto=1`, 
+            'DirectPrint', 
+            'width=800,height=600,scrollbars=yes'
+        );
+        
+        // Mostrar notificación
+        showNotification('Enviando a impresora...', 'info');
+        
+        // Opcional: actualizar estado del pedido
+        setTimeout(() => {
+            changeOrderStatus(orderId, 'PRINTING');
+        }, 2000);
+    }
+}
+
+function quickPrint(orderId) {
+    // Impresión rápida sin confirmación
+    window.open(`direct-print-terminal.php?order_id=${orderId}&auto=1`, '_blank');
+}
+
+async function selectPrinterAndPrint(orderId) {
+    // Récupérer imprimantes disponibles
+    const response = await fetch('api/get-printers.php');
+    const printers = await response.json();
+    
+    if (printers.length === 0) {
+        alert('No hay impresoras configuradas. Ve a Configuración > Impresoras');
+        return;
+    }
+    
+    // Créer modal de sélection
+    showPrinterSelectionModal(orderId, printers);
+}
+
+function showPrinterSelectionModal(orderId, printers) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Seleccionar Impresora</h3>
+            <div class="space-y-3">
+                ${printers.map(printer => `
+                    <button onclick="printWithPrinter(${orderId}, ${printer.id})" 
+                            class="w-full text-left p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        <div class="font-medium">${printer.name}</div>
+                        <div class="text-sm text-gray-500">${printer.type === 'COLOR' ? 'Color' : printer.type === 'BW' ? 'Blanco y Negro' : 'Color y B/N'}</div>
+                    </button>
+                `).join('')}
+            </div>
+            <button onclick="document.body.removeChild(this.closest('.fixed'))" 
+                    class="mt-4 w-full bg-gray-500 text-white py-2 rounded-lg">
+                Cancelar
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function printWithPrinter(orderId, printerId) {
+    // Fermer modal
+    document.querySelector('.fixed').remove();
+    
+    // Ouvrir impression avec imprimante sélectionnée
+    window.open(`print-files-direct.php?order_id=${orderId}&printer_id=${printerId}`, 'PrintWindow', 'width=800,height=600');
+}
+
     </script>
 
 </body>

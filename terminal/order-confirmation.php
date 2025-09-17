@@ -93,7 +93,9 @@ $terminal_info = $print_config['terminal_info'] ?? [];
         <div class="max-w-full px-6 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-4">
-                    <img src="../assets/img/1.jpeg" alt="Copisteria Logo" class="h-16 w-16 object-contain">
+                    <a href="index" target="_blank">
+  <img src="../assets/img/1.jpeg" alt="Copisteria Logo" class="h-20 w-20 object-contain">
+</a>
                     <h1 class="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
                         Tinta Expres LZ
                     </h1>

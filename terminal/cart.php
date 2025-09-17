@@ -1,5 +1,9 @@
 <?php
 session_start();
+// Récupérer token depuis session ou URL
+if (isset($_GET['token'])) {
+    $_SESSION['terminal_token'] = $_GET['token'];
+}
 require_once '../config/database.php';
 require_once '../includes/functions.php';
 require_once '../includes/user_functions.php';
@@ -215,25 +219,63 @@ h1:hover {
                 <!-- Método de pago -->
                <!-- Método de pago -->
 <!-- Section Método de pago -->
-<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-        <i class="fas fa-credit-card mr-2 text-blue-600"></i>Método de pago
-    </h3>
+<!-- Datos del Cliente -->
+<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+    <div class="flex items-center mb-6">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+            <i class="fas fa-user text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Datos del Cliente</h3>
+    </div>
     
-    <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div class="flex items-center space-x-3">
-            <i class="fas fa-store text-blue-600 text-xl"></i>
-            <div>
-                <div class="font-medium text-gray-800" id="selected-payment-method">Pago en tienda</div>
-                <div class="text-sm text-gray-600">Pagar directamente en el mostrador</div>
+    <div class="space-y-5">
+        <!-- Nombre completo -->
+        <div class="group">
+            <label class="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-blue-600 transition-colors">
+                <i class="fas fa-user-circle mr-1"></i>Nombre completo *
+            </label>
+            <div class="relative">
+                <input type="text" id="customer-name" required 
+                       placeholder="Ej: Juan Pérez García"
+                       class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white">
+                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
         </div>
-        <button onclick="openPaymentModal()" class="text-blue-600 hover:text-blue-700 font-medium">
-            Cambiar
-        </button>
+        
+        <!-- Teléfono -->
+        <div class="group">
+            <label class="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-blue-600 transition-colors">
+                <i class="fas fa-phone mr-1"></i>Teléfono *
+            </label>
+            <div class="relative">
+                <input type="tel" id="customer-phone" required 
+                       placeholder="Ej: +34 600 123 456"
+                       class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white">
+                <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+        
+        <!-- Consentimiento -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+            <label class="flex items-start space-x-3 cursor-pointer group">
+                <div class="relative">
+                    <input type="checkbox" id="data-consent" required 
+                           class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200">
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-20 bg-blue-500 rounded transition-opacity duration-200"></div>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-700 leading-relaxed">
+                        <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
+                        Autorizo a <span class="font-semibold text-blue-800">Tinta Expres LZ</span> al tratamiento de mis datos personales
+                    </span>
+                    <div class="text-xs text-gray-500 mt-1">
+                        Tus datos se utilizarán únicamente para gestionar tu pedido
+                    </div>
+                </div>
+            </label>
+        </div>
     </div>
 </div>
-
 
 
    <div class="bg-white rounded-lg shadow-sm p-6">
@@ -390,55 +432,49 @@ h1:hover {
         });
 
         function initializeCart() {
-            // Vérifier les différentes sources de données
-            const cartData = sessionStorage.getItem('cartData');
-            const currentCart = sessionStorage.getItem('currentCart');
-            
-            console.log('cartData from sessionStorage:', cartData);
-            console.log('currentCart from sessionStorage:', currentCart);
-            
-            if (currentCart) {
-                // Utiliser currentCart (format multi-dossiers)
-                currentCartData = JSON.parse(currentCart);
-            } else if (cartData) {
-                // Convertir cartData (format simple) en currentCart
-                const parsedData = JSON.parse(cartData);
-                currentCartData = {
-                    folders: [{
-                        id: 1,
-                        name: 'Carpeta sin título',
-                        files: parsedData.files || [],
-                        configuration: parsedData.configuration || {},
-                        copies: parsedData.configuration?.copies || 1,
-                        total: parsedData.total || 0,
-                        comments: parsedData.comments || ''
-                    }]
-                };
-                
-                // Sauvegarder au nouveau format
-                sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
-                sessionStorage.removeItem('cartData'); // Nettoyer l'ancien
-            } else {
-                // Pas de données, retourner à index
-                console.log('No cart data found, redirecting to index');
-                window.location.href = 'index.php';
-                return;
-            }
-                document.getElementById('selected-payment-method').textContent = 'Transferencia bancaria';
-            console.log('Final cart data:', currentCartData);
-            
-            if (currentCartData.folders && currentCartData.folders.length > 0) {
-                displayFolders();
-                updateCartSummary();
-                 // Synchroniser le prix initial
-        syncPriceToSummary();
+    // Vérifier les différentes sources de données
+    const cartData = sessionStorage.getItem('cartData');
+    const currentCart = sessionStorage.getItem('currentCart');
+    
+    console.log('cartData from sessionStorage:', cartData);
+    console.log('currentCart from sessionStorage:', currentCart);
+    
+    if (currentCart) {
+        // Utiliser currentCart (format multi-dossiers)
+        currentCartData = JSON.parse(currentCart);
+    } else if (cartData) {
+        // Convertir cartData (format simple) en currentCart
+        const parsedData = JSON.parse(cartData);
+        currentCartData = {
+            folders: [{
+                id: 1,
+                name: 'Carpeta sin título',
+                files: parsedData.files || [],
+                configuration: parsedData.configuration || {},
+                copies: parsedData.configuration?.copies || 1,
+                total: parsedData.total || 0,
+                comments: parsedData.comments || ''
+            }]
+        };
         
-        // Activer la synchronisation automatique
-        setupPriceSync();
-            } else {
-                window.location.href = 'index.php';
-            }
-        }
+        // Sauvegarder au nouveau format
+        sessionStorage.setItem('currentCart', JSON.stringify(currentCartData));
+        sessionStorage.removeItem('cartData'); // Nettoyer l'ancien
+    } else {
+        // Pas de données, retourner à index
+        console.log('No cart data found, redirecting to index');
+        window.location.href = 'index.php';
+        return;
+    }
+    
+    console.log('Final cart data:', currentCartData);
+    
+    // AJOUTER CES LIGNES MANQUANTES :
+    if (currentCartData.folders && currentCartData.folders.length > 0) {
+        displayFolders();
+        updateCartSummary();
+    }
+}
 
         // Fonction pour observer les changements du prix du panier
 function setupPriceSync() {
@@ -492,19 +528,28 @@ function syncPriceToSummary() {
     }
 }
 
-
-        function displayFolders() {
-            const dynamicContainer = document.getElementById('dynamic-folders');
-            dynamicContainer.innerHTML = '';
-            
-            currentCartData.folders.forEach((folder, index) => {
-                const folderElement = createFolderHTML(folder);
-                dynamicContainer.appendChild(folderElement);
-            });
-            
-            // Ajouter bouton "Crear nueva carpeta" à la fin
-            addCreateFolderButton(dynamicContainer);
-        }
+function displayFolders() {
+    const dynamicContainer = document.getElementById('dynamic-folders');
+    if (!dynamicContainer) {
+        console.error('Element dynamic-folders not found');
+        return;
+    }
+    
+    dynamicContainer.innerHTML = '';
+    
+    currentCartData.folders.forEach((folder, index) => {
+        const folderElement = createFolderHTML(folder);
+        dynamicContainer.appendChild(folderElement);
+    });
+    
+    // Mettre à jour compteur avec vérification
+    const folderCountElement = document.getElementById('folder-count');
+    if (folderCountElement) {
+        folderCountElement.textContent = currentCartData.folders.length;
+    }
+    
+    addCreateFolderButton(dynamicContainer);
+}
 
         function createFolderHTML(folder) {
             const folderDiv = document.createElement('div');
@@ -572,25 +617,18 @@ function syncPriceToSummary() {
             return folderDiv;
         }
 
-        function generateConfigBadges(config) {
-            if (!config) return '';
-            
-            const finishingCodes = {
-                'individual': 'IN', 'grouped': 'AG', 'none': 'SA',
-                'spiral': 'EN', 'staple': 'GR', 'laminated': 'PL',
-                'perforated2': 'P2', 'perforated4': 'P4'
-            };
-            
-            return `
-                <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
-                <span class="badge badge-green">${config.paperSize || 'A4'}</span>
-                <span class="badge badge-orange">${(config.paperWeight || '80g').replace('g', '')}</span>
-                <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
-                <span class="badge badge-teal">${finishingCodes[config.finishing] || 'IN'}</span>
-                <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
-                <span class="badge badge-pink">${config.copies || 1}</span>
-            `;
-        }
+       function generateConfigBadges(config) {
+    if (!config) return '';
+    
+    return `
+        <span class="badge badge-blue">${config.colorMode === 'bw' ? 'BN' : 'CO'}</span>
+        <span class="badge badge-green">${config.paperSize || 'A4'}</span>
+        <span class="badge badge-orange">${(config.paperWeight || '80g').replace('g', '')}</span>
+        <span class="badge badge-purple">${config.sides === 'single' ? 'UC' : 'DC'}</span>
+        <span class="badge badge-cyan">${config.orientation === 'portrait' ? 'VE' : 'HO'}</span>
+        <span class="badge badge-pink">${config.copies || 1}</span>
+    `;
+}
 
         function generateFilesTable(files) {
             if (!files || files.length === 0) return '<tr><td colspan="4" class="text-center py-4 text-gray-500">Sin archivos</td></tr>';
@@ -603,7 +641,7 @@ function syncPriceToSummary() {
                             <i class="fas fa-file-pdf text-red-500"></i>
                             <div>
                                 <div class="font-medium text-gray-800">${file.name}</div>
-                                <div class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full inline-block">Sin acabado</div>
+                                <div class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full inline-block">PDF</div>
                             </div>
                         </div>
                     </td>
@@ -788,17 +826,41 @@ document.addEventListener('keydown', function(e) {
 
 async function processOrder() {
     try {
-        // Validation des données
+        // Récupérer données client
+        const customerName = document.getElementById('customer-name')?.value.trim();
+        const customerPhone = document.getElementById('customer-phone')?.value.trim();
+        const dataConsent = document.getElementById('data-consent')?.checked;
+
+          if (!customerName) {
+            showNotification('Por favor, introduce tu nombre completo', 'error');
+            document.getElementById('customer-name')?.focus();
+            return;
+        }
+
+        if (!customerPhone) {
+            showNotification('Por favor, introduce tu número de teléfono', 'error');
+            document.getElementById('customer-phone')?.focus();
+            return;
+        }
+
+        if (!dataConsent) {
+            showNotification('Debes autorizar el tratamiento de datos personales para continuar', 'error');
+            document.getElementById('data-consent')?.focus();
+            return;
+        }
+
+        // Validation des données du panier
         if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
             showNotification('No hay productos en el carrito', 'error');
             return;
         }
         
-        // Préparer les données pour l'API
         const orderData = {
             folders: currentCartData.folders,
             paymentMethod: selectedPayment,
             comments: document.getElementById('order-comments')?.value || '',
+            customerName: customerName,
+            customerPhone: customerPhone,
             promoCode: currentPromoCode,
             discount: discountAmount,
             finalTotal: currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0)
@@ -806,28 +868,28 @@ async function processOrder() {
         
         console.log('Données commande:', orderData);
         
-        // Envoyer à l'API
         const response = await fetch('api/create-order.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(orderData)
         });
-        
-        const result = await response.json();
-        console.log('Résultat API:', result);
+
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);
+
+        const result = JSON.parse(responseText);
         
         if (result.success) {
-            // Sauvegarder pour la page de confirmation
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
-            sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));
-            
-            // Rediriger vers confirmation
-            window.location.href = result.redirect_url || 'order-confirmation.php';
+            // VIDER LE PANIER APRÈS LA COMMANDE :
+            sessionStorage.removeItem('currentCart');
+            sessionStorage.removeItem('cartData');
+            window.location.href = result.redirect_url;
         } else {
             showNotification('Error: ' + result.error, 'error');
         }
         
-    } catch (error) {
+    } catch (error) {  // ← Ce catch était manquant
         console.error('Erreur processOrder:', error);
         showNotification('Error al procesar el pedido: ' + error.message, 'error');
     }

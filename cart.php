@@ -806,7 +806,7 @@ if (selectedPayment.type !== 'transfer') {
     paymentMethod: selectedPayment,
     promoCode: currentPromoCode,
     discount: discountAmount || 0,
-    total: parseFloat(document.getElementById('price-display')?.textContent || 0), // CETTE LIGNE
+    finalTotal: parseFloat(document.getElementById('final-total').textContent.replace('€', '').replace(',', '.')), // <-- AJOUTER
     subtotal: calculateSubtotal(),
     total: calculateSubtotal() - (discountAmount || 0),
     comments: document.getElementById('order-comments')?.value || '',
@@ -816,7 +816,7 @@ if (selectedPayment.type !== 'transfer') {
         console.log('Sending order data:', orderData);
         
         // Envoyer à l'API
-        const response = await fetch('api/create-order.php', {
+        const response = await fetch('api/create-order-online.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

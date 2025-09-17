@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once 'config/database.php';
-require_once 'includes/functions.php';
-require_once 'includes/user_functions.php';
-require_once 'includes/csrf.php';
-require_once 'includes/security_headers.php';
+require_once '../config/database.php';
+require_once '../includes/functions.php';
+require_once '../includes/user_functions.php';
+require_once '../includes/csrf.php';
+require_once '../includes/security_headers.php';
 
 // Vérifier si l'utilisateur est connecté
 if (!isLoggedIn()) {

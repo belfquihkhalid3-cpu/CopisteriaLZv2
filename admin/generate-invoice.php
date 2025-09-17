@@ -246,9 +246,10 @@ $total = $subtotal + $iva;
                     <div class="company-details">
                         <h1>Tinta Expres LZ</h1>
                         <p>Servicios de Impresión Profesional</p>
-                        <p>Calle Ejemplo, 123 - 28001 Madrid, España</p>
-                        <p>Tel: +34 123 456 789 | Email: info@tintaexpreslz.com</p>
-                        <p>CIF: B12345678</p>
+                        <p>Carrer de les Tres Creus, 142
+08202 Sabadell, Barcelona, Spain</p>
+                        <p>Tel: +34 932 52 05 70 | Email: info@tintaexpreslz.com</p>
+                        <p>CIF: Y1082366T</p>
                     </div>
                 </div>
                 <div class="invoice-info">
@@ -352,7 +353,7 @@ $total = $subtotal + $iva;
         <div class="footer">
             <p><strong>¡Gracias por confiar en Tinta Expres LZ!</strong></p>
             <p>Esta factura fue generada electrónicamente el <?= date('d/m/Y H:i') ?></p>
-            <p>Para cualquier consulta, contacte con nosotros en info@tintaexpreslz.com o +34 123 456 789</p>
+            <p>Para cualquier consulta, contacte con nosotros en info@tintaexpreslz.com o +34 932 52 05 70</p>
         </div>
 
     </div>
