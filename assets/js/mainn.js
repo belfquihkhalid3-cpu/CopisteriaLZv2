@@ -30,7 +30,16 @@ function initializeDefaultPricing() {
 // Pricing data (corresponds to your SQL table)
 let pricing = {}; // Vide au début
 
-let finishingCosts = {};
+let finishingCosts = {
+    'individual': 0,
+    'grouped': 0,
+    'none': 0,
+    'spiral': 1.5,
+    'staple': 0.5,
+    'laminated': 5,
+    'perforated2': 1,
+    'perforated4': 1.5
+};
 
 /**
  * Utility Functions
@@ -47,14 +56,17 @@ function updateActiveButton(container, activeData, value) {
 
 function calculatePrice() {
 
-    if (config.files.length === 0) {
+      if (config.files.length === 0) {
         updatePriceDisplay(0);
         return;
     }
     
-    console.log('Calcul prix avec config:', config);
-    console.log('Pricing disponible:', pricing);
+    console.log('=== DEBUG CALCUL PRIX ===');
+    console.log('Config finishing:', config.finishing);
+    console.log('FinishingCosts disponibles:', finishingCosts);
     
+    let finishingCost = finishingCosts[config.finishing] || 0;
+    console.log('Coût finition appliqué:', finishingCost);
 
     if (!pricing[config.paperSize]) {
         console.error('Pas de pricing pour', config.paperSize);
@@ -79,7 +91,7 @@ function calculatePrice() {
     let totalPrice = basePrice * totalPages * config.copies;
     
    
-let finishingCost = finishingCosts[config.finishing] || 0;
+
     totalPrice += finishingCost * config.copies;
     
     updatePriceDisplay(totalPrice);
@@ -707,7 +719,21 @@ function initializeRealTimeUpdates() {
     // Auto-save configuration periodically
     setInterval(saveConfiguration, 30000); // Every 30 seconds
 }
-
+async function loadFinishingCosts() {
+    try {
+    console.log('=== DEBUT loadFinishingCosts ==='); // ← AJOUTER
+        const response = await fetch('api/get-finishing.php');
+        const data = await response.json();
+        console.log('Données API reçues:', data.finishing_costs);
+        if (data.success && data.finishing_costs) {
+            // Mettre à jour les coûts de finition globaux
+            finishingCosts = data.finishing_costs;
+            calculatePrice(); // Recalculer le prix
+        }
+    } catch (error) {
+        console.error('Erreur chargement coûts finition:', error);
+    }
+}
 /**
  * Initialize Application
  */
@@ -774,40 +800,7 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
     initializeApp();
-
-// Fonction pour mettre à jour les badges avec codes courts
-function updateConfigBadges() {
-    // Couleur : BN (Blanc/Noir) ou CO (Couleur)
-    document.getElementById('color-badge').textContent = config.colorMode === 'bw' ? 'BN' : 'CO';
-    
-    // Taille : A4, A3, A5
-    document.getElementById('size-badge').textContent = config.paperSize;
-    
-    // Poids : 80, 160, 280
-    document.getElementById('weight-badge').textContent = config.paperWeight.replace('g', '');
-    
-    // Faces : UC (Una Cara) ou DC (Doble Cara)
-    document.getElementById('sides-badge').textContent = config.sides === 'single' ? 'UC' : 'DC';
-    
-    // Finition : codes courts
-    const finishingCodes = {
-        'individual': 'IN',
-        'grouped': 'AG',
-        'none': 'SA',
-        'spiral': 'EN',
-        'staple': 'GR',
-        'laminated': 'PL',
-        'perforated2': 'P2',
-        'perforated4': 'P4'
-    };
-    document.getElementById('finishing-badge').textContent = finishingCodes[config.finishing];
-    
-    // Orientation : VE (Vertical) ou HO (Horizontal)  
-    document.getElementById('orientation-badge').textContent = config.orientation === 'portrait' ? 'VE' : 'HO';
-    
-    // Copies : nombre
-    document.getElementById('copies-badge').textContent = config.copies.toString();
-}}
+}
 
 // Fonction pour mettre à jour les badges avec codes courts
 function updateConfigBadges() {
@@ -1126,20 +1119,7 @@ function socialLogin(provider) {
 }
 
 // Charger les coûts de finition depuis l'API
-async function loadFinishingCosts() {
-    try {
-        const response = await fetch('api/get-finishing.php');
-        const data = await response.json();
-        
-        if (data.success && data.finishing_costs) {
-            // Mettre à jour les coûts de finition globaux
-            finishingCosts = data.finishing_costs;
-            calculatePrice(); // Recalculer le prix
-        }
-    } catch (error) {
-        console.error('Erreur chargement coûts finition:', error);
-    }
-}
+
 
 
 
