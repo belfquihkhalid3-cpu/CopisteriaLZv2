@@ -827,6 +827,12 @@ document.addEventListener('keydown', function(e) {
 async function processOrder() {
     try {
         // Validation des données
+           // Validation des données
+        if (!customerName || customerName.trim() === '') {
+            showNotification('El nombre del cliente es obligatorio', 'error');
+            return;
+        }
+        
         if (!currentCartData || !currentCartData.folders || currentCartData.folders.length === 0) {
             showNotification('No hay productos en el carrito', 'error');
             return;
@@ -836,8 +842,8 @@ async function processOrder() {
             folders: currentCartData.folders,
             paymentMethod: selectedPayment,
             comments: document.getElementById('order-comments')?.value || '',
-            customerName: customerName,
-            customerPhone: customerPhone,
+         customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
             promoCode: currentPromoCode,
             discount: discountAmount,
             finalTotal: currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0)

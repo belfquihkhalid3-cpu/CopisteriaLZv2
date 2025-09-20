@@ -29,7 +29,8 @@ try {
     if (!$data) {
         throw new Exception('Datos de pedido no válidos');
     }
-    
+    $customer_name = $data['customerName'] ?? '';
+$customer_phone = $data['customerPhone'] ?? '';
     // Valider les données obligatoires
     if (empty($data['folders']) || !is_array($data['folders'])) {
         throw new Exception('No hay carpetas en el pedido');
@@ -43,8 +44,7 @@ try {
     if (!in_array($data['paymentMethod']['type'], ['transfer', 'store'])) {
         throw new Exception('Método de pago no válido para terminales');
     }
-        $customer_name = $data['customerName'] ?? '';
-$customer_phone = $data['customerPhone'] ?? '';
+        
     // Obtenir infos terminal
     $terminal_info = getTerminalInfo();
     

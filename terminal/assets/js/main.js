@@ -28,23 +28,7 @@ function initializeDefaultPricing() {
 
 
 // Pricing data (corresponds to your SQL table)
-const pricing = {
-    'A4': {
-        '80g': { 'bw': 0.05, 'color': 0.15 },
-        '160g': { 'bw': 0.07, 'color': 0.20 },
-        '280g': { 'bw': 0.12, 'color': 0.30 }
-    },
-    'A3': {
-        '80g': { 'bw': 0.10, 'color': 0.25 },
-        '160g': { 'bw': 0.15, 'color': 0.35 },
-        '280g': { 'bw': 0.20, 'color': 0.40 }
-    },
-    'A5': {
-        '80g': { 'bw': 0.03, 'color': 0.12 },
-        '160g': { 'bw': 0.05, 'color': 0.18 },
-        '280g': { 'bw': 0.08, 'color': 0.25 }
-    }
-};
+let pricing = {}; 
 
 const finishingCosts = {
     'individual': 0,
@@ -104,8 +88,8 @@ function calculatePrice() {
     let totalPrice = basePrice * totalPages * config.copies;
     
     // Ajouter coût de finition
-    let finishingCost = finishingCosts[config.finishing] || 0;
-    totalPrice += finishingCost * config.copies;
+    //let finishingCost = finishingCosts[config.finishing] || 0;
+    //totalPrice += finishingCost * config.copies;
     
     updatePriceDisplay(totalPrice);
 }
