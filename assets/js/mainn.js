@@ -173,7 +173,7 @@ function selectOrientation(orientation) {
 function selectFinishing(finishing) {
     config.finishing = finishing;
      if (finishing === 'spiral') {
-        showSpiralColorModal();
+        showSpiralOptionsModal();
         return;
     }
     // Mettre à jour les boutons actifs
@@ -189,37 +189,174 @@ function selectFinishing(finishing) {
     updateConfigBadges();
     saveConfiguration();
 }
-function showSpiralColorModal() {
+
+
+function showSpiralOptionsModal() {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
     modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 w-80">
-            <h3 class="text-lg font-semibold mb-4">Color del Espiral</h3>
-            <div class="space-y-3">
-                <button onclick="selectSpiralColor('black')" 
-                        class="w-full p-3 border rounded-lg hover:bg-gray-50 flex items-center">
-                    <div class="w-6 h-6 bg-black rounded mr-3"></div>
-                    Espiral Negro
+        <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl transform transition-all">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <svg width="36" height="36" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-white" stroke-width="2"></rect>
+                        <line x1="6" y1="4" x2="6" y2="37" class="stroke-white" style="stroke-width: 4px;"></line>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Configurar Encuadernado</h3>
+                <p class="text-gray-500 text-sm mt-2">Personaliza los colores de tu encuadernación</p>
+            </div>
+            
+            <!-- Color del Espiral -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    Color del Espiral
+                </h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectSpiralColor('negro')" class="spiral-color-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-black rounded-full border border-gray-300"></div>
+                            <span class="text-sm font-medium">Negro</span>
+                        </div>
+                    </button>
+                    <button onclick="selectSpiralColor('blanco')" class="spiral-color-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-white rounded-full border-2 border-gray-400"></div>
+                            <span class="text-sm font-medium">Blanco</span>
+                        </div>
+                    </button>
+                    <button onclick="selectSpiralColor('transparente')" class="spiral-color-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-gradient-to-br from-blue-100 to-white rounded-full border border-gray-300 relative">
+                                <div class="absolute inset-0 bg-white opacity-60 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-medium">Transparente</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tapa Delantera -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    Tapa Delantera
+                </h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectFrontCover('negro')" class="cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-black rounded border border-gray-300"></div>
+                            <span class="text-sm font-medium">Negro</span>
+                        </div>
+                    </button>
+                    <button onclick="selectFrontCover('blanco')" class="cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-white rounded border-2 border-gray-400"></div>
+                            <span class="text-sm font-medium">Blanco</span>
+                        </div>
+                    </button>
+                    <button onclick="selectFrontCover('transparente')" class="cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-gradient-to-br from-blue-100 to-white rounded border border-gray-300 relative">
+                                <div class="absolute inset-0 bg-white opacity-60 rounded"></div>
+                            </div>
+                            <span class="text-sm font-medium">Transparente</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tapa Trasera -->
+            <div class="mb-8">
+                <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                    Tapa Trasera
+                </h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectBackCover('negro')" class="back-cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-black rounded border border-gray-300"></div>
+                            <span class="text-sm font-medium">Negro</span>
+                        </div>
+                    </button>
+                    <button onclick="selectBackCover('blanco')" class="back-cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-white rounded border-2 border-gray-400"></div>
+                            <span class="text-sm font-medium">Blanco</span>
+                        </div>
+                    </button>
+                    <button onclick="selectBackCover('transparente')" class="back-cover-btn p-3 border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 bg-gradient-to-br from-blue-100 to-white rounded border border-gray-300 relative">
+                                <div class="absolute inset-0 bg-white opacity-60 rounded"></div>
+                            </div>
+                            <span class="text-sm font-medium">Transparente</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex space-x-4">
+                <button onclick="closeSpiralModal()" class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
+                    Cancelar
                 </button>
-                <button onclick="selectSpiralColor('white')" 
-                        class="w-full p-3 border rounded-lg hover:bg-gray-50 flex items-center">
-                    <div class="w-6 h-6 bg-white border rounded mr-3"></div>
-                    Espiral Blanco
+                <button onclick="confirmSpiralOptions()" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-colors shadow-lg">
+                    Confirmar
                 </button>
             </div>
-            <button onclick="closeSpiralModal()" 
-                    class="mt-4 w-full bg-gray-200 text-gray-700 py-2 rounded-lg">
-                Cancelar
-            </button>
         </div>
     `;
     
     document.body.appendChild(modal);
     modal.id = 'spiral-modal';
+    
+    // Sélections par défaut
+    setTimeout(() => {
+        selectSpiralColor('negro');
+        selectFrontCover('blanco');
+        selectBackCover('negro');
+    }, 100);
 }
+
+// Fonctions de sélection avec styles améliorés
 function selectSpiralColor(color) {
+    spiralOptions.color = color;
+    document.querySelectorAll('.spiral-color-btn').forEach(btn => {
+        btn.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
+        btn.classList.add('border-gray-200');
+    });
+    event.target.closest('button').classList.remove('border-gray-200');
+    event.target.closest('button').classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
+}
+
+function selectFrontCover(color) {
+    spiralOptions.frontCover = color;
+    document.querySelectorAll('.cover-btn').forEach(btn => {
+        btn.classList.remove('border-green-500', 'bg-green-50', 'shadow-md');
+        btn.classList.add('border-gray-200');
+    });
+    event.target.closest('button').classList.remove('border-gray-200');
+    event.target.closest('button').classList.add('border-green-500', 'bg-green-50', 'shadow-md');
+}
+
+function selectBackCover(color) {
+    spiralOptions.backCover = color;
+    document.querySelectorAll('.back-cover-btn').forEach(btn => {
+        btn.classList.remove('border-purple-500', 'bg-purple-50', 'shadow-md');
+        btn.classList.add('border-gray-200');
+    });
+    event.target.closest('button').classList.remove('border-gray-200');
+    event.target.closest('button').classList.add('border-purple-500', 'bg-purple-50', 'shadow-md');
+}
+
+function confirmSpiralOptions() {
     config.finishing = 'spiral';
-    config.spiralColor = color; // Guardar la couleur choisie
+    config.spiralColor = spiralOptions.color;
+    config.frontCover = spiralOptions.frontCover;
+    config.backCover = spiralOptions.backCover;
     
     // Mettre à jour les boutons actifs
     const finishingButtons = document.querySelectorAll('[data-finishing]');
@@ -235,8 +372,9 @@ function selectSpiralColor(color) {
     saveConfiguration();
     closeSpiralModal();
     
-    showNotification(`Espiral ${color === 'black' ? 'negro' : 'blanco'} seleccionado`, 'success');
+    showNotification(`Encuadernado configurado: Espiral ${spiralOptions.color}, Tapa delantera ${spiralOptions.frontCover}, Tapa trasera ${spiralOptions.backCover}`, 'success');
 }
+
 function closeSpiralModal() {
     const modal = document.getElementById('spiral-modal');
     if (modal) {
