@@ -270,19 +270,34 @@ $print_config = json_decode($order['print_config'], true) ?: [];
                         <div class="text-gray-600 text-xs">CARAS</div>
                         <div class="font-medium"><?= $folder['configuration']['sides'] === 'single' ? 'Una' : 'Doble' ?></div>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded">
-                        <div class="text-gray-600 text-xs">ACABADO</div>
-                        <div class="font-medium">
-                            <?php
-                            $finishing = $folder['configuration']['finishing'] ?? 'none';
-                            $finishingLabels = [
-                                'individual' => 'Individual', 'grouped' => 'Agrupado', 'none' => 'Sin acabado',
-                                'spiral' => 'Encuadernado', 'staple' => 'Grapado', 'laminated' => 'Plastificado'
-                            ];
-                            echo $finishingLabels[$finishing] ?? $finishing;
-                            ?>
-                        </div>
-                    </div>
+                   <div class="bg-gray-50 p-3 rounded">
+    <div class="text-gray-600 text-xs">ACABADO</div>
+    <div class="font-medium">
+        <?php
+        $finishing = $folder['configuration']['finishing'] ?? 'none';
+        $spiralColor = $folder['configuration']['spiralColor'] ?? null;
+        
+        $finishingLabels = [
+            'individual' => 'Individual', 
+            'grouped' => 'Agrupado', 
+            'none' => 'Sin acabado',
+            'spiral' => 'Encuadernado', 
+            'staple' => 'Grapado', 
+            'laminated' => 'Plastificado'
+        ];
+        
+        $label = $finishingLabels[$finishing] ?? $finishing;
+        
+        // Si c'est spiral, ajouter la couleur
+        if ($finishing === 'spiral' && $spiralColor) {
+            $colorText = $spiralColor === 'black' ? 'Negro' : 'Blanco';
+            $label .= " ($colorText)";
+        }
+        
+        echo $label;
+        ?>
+    </div>
+</div>
                 </div>
                 
                 <?php if (!empty($folder['comments'])): ?>

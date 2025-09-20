@@ -6,12 +6,14 @@ requireAdmin();
 require_once '../config/database.php';
 require_once '../includes/functions.php';
 require_once '../includes/security_headers.php';
+require_once '../terminal/config.php';
 
 $admin = getAdminUser();
 
 // Filtres
 $status_filter = $_GET['status'] ?? '';
 $search = $_GET['search'] ?? '';
+$terminal_filter = $_GET['online'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
 
 // Pagination
@@ -34,117 +36,245 @@ if ($search) {
     $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param, $search_param]);
 }
 
+if ($terminal_filter) {
+    $where_conditions[] = 'o.terminal_id = ?';
+    $params[] = $terminal_filter;
+}
+
 if ($date_from) {
     $where_conditions[] = 'DATE(o.created_at) >= ?';
     $params[] = $date_from;
 }
 
-$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+$where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
 // Compter total
-$count_sql = "SELECT COUNT(*) as total FROM orders o JOIN users u ON o.user_id = u.id $where_clause";
+$count_sql = "SELECT COUNT(*) as total FROM orders o LEFT JOIN users u ON o.user_id = u.id $where_clause";
 $total_orders = fetchOne($count_sql, $params)['total'];
 $total_pages = ceil($total_orders / $per_page);
 
 // Récupérer commandes
-$orders_sql = "SELECT o.*, u.first_name, u.last_name, u.email, u.phone 
+$orders_sql = "SELECT o.*, u.first_name, u.last_name, u.email, u.phone,
+               CASE 
+                   WHEN o.is_guest = 1 AND o.customer_name IS NOT NULL THEN o.customer_name
+                   WHEN o.is_guest = 1 THEN 'Cliente Invitado' 
+                   ELSE CONCAT(u.first_name, ' ', u.last_name) 
+               END as customer_name,
+               CASE 
+                   WHEN o.is_guest = 1 AND o.customer_phone IS NOT NULL THEN o.customer_phone
+                   WHEN o.is_guest = 1 THEN 'Sin teléfono'
+                   ELSE u.phone 
+               END as customer_phone_display
                FROM orders o 
-               JOIN users u ON o.user_id = u.id 
+               LEFT JOIN users u ON o.user_id = u.id 
                $where_clause 
                ORDER BY o.created_at DESC 
                LIMIT $per_page OFFSET $offset";
 $orders = fetchAll($orders_sql, $params);
+
+// Obtenir liste des terminaux pour le filtre
+global $terminals;
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Pedidos - Admin</title>
+    <title>Pedidos Locales - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .orders-table {
-    font-size: 0.875rem;
+      
+/* Badges de configuration */
+.config-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-.orders-table th, .orders-table td {
-    padding: 0.5rem;
-    white-space: nowrap;
+
+/* Conteneur configuration compact */
+.config-container {
+    max-width: 200px;
+    overflow: hidden;
 }
-@media (max-width: 768px) {
-    .orders-table {
-        font-size: 0.75rem;
+
+.config-folder {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-left: 3px solid #3b82f6;
+    transition: all 0.2s ease;
+}
+
+.config-folder:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Style pour le select de statut */
+.status-select {
+    
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-select:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Couleurs par statut */
+.status-select option[value="PENDING"] {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    color: #92400e;
+}
+
+.status-select option[value="CONFIRMED"] {
+    background: linear-gradient(135deg, #dbeafe, #3b82f6);
+    color: #1e40af;
+}
+
+.status-select option[value="PROCESSING"] {
+    background: linear-gradient(135deg, #fed7aa, #f97316);
+    color: #c2410c;
+}
+
+.status-select option[value="PRINTING"] {
+    background: linear-gradient(135deg, #e0e7ff, #6366f1);
+    color: #4338ca;
+}
+
+.status-select option[value="READY"] {
+    background: linear-gradient(135deg, #d1fae5, #10b981);
+    color: #059669;
+}
+
+.status-select option[value="COMPLETED"] {
+    background: linear-gradient(135deg, #dcfce7, #22c55e);
+    color: #16a34a;
+}
+
+.status-select option[value="CANCELLED"] {
+    background: linear-gradient(135deg, #fecaca, #ef4444);
+    color: #dc2626;
+}
+
+/* Style dynamique basé sur la valeur sélectionnée */
+.status-select[data-status="PENDING"] {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    color: #92400e;
+    border-color: #f59e0b;
+}
+
+.status-select[data-status="CONFIRMED"] {
+    background: linear-gradient(135deg, #dbeafe, #3b82f6);
+    color: #1e40af;
+    border-color: #3b82f6;
+}
+
+.status-select[data-status="PROCESSING"] {
+    background: linear-gradient(135deg, #fed7aa, #f97316);
+    color: #c2410c;
+    border-color: #f97316;
+}
+
+.status-select[data-status="PRINTING"] {
+    background: linear-gradient(135deg, #e0e7ff, #6366f1);
+    color: #4338ca;
+    border-color: #6366f1;
+}
+
+.status-select[data-status="READY"] {
+    background: linear-gradient(135deg, #d1fae5, #10b981);
+    color: #059669;
+    border-color: #10b981;
+}
+
+.status-select[data-status="COMPLETED"] {
+    background: linear-gradient(135deg, #dcfce7, #22c55e);
+    color: #16a34a;
+    border-color: #22c55e;
+}
+
+.status-select[data-status="CANCELLED"] {
+    background: linear-gradient(135deg, #fecaca, #ef4444);
+    color: #dc2626;
+    border-color: #ef4444;
+}
+
+/* Animation de hover */
+.status-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Style pour les notifications */
+.notification {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }
-        /* Estilo para el indicador de la barra de navegación activa */
-    .nav-active { position: relative; }
-.nav-active::before { 
-    content: ''; 
-    position: absolute; 
-    left: 0; 
-    top: 50%; 
-    transform: translateY(-50%); 
-    height: 60%; 
-    width: 4px; 
-    background-color: white; 
-    border-radius: 0 4px 4px 0; 
+
+/* Amélioration de l'apparence du tableau */
+.orders-table tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
 }
-    </style>
+
+/* Badge pour les terminaux */
+.terminal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: linear-gradient(135deg, #e0f2fe, #0284c7);
+    color: #0369a1;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
 </head>
 <body class="bg-gray-100">
 
-  
-    <!-- Include Sidebar (même que dashboard) -->
     <?php include 'includes/sidebar.php'; ?>
-<!-- Ajouter après les filtres, avant la table -->
 
-<!-- Bulk Actions Panel -->
-<div id="bulk-actions" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 hidden">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <span class="font-medium text-blue-800">
-                <span id="selected-count">0</span> pedidos seleccionados
-            </span>
-        </div>
-        <div class="flex space-x-2">
-            <button onclick="bulkAction('mark_confirmed')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
-                Confirmar
-            </button>
-            <button onclick="bulkAction('mark_ready')" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
-                Marcar Listos
-            </button>
-            <button onclick="bulkAction('mark_completed')" class="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600">
-                Completar
-            </button>
-            <button onclick="bulkAction('export_selected')" class="bg-orange-500 text-white px-3 py-1 rounded text-sm hover:bg-orange-600">
-                <i class="fas fa-download mr-1"></i>Exportar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Ajouter checkbox dans l'en-tête de table -->
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-    <input type="checkbox" onchange="selectAllOrders(this.checked)" class="rounded">
-</th>
-
-<!-- Ajouter checkbox dans chaque ligne -->
-<td class="px-6 py-4">
-    <input type="checkbox" value="<?= $order['id'] ?>" class="order-checkbox rounded" 
-           onchange="toggleOrderSelection(<?= $order['id'] ?>, this)">
-</td>
     <div class="ml-64 min-h-screen">
         
         <!-- Header -->
         <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-gray-800">Gestión de Pedidos</h1>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-desktop mr-2 text-blue-500"></i>Pedidos Online
+                </h1>
                 <div class="flex items-center space-x-4">
-                    <button onclick="exportOrders()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                        <i class="fas fa-download mr-2"></i>Exportar Excel
-                    </button>
-                    <button onclick="refreshOrders()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-sync mr-2"></i>Actualizar
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                        Total: <?= $total_orders ?> pedidos
+                    </span>
+                    <button onclick="exportTerminalOrders()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Exportar
                     </button>
                 </div>
             </div>
@@ -153,7 +283,9 @@ $orders = fetchAll($orders_sql, $params);
         <!-- Filters -->
         <div class="p-6">
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    
+                    <!-- Estado -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                         <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
@@ -165,22 +297,41 @@ $orders = fetchAll($orders_sql, $params);
                             <option value="COMPLETED" <?= $status_filter === 'COMPLETED' ? 'selected' : '' ?>>Completados</option>
                         </select>
                     </div>
+
+                    <!-- Terminal -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Terminal</label>
+                        <select name="terminal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Todos los terminales</option>
+                            <?php foreach ($terminals as $ip => $terminal): ?>
+                                <option value="<?= $terminal['id'] ?>" <?= $terminal_filter === $terminal['id'] ? 'selected' : '' ?>>
+                                    <?= $terminal['name'] ?> (<?= $terminal['location'] ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <!-- Buscar -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
                         <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
-                               placeholder="Número, cliente, email..." 
+                               placeholder="Número, cliente..." 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
+                    
+                    <!-- Fecha -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha desde</label>
                         <input type="date" name="date_from" value="<?= htmlspecialchars($date_from) ?>" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
+                    
+                    <!-- Botones -->
                     <div class="flex items-end space-x-2">
                         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
                             <i class="fas fa-search mr-2"></i>Filtrar
                         </button>
-                        <a href="orders.php" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                        <a href="orders-local.php" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors">
                             <i class="fas fa-times mr-2"></i>Limpiar
                         </a>
                     </div>
@@ -189,89 +340,180 @@ $orders = fetchAll($orders_sql, $params);
 
             <!-- Orders Table -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-               <table class="orders-table min-w-full divide-y divide-gray-200">
-    <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivos</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vista Previa</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-    </tr>
-</thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php foreach ($orders as $order): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900">#<?= htmlspecialchars($order['order_number']) ?></div>
-                                <div class="text-xs text-gray-500">Código: <?= htmlspecialchars($order['pickup_code']) ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900"><?= htmlspecialchars($order['first_name'] . ' ' . $order['last_name']) ?></div>
-                                <div class="text-xs text-gray-500"><?= htmlspecialchars($order['email']) ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-    <div class="text-sm text-gray-900">
-        <?php if (!empty($order['phone'])): ?>
-            <i class="fas fa-phone text-green-500 mr-1"></i>
-            <?= htmlspecialchars($order['phone']) ?>
-        <?php else: ?>
-            <span class="text-gray-400">No proporcionado</span>
-        <?php endif; ?>
-    </div>
-</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <select onchange="changeOrderStatus(<?= $order['id'] ?>, this.value)" 
-                                        class="status-select text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500">
-                                    <option value="PENDING" <?= $order['status'] === 'PENDING' ? 'selected' : '' ?>>Pendiente</option>
-                                    <option value="CONFIRMED" <?= $order['status'] === 'CONFIRMED' ? 'selected' : '' ?>>Confirmado</option>
-                                    <option value="PROCESSING" <?= $order['status'] === 'PROCESSING' ? 'selected' : '' ?>>En Proceso</option>
-                                    <option value="READY" <?= $order['status'] === 'READY' ? 'selected' : '' ?>>Listo</option>
-                                    <option value="COMPLETED" <?= $order['status'] === 'COMPLETED' ? 'selected' : '' ?>>Completado</option>
-                                    <option value="CANCELLED" <?= $order['status'] === 'CANCELLED' ? 'selected' : '' ?>>Cancelado</option>
-                                </select>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-    <button onclick="viewOrderFiles(<?= $order['id'] ?>)" 
-            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition-colors">
-        <i class="fas fa-eye mr-1"></i>Ver Archivos
-    </button>
-</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div><?= $order['total_files'] ?> archivos</div>
-                                <div class="text-xs text-gray-500"><?= $order['total_pages'] ?> páginas</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900">€<?= number_format($order['total_price'], 2) ?></div>
-                                <div class="text-xs text-gray-500"><?= ucfirst(strtolower(str_replace('_', ' ', $order['payment_method']))) ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <?= date('d/m/Y', strtotime($order['created_at'])) ?><br>
-                                <span class="text-xs"><?= date('H:i', strtotime($order['created_at'])) ?></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div class="flex space-x-2">
-            <button onclick="viewOrder(<?= $order['id'] ?>)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
-    <i class="fas fa-eye"></i>
-</button>
-                                        <a href="generate-invoice.php?order_id=<?= $order['id'] ?>" 
-       target="_blank"
-       class="text-green-600 hover:text-green-900">Factura</a>
-                                    <button onclick="downloadFiles(<?= $order['id'] ?>)" class="text-green-600 hover:text-green-900" title="Descargar archivos">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button onclick="printOrder(<?= $order['id'] ?>)" class="text-purple-600 hover:text-purple-900" title="Imprimir">
-                                        <i class="fas fa-print"></i>
-                                    </button>
+               <table class="min-w-full divide-y divide-gray-200 orders-table">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terminal</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Configuración</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            <?php foreach ($orders as $order): ?>
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="font-medium">
+                        <?= date('d/m/Y', strtotime($order['created_at'])) ?>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <?= date('H:i', strtotime($order['created_at'])) ?>
+                    </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">
+                        #<?= htmlspecialchars($order['order_number']) ?>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Código: <?= htmlspecialchars($order['pickup_code']) ?>
+                    </div>
+                </td>
+                
+               
+                
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <div class="font-medium text-gray-900">
+                        <?= htmlspecialchars($order['customer_name']) ?>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <?= htmlspecialchars($order['customer_phone_display']) ?>
+                    </div>
+                    <?php if ($order['is_guest']): ?>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Invitado
+                        </span>
+                    <?php endif; ?>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <select class="status-select rounded-lg border-0 text-xs font-medium px-3 py-1 focus:ring-2 focus:ring-blue-500" 
+                            data-status="<?= $order['status'] ?>"
+                            onchange="changeOrderStatus(<?= $order['id'] ?>, this.value)">
+                        <option value="PENDING" <?= $order['status'] === 'PENDING' ? 'selected' : '' ?>>Pendiente</option>
+                        <option value="CONFIRMED" <?= $order['status'] === 'CONFIRMED' ? 'selected' : '' ?>>Confirmado</option>
+                        <option value="PROCESSING" <?= $order['status'] === 'PROCESSING' ? 'selected' : '' ?>>En Proceso</option>
+                        <option value="PRINTING" <?= $order['status'] === 'PRINTING' ? 'selected' : '' ?>>Imprimiendo</option>
+                        <option value="READY" <?= $order['status'] === 'READY' ? 'selected' : '' ?>>Listo</option>
+                        <option value="COMPLETED" <?= $order['status'] === 'COMPLETED' ? 'selected' : '' ?>>Completado</option>
+                        <option value="CANCELLED" <?= $order['status'] === 'CANCELLED' ? 'selected' : '' ?>>Cancelado</option>
+                    </select>
+                </td>
+                
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    <div class="config-container max-w-xs">
+                        <?php 
+                        $print_config = json_decode($order['print_config'], true);
+                        if ($print_config && isset($print_config['folders'])) {
+                            foreach ($print_config['folders'] as $index => $folder) {
+                                $config = $folder['configuration'];
+                                ?>
+                                <div class="config-folder mb-2 p-2 bg-gray-50 rounded-lg text-xs border-l-3 border-blue-500">
+                                    <div class="font-semibold text-gray-700 mb-1">
+                                        📁 <?= htmlspecialchars($folder['name'] ?? "Carpeta " . ($index + 1)) ?>
+                                    </div>
+                                    
+                                    <div class="space-y-1">
+                                        <!-- Papel y Color -->
+                                        <div class="flex items-center space-x-1">
+                                            <span class="config-badge bg-blue-100 text-blue-800">
+                                                📄 <?= $config['paperSize'] ?> <?= $config['paperWeight'] ?>
+                                            </span>
+                                            <span class="config-badge <?= $config['colorMode'] === 'bw' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800' ?>">
+                                                <?= $config['colorMode'] === 'bw' ? '⚫ B/N' : '🎨 Color' ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Lados y Orientación -->
+                                        <div class="flex items-center space-x-1">
+                                            <span class="config-badge bg-green-100 text-green-800">
+                                                📑 <?= $config['sides'] === 'single' ? 'Una cara' : 'Doble cara' ?>
+                                            </span>
+                                            <span class="config-badge bg-purple-100 text-purple-800">
+                                                📐 <?= $config['orientation'] === 'portrait' ? 'Vertical' : 'Horizontal' ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Acabado -->
+                                        <div class="flex items-center space-x-1">
+                                            <?php
+                                            $finishing_labels = [
+                                                'individual' => ['Individual', '📋'],
+                                                'grouped' => ['Agrupado', '📚'], 
+                                                'none' => ['Sin acabado', '📄'],
+                                                'spiral' => ['Encuadernado', '📖'],
+                                                'staple' => ['Grapado', '📎'],
+                                                'laminated' => ['Plastificado', '🛡️'],
+                                                'perforated2' => ['Perforado 2', '🕳️'],
+                                                'perforated4' => ['Perforado 4', '🕳️']
+                                            ];
+                                            
+                                            $finishing_info = $finishing_labels[$config['finishing']] ?? [$config['finishing'], '❓'];
+                                            $finishing_text = $finishing_info[1] . ' ' . $finishing_info[0];
+                                            
+                                            // Ajouter couleur spiral si présente
+                                            if ($config['finishing'] === 'spiral' && isset($config['spiralColor'])) {
+                                                $spiral_color = $config['spiralColor'] === 'black' ? 'Negro ⚫' : 'Blanco ⚪';
+                                                $finishing_text .= " ($spiral_color)";
+                                            }
+                                            ?>
+                                            <span class="config-badge bg-orange-100 text-orange-800">
+                                                <?= $finishing_text ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Copias y Páginas -->
+                                        <div class="flex items-center space-x-1">
+                                            <span class="config-badge bg-indigo-100 text-indigo-800">
+                                                🔢 <?= $config['copies'] ?> copias
+                                            </span>
+                                            <span class="config-badge bg-gray-100 text-gray-800">
+                                                📊 <?= count($folder['files']) ?> archivos
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                <?php
+                            }
+                        } else {
+                            echo '<span class="text-gray-400 text-xs">Sin configuración</span>';
+                        }
+                        ?>
+                    </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="font-bold text-lg">
+                        <?= number_format($order['total_price'], 2) ?>€
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <?= $order['total_pages'] ?> págs • <?= $order['total_files'] ?> archivos
+                    </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex space-x-2">
+                        <a href="order_details.php?id=<?= $order['id'] ?>" 
+                           class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button onclick="downloadFiles(<?= $order['id'] ?>)" 
+                                class="text-green-600 hover:text-green-900" title="Descargar archivos">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="printOrder(<?= $order['id'] ?>)" 
+                                class="text-purple-600 hover:text-purple-900" title="Imprimir orden">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
                 
                 <!-- Pagination -->
                 <?php if ($total_pages > 1): ?>
@@ -282,11 +524,11 @@ $orders = fetchAll($orders_sql, $params);
                         </div>
                         <div class="flex space-x-2">
                             <?php if ($page > 1): ?>
-                            <a href="?page=<?= $page - 1 ?>&status=<?= $status_filter ?>&search=<?= $search ?>" 
+                            <a href="?page=<?= $page - 1 ?>&status=<?= $status_filter ?>&search=<?= $search ?>&terminal=<?= $terminal_filter ?>&date_from=<?= $date_from ?>" 
                                class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Anterior</a>
                             <?php endif; ?>
                             <?php if ($page < $total_pages): ?>
-                            <a href="?page=<?= $page + 1 ?>&status=<?= $status_filter ?>&search=<?= $search ?>" 
+                            <a href="?page=<?= $page + 1 ?>&status=<?= $status_filter ?>&search=<?= $search ?>&terminal=<?= $terminal_filter ?>&date_from=<?= $date_from ?>" 
                                class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Siguiente</a>
                             <?php endif; ?>
                         </div>
@@ -295,145 +537,60 @@ $orders = fetchAll($orders_sql, $params);
                 <?php endif; ?>
             </div>
         </div>
-
-        
     </div>
 
-
-<!-- Ajouter checkbox dans l'en-tête de table -->
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-    <input type="checkbox" onchange="selectAllOrders(this.checked)" class="rounded">
-</th>
-
-<!-- Ajouter checkbox dans chaque ligne -->
-<td class="px-6 py-4">
-    <input type="checkbox" value="<?= $order['id'] ?>" class="order-checkbox rounded" 
-           onchange="toggleOrderSelection(<?= $order['id'] ?>, this)">
-</td>
     <script>
-        // Changer statut commande
-        async function changeOrderStatus(orderId, newStatus) {
+        // Utiliser les mêmes fonctions que orders.php
+        async function viewOrder(orderId) {
             try {
-                const response = await fetch('api/update-order-status.php', {
+                const response = await fetch('api/get-order-token.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order_id: orderId, status: newStatus })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({order_id: orderId})
                 });
-                
                 const result = await response.json();
                 
                 if (result.success) {
-                    showNotification('Estado actualizado correctamente', 'success');
+                    window.open('order-details.php?id=' + orderId + '&token=' + result.token, '_blank');
                 } else {
-                    showNotification('Error: ' + result.error, 'error');
+                    alert('Error al generar el token');
                 }
             } catch (error) {
-                showNotification('Error de conexión', 'error');
+                console.error('Error:', error);
+                alert('Error de conexión');
             }
         }
 
-     
-        // Télécharger fichiers
         function downloadFiles(orderId) {
             window.location.href = 'download-files.php?order=' + orderId;
         }
 
-        // Imprimer commande
         function printOrder(orderId) {
             window.open('print-order.php?id=' + orderId, '_blank');
         }
 
-        // Exporter Excel
-        function exportOrders() {
+        function exportTerminalOrders() {
             const params = new URLSearchParams(window.location.search);
+            params.set('export', 'terminal');
             window.location.href = 'export-orders.php?' + params.toString();
         }
 
-        // Actualiser page
-        function refreshOrders() {
-            location.reload();
-        }
-
-        // Notifications
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
-        // Ajouter après les autres fonctions JavaScript
-
-// Sélection multiple
-let selectedOrders = new Set();
-
-function toggleOrderSelection(orderId, checkbox) {
-    if (checkbox.checked) {
-        selectedOrders.add(orderId);
-    } else {
-        selectedOrders.delete(orderId);
-    }
-    updateBulkActions();
-}
-
-function selectAllOrders(selectAll) {
-    const checkboxes = document.querySelectorAll('.order-checkbox');
-    checkboxes.forEach(cb => {
-        cb.checked = selectAll;
-        const orderId = parseInt(cb.value);
-        if (selectAll) {
-            selectedOrders.add(orderId);
-        } else {
-            selectedOrders.delete(orderId);
-        }
-    });
-    updateBulkActions();
-}
-
-function updateBulkActions() {
-    const bulkPanel = document.getElementById('bulk-actions');
-    const selectedCount = document.getElementById('selected-count');
-    
-    if (selectedOrders.size > 0) {
-        bulkPanel.classList.remove('hidden');
-        selectedCount.textContent = selectedOrders.size;
-    } else {
-        bulkPanel.classList.add('hidden');
-    }
-}
-
-// Actions en lot
-async function bulkAction(action) {
-    if (selectedOrders.size === 0) return;
-    
-    const actionNames = {
-        'mark_confirmed': 'marcar como confirmados',
-        'mark_ready': 'marcar como listos', 
-        'mark_completed': 'marcar como completados',
-        'export_selected': 'exportar archivos'
-    };
-    
-    if (!confirm(`¿${actionNames[action]} ${selectedOrders.size} pedidos?`)) return;
+      
+async function changeOrderStatus(orderId, newStatus) {
+    const selectElement = event.target;
+    selectElement.setAttribute('data-status', newStatus);
     
     try {
-        const response = await fetch('api/bulk-actions.php', {
+        const response = await fetch('api/update-order-status.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: action,
-                order_ids: Array.from(selectedOrders)
-            })
+            body: JSON.stringify({ order_id: orderId, status: newStatus })
         });
         
         const result = await response.json();
         
         if (result.success) {
-            if (result.download_url) {
-                window.location.href = result.download_url;
-            } else {
-                showNotification(result.message, 'success');
-                setTimeout(() => location.reload(), 1500);
-            }
+            showNotification('Estado actualizado correctamente', 'success');
         } else {
             showNotification('Error: ' + result.error, 'error');
         }
@@ -442,66 +599,95 @@ async function bulkAction(action) {
     }
 }
 
-// Búsqueda en tiempo real
-let searchTimeout;
-function liveSearch(value) {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        const url = new URL(window.location);
-        url.searchParams.set('search', value);
-        url.searchParams.delete('page');
-        window.location.href = url.toString();
-    }, 500);
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl ${type === 'success' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-red-600'} text-white font-medium`;
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
-// Auto-refresh cada 30 segundos
-setInterval(() => {
-    if (selectedOrders.size === 0) {
-        location.reload();
-    }
-}, 30000);
-
-async function openOrderDetails(orderId) {
-    try {
-        const response = await fetch('api/get-order-token.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({order_id: orderId})
-        });
-        const result = await response.json();
+function directPrint(orderId) {
+    // Confirmación antes de imprimir
+    if (confirm('¿Enviar este pedido directamente a la impresora?')) {
+        // Abrir ventana de impresión
+        const printWindow = window.open(
+            `direct-print-terminal.php?order_id=${orderId}&auto=1`, 
+            'DirectPrint', 
+            'width=800,height=600,scrollbars=yes'
+        );
         
-        if (result.success) {
-            window.open('pedido/' + orderId + '/' + result.token, '_blank');
-        }
-    } catch (error) {
-        console.error('Error:', error);
+        // Mostrar notificación
+        showNotification('Enviando a impresora...', 'info');
+        
+        // Opcional: actualizar estado del pedido
+        setTimeout(() => {
+            changeOrderStatus(orderId, 'PRINTING');
+        }, 2000);
     }
 }
 
-function viewOrderFiles(orderId) {
-    const url = `view-files.php?order_id=${orderId}`;
-    window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+function quickPrint(orderId) {
+    // Impresión rápida sin confirmación
+    window.open(`direct-print-terminal.php?order_id=${orderId}&auto=1`, '_blank');
 }
-async function viewOrder(orderId) {
-    try {
-        const response = await fetch('./api/get-order-token.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({order_id: orderId})
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            window.open('order-details.php?id=' + orderId + '&token=' + result.token, '_blank');
-        } else {
-            console.log('Error:', result.error);
-            alert('Error al generar el token');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error de conexión');
+
+async function selectPrinterAndPrint(orderId) {
+    // Récupérer imprimantes disponibles
+    const response = await fetch('api/get-printers.php');
+    const printers = await response.json();
+    
+    if (printers.length === 0) {
+        alert('No hay impresoras configuradas. Ve a Configuración > Impresoras');
+        return;
     }
+    
+    // Créer modal de sélection
+    showPrinterSelectionModal(orderId, printers);
 }
+
+function showPrinterSelectionModal(orderId, printers) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Seleccionar Impresora</h3>
+            <div class="space-y-3">
+                ${printers.map(printer => `
+                    <button onclick="printWithPrinter(${orderId}, ${printer.id})" 
+                            class="w-full text-left p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        <div class="font-medium">${printer.name}</div>
+                        <div class="text-sm text-gray-500">${printer.type === 'COLOR' ? 'Color' : printer.type === 'BW' ? 'Blanco y Negro' : 'Color y B/N'}</div>
+                    </button>
+                `).join('')}
+            </div>
+            <button onclick="document.body.removeChild(this.closest('.fixed'))" 
+                    class="mt-4 w-full bg-gray-500 text-white py-2 rounded-lg">
+                Cancelar
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function printWithPrinter(orderId, printerId) {
+    // Fermer modal
+    document.querySelector('.fixed').remove();
+    
+    // Ouvrir impression avec imprimante sélectionnée
+    window.open(`print-files-direct.php?order_id=${orderId}&printer_id=${printerId}`, 'PrintWindow', 'width=800,height=600');
+}
+
     </script>
 
 </body>

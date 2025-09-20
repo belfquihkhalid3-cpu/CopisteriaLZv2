@@ -193,11 +193,10 @@ h1:hover {
 </div>
                 <!-- Datos de facturación -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Datos de facturación</h3>
-                    <div class="text-sm text-gray-500 mb-2">No proporcionado</div>
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                        Añadir
-                    </button>
+                   <button onclick="openBillingModal()" class="w-full text-left py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg">
+    <i class="fas fa-receipt mr-2"></i>Datos de facturación
+    <span id="billing-status" class="text-xs text-gray-500 block">Click para completar</span>
+</button>
                 </div>
 
                 <!-- Método de pago -->
@@ -370,7 +369,75 @@ h1:hover {
     </div>
     
 </div>
-
+<!-- Modal Datos de Facturación -->
+<div id="billingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Datos de Facturación</h3>
+            <button onclick="closeBillingModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="billingForm">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+                    <input type="text" id="billing_name" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" id="billing_email" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input type="tel" id="billing_phone" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <input type="text" id="billing_address" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                        <input type="text" id="billing_city" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                        <input type="text" id="billing_postal" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NIF/CIF (para factura)</label>
+                    <input type="text" id="billing_nif" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="saveBillingData()" 
+                        class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                    Guardar
+                </button>
+                <button type="button" onclick="closeBillingModal()" 
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
     <script>
         // Variables globales
         let currentCartData = { folders: [] };
@@ -787,11 +854,11 @@ async function processOrder() {
         return;
     }
     
-   // Vérifier mode de paiement sélectionné
-if (selectedPayment.type !== 'transfer') {
-    showNotification('Solo está disponible la transferencia bancaria actualmente', 'warning');
-    return;
-}
+    // Vérifier mode de paiement sélectionné
+    if (selectedPayment.type !== 'transfer') {
+        showNotification('Solo está disponible la transferencia bancaria actualmente', 'warning');
+        return;
+    }
     
     // Désactiver le bouton pendant le traitement
     const button = event.target;
@@ -802,15 +869,16 @@ if (selectedPayment.type !== 'transfer') {
     try {
         // Préparer les données de commande
         const orderData = {
-           folders: currentCartData.folders,
-    paymentMethod: selectedPayment,
-    promoCode: currentPromoCode,
-    discount: discountAmount || 0,
-    finalTotal: parseFloat(document.getElementById('final-total').textContent.replace('€', '').replace(',', '.')), // <-- AJOUTER
-    subtotal: calculateSubtotal(),
-    total: calculateSubtotal() - (discountAmount || 0),
-    comments: document.getElementById('order-comments')?.value || '',
-    orderDate: new Date().toISOString()
+            folders: currentCartData.folders,
+            paymentMethod: selectedPayment,
+            promoCode: currentPromoCode,
+            discount: discountAmount || 0,
+            finalTotal: parseFloat(document.getElementById('final-total').textContent.replace('€', '').replace(',', '.')),
+            subtotal: calculateSubtotal(),
+            total: calculateSubtotal() - (discountAmount || 0),
+            comments: document.getElementById('order-comments')?.value || '',
+            orderDate: new Date().toISOString(),
+            billingData: billingData || null // Ajouter les données de facturation
         };
         
         console.log('Sending order data:', orderData);
@@ -855,7 +923,56 @@ if (selectedPayment.type !== 'transfer') {
         button.textContent = originalText;
     }
 }
+let billingData = {};
 
+function openBillingModal() {
+    document.getElementById('billingModal').classList.remove('hidden');
+    
+    // Prellenar con datos existentes
+    if (billingData.name) {
+        document.getElementById('billing_name').value = billingData.name || '';
+        document.getElementById('billing_email').value = billingData.email || '';
+        document.getElementById('billing_phone').value = billingData.phone || '';
+        document.getElementById('billing_address').value = billingData.address || '';
+        document.getElementById('billing_city').value = billingData.city || '';
+        document.getElementById('billing_postal').value = billingData.postal || '';
+        document.getElementById('billing_nif').value = billingData.nif || '';
+    }
+}
+
+function closeBillingModal() {
+    document.getElementById('billingModal').classList.add('hidden');
+}
+
+function saveBillingData() {
+    const name = document.getElementById('billing_name').value;
+    const email = document.getElementById('billing_email').value;
+    
+    if (!name || !email) {
+        alert('Nombre y email son obligatorios');
+        return;
+    }
+    
+    // Guardar datos
+    billingData = {
+        name: name,
+        email: email,
+        phone: document.getElementById('billing_phone').value,
+        address: document.getElementById('billing_address').value,
+        city: document.getElementById('billing_city').value,
+        postal: document.getElementById('billing_postal').value,
+        nif: document.getElementById('billing_nif').value
+    };
+    
+    // Actualizar estado en la UI
+    const statusSpan = document.getElementById('billing-status');
+    statusSpan.textContent = `${name} - ${email}`;
+    statusSpan.className = 'text-xs text-green-600 block';
+    
+    closeBillingModal();
+    
+    showNotification('Datos de facturación guardados', 'success');
+}
 // Version simple qui utilise les totaux déjà calculés
 function calculateSubtotal() {
     if (!currentCartData || !currentCartData.folders) {

@@ -172,7 +172,10 @@ function selectOrientation(orientation) {
 
 function selectFinishing(finishing) {
     config.finishing = finishing;
-    
+     if (finishing === 'spiral') {
+        showSpiralColorModal();
+        return;
+    }
     // Mettre à jour les boutons actifs
     const finishingButtons = document.querySelectorAll('[data-finishing]');
     finishingButtons.forEach(btn => {
@@ -186,7 +189,60 @@ function selectFinishing(finishing) {
     updateConfigBadges();
     saveConfiguration();
 }
-
+function showSpiralColorModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 w-80">
+            <h3 class="text-lg font-semibold mb-4">Color del Espiral</h3>
+            <div class="space-y-3">
+                <button onclick="selectSpiralColor('black')" 
+                        class="w-full p-3 border rounded-lg hover:bg-gray-50 flex items-center">
+                    <div class="w-6 h-6 bg-black rounded mr-3"></div>
+                    Espiral Negro
+                </button>
+                <button onclick="selectSpiralColor('white')" 
+                        class="w-full p-3 border rounded-lg hover:bg-gray-50 flex items-center">
+                    <div class="w-6 h-6 bg-white border rounded mr-3"></div>
+                    Espiral Blanco
+                </button>
+            </div>
+            <button onclick="closeSpiralModal()" 
+                    class="mt-4 w-full bg-gray-200 text-gray-700 py-2 rounded-lg">
+                Cancelar
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.id = 'spiral-modal';
+}
+function selectSpiralColor(color) {
+    config.finishing = 'spiral';
+    config.spiralColor = color; // Guardar la couleur choisie
+    
+    // Mettre à jour les boutons actifs
+    const finishingButtons = document.querySelectorAll('[data-finishing]');
+    finishingButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.finishing === 'spiral') {
+            btn.classList.add('active');
+        }
+    });
+    
+    calculatePrice();
+    updateConfigBadges();
+    saveConfiguration();
+    closeSpiralModal();
+    
+    showNotification(`Espiral ${color === 'black' ? 'negro' : 'blanco'} seleccionado`, 'success');
+}
+function closeSpiralModal() {
+    const modal = document.getElementById('spiral-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
 /**
  * File Upload Handling
  */
@@ -558,12 +614,15 @@ function addToCart() {
     // Récupérer le panier existant
     const existingCart = JSON.parse(sessionStorage.getItem('currentCart') || '{"folders": []}');
     
-    // Créer un nouveau dossier
+    // Créer un nouveau dossier avec spiralColor inclus
     const newFolder = {
         id: existingCart.folders.length + 1,
         name: `Carpeta ${existingCart.folders.length + 1}`,
         files: config.files,
-        configuration: config,
+        configuration: {
+            ...config,
+            spiralColor: config.spiralColor || null // Inclure la couleur spiral
+        },
         copies: config.copies,
         total: parseFloat(document.getElementById('price-display')?.textContent || 0),
         comments: document.getElementById('print-comments')?.value || ''

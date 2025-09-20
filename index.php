@@ -699,7 +699,7 @@ h1:hover {
     </div>
 </div>
     <!-- JavaScript -->
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/mainn.js"></script>
     <script>
 function openTrackingModal() {
     const modal = document.getElementById('trackingModal');
