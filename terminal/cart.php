@@ -424,7 +424,35 @@ h1:hover {
     <script>
         // Variables globales
         let currentCartData = { folders: [] };
+let customerName = '';
+let customerPhone = '';
 
+function saveCustomerData() {
+    const nameInput = document.getElementById('customer-name');
+    const phoneInput = document.getElementById('customer-phone');
+    
+    if (nameInput) {
+        customerName = nameInput.value.trim();
+    }
+    if (phoneInput) {
+        customerPhone = phoneInput.value.trim();
+    }
+    
+    console.log('Customer data saved:', customerName, customerPhone);
+}
+
+// Ajouter les listeners pour capturer les données
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('customer-name');
+    const phoneInput = document.getElementById('customer-phone');
+    
+    if (nameInput) {
+        nameInput.addEventListener('input', saveCustomerData);
+    }
+    if (phoneInput) {
+        phoneInput.addEventListener('input', saveCustomerData);
+    }
+});
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('=== CART.PHP INITIALIZED ===');

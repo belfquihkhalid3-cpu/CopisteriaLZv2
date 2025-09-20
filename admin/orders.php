@@ -31,9 +31,9 @@ if ($status_filter && $status_filter !== 'ALL') {
 }
 
 if ($search) {
-    $where_conditions[] = '(o.order_number LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
+    $where_conditions[] = '(o.order_number LIKE ? OR o.pickup_code LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
     $search_param = '%' . $search . '%';
-    $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param, $search_param]);
+    $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param, $search_param, $search_param]);
 }
 
 if ($terminal_filter) {
@@ -314,10 +314,10 @@ global $terminals;
                     <!-- Buscar -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
-                        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
-                               placeholder="Número, cliente..." 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
+                       <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
+       placeholder="Buscar por pedido, código, cliente, email..." 
+       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
                     
                     <!-- Fecha -->
                     <div>
@@ -500,10 +500,11 @@ global $terminals;
                            class="text-blue-600 hover:text-blue-900" title="Ver detalles">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <button onclick="downloadFiles(<?= $order['id'] ?>)" 
-                                class="text-green-600 hover:text-green-900" title="Descargar archivos">
-                            <i class="fas fa-download"></i>
-                        </button>
+                       <a href="generate-invoice.php?order_id=<?= $order['id'] ?>" target="_blank" 
+   class="inline-flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors" 
+   title="Generar factura">
+    <i class="fas fa-file-invoice text-sm"></i>
+</a>
                         <button onclick="printOrder(<?= $order['id'] ?>)" 
                                 class="text-purple-600 hover:text-purple-900" title="Imprimir orden">
                             <i class="fas fa-print"></i>

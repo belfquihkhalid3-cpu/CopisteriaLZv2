@@ -233,7 +233,24 @@ h1:hover {
                         </button>
                     </div>
                 </div>
-
+ <!-- Orientación -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        Orientación
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                            <span class="tooltiptext">Orientación del documento</span>
+                        </div>
+                    </h3>
+                    <div class="option-grid-2">
+                        <button class="option-btn active" onclick="selectOrientation('portrait')" data-orientation="portrait">
+                            <div class="font-semibold">Vertical</div>
+                        </button>
+                        <button class="option-btn" onclick="selectOrientation('landscape')" data-orientation="landscape">
+                            <div class="font-semibold">Horizontal</div>
+                        </button>
+                    </div>
+                </div>
                 <!-- Forma de impresión -->
                 <div class="config-section">
                     <h3 class="section-title">
@@ -255,24 +272,7 @@ h1:hover {
                     </div>
                 </div>
 
-                <!-- Orientación -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Orientación
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Orientación del documento</span>
-                        </div>
-                    </h3>
-                    <div class="option-grid-2">
-                        <button class="option-btn active" onclick="selectOrientation('portrait')" data-orientation="portrait">
-                            <div class="font-semibold">Vertical</div>
-                        </button>
-                        <button class="option-btn" onclick="selectOrientation('landscape')" data-orientation="landscape">
-                            <div class="font-semibold">Horizontal</div>
-                        </button>
-                    </div>
-                </div>
+               
 
                 <!-- Comentario -->
                 <div class="config-section">
@@ -308,187 +308,187 @@ h1:hover {
     <span class="badge badge-teal" id="finishing-badge">IN</span>
     <span class="badge badge-cyan" id="orientation-badge">VE</span>
     <span class="badge badge-pink" id="copies-badge">5</span>
-</div>
+    </div>
 
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-gray-800" id="price-display">0,00</div>
+                            <div class="text-sm text-gray-600">EUR</div>
+                            <button class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-full mt-1 transition-colors">
+                                Añadir al carro
+                            </button>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-bold text-gray-800" id="price-display">0,00</div>
-                        <div class="text-sm text-gray-600">EUR</div>
-                        <button class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-full mt-1 transition-colors">
-                            Añadir al carro
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="hidden p-6 border-t border-gray-200" id="file-list">
+                    <h4 class="font-medium text-gray-800 mb-4">Documentos subidos:</h4>
+                    <div id="files-container" class="space-y-2">
+                        <!-- Files will be dynamically added here -->
+                    </div>
+                </div>
+            <div class="flex-1 flex items-center justify-center p-8">
+                    <!-- File List (initially hidden) -->
+                
+                    <div class="upload-zone w-full max-w-2xl h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer" id="upload-zone">
+                        <!-- Illustration -->
+                        <div class="mb-6">
+                            <svg width="120" height="120" viewBox="0 0 200 200" class="text-gray-400">
+                                <!-- Laptop -->
+                                <rect x="40" y="80" width="120" height="80" rx="8" fill="currentColor" opacity="0.3"/>
+                                <rect x="50" y="90" width="100" height="60" rx="4" fill="white"/>
+                                <!-- Documents floating -->
+                                <rect x="70" y="40" width="30" height="40" rx="2" fill="currentColor" opacity="0.6" transform="rotate(-10 85 60)"/>
+                                <rect x="90" y="30" width="30" height="40" rx="2" fill="currentColor" opacity="0.7" transform="rotate(5 105 50)"/>
+                                <rect x="110" y="45" width="30" height="40" rx="2" fill="currentColor" opacity="0.8" transform="rotate(-5 125 65)"/>
+                                <!-- Chart lines in documents -->
+                                <path d="M75 55 L85 50 L95 58" stroke="white" stroke-width="1.5" fill="none"/>
+                                <path d="M95 40 L105 35 L115 42" stroke="white" stroke-width="1.5" fill="none"/>
+                                <!-- Floating elements -->
+                                <circle cx="160" cy="50" r="3" fill="currentColor" opacity="0.4"/>
+                                <circle cx="170" cy="70" r="2" fill="currentColor" opacity="0.3"/>
+                                <circle cx="155" cy="80" r="2" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Selecciona los documentos a imprimir</h3>
+                        <p class="text-gray-600 mb-6">Sube tus documentos y empieza a imprimir con la mejor calidad al mejor precio</p>
+                        
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-3 rounded-lg flex items-center space-x-2 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Subir documentos ( pdf )</span>
                         </button>
+                        
+                        <!-- Cloud service icons -->
+                        <div class="flex items-center space-x-4 mt-6 opacity-70">
+                            <i class="fab fa-google-drive text-2xl text-blue-500"></i>
+                            <i class="fab fa-dropbox text-2xl text-blue-600"></i>
+                            <i class="fab fa-microsoft text-2xl text-blue-700"></i>
+                        </div>
+                        
+                        <input type="file" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" id="file-input">
                     </div>
                 </div>
-            </div>
 
-            <!-- Upload Zone -->
-             <div class="hidden p-6 border-t border-gray-200" id="file-list">
-                <h4 class="font-medium text-gray-800 mb-4">Documentos subidos:</h4>
-                <div id="files-container" class="space-y-2">
-                    <!-- Files will be dynamically added here -->
-                </div>
-            </div>
-        <div class="flex-1 flex items-center justify-center p-8">
-                  <!-- File List (initially hidden) -->
+
             
-                <div class="upload-zone w-full max-w-2xl h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer" id="upload-zone">
-                    <!-- Illustration -->
-                    <div class="mb-6">
-                        <svg width="120" height="120" viewBox="0 0 200 200" class="text-gray-400">
-                            <!-- Laptop -->
-                            <rect x="40" y="80" width="120" height="80" rx="8" fill="currentColor" opacity="0.3"/>
-                            <rect x="50" y="90" width="100" height="60" rx="4" fill="white"/>
-                            <!-- Documents floating -->
-                            <rect x="70" y="40" width="30" height="40" rx="2" fill="currentColor" opacity="0.6" transform="rotate(-10 85 60)"/>
-                            <rect x="90" y="30" width="30" height="40" rx="2" fill="currentColor" opacity="0.7" transform="rotate(5 105 50)"/>
-                            <rect x="110" y="45" width="30" height="40" rx="2" fill="currentColor" opacity="0.8" transform="rotate(-5 125 65)"/>
-                            <!-- Chart lines in documents -->
-                            <path d="M75 55 L85 50 L95 58" stroke="white" stroke-width="1.5" fill="none"/>
-                            <path d="M95 40 L105 35 L115 42" stroke="white" stroke-width="1.5" fill="none"/>
-                            <!-- Floating elements -->
-                            <circle cx="160" cy="50" r="3" fill="currentColor" opacity="0.4"/>
-                            <circle cx="170" cy="70" r="2" fill="currentColor" opacity="0.3"/>
-                            <circle cx="155" cy="80" r="2" fill="currentColor" opacity="0.5"/>
-                        </svg>
-                    </div>
-                    
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Selecciona los documentos a imprimir</h3>
-                    <p class="text-gray-600 mb-6">Sube tus documentos y empieza a imprimir con la mejor calidad al mejor precio</p>
-                    
-                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-3 rounded-lg flex items-center space-x-2 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Subir documentos ( pdf )</span>
-                    </button>
-                    
-                    <!-- Cloud service icons -->
-                    <div class="flex items-center space-x-4 mt-6 opacity-70">
-                        <i class="fab fa-google-drive text-2xl text-blue-500"></i>
-                        <i class="fab fa-dropbox text-2xl text-blue-600"></i>
-                        <i class="fab fa-microsoft text-2xl text-blue-700"></i>
-                    </div>
-                    
-                    <input type="file" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" id="file-input">
-                </div>
-            </div>
-
-
-          
-        </main>
-    </div>
-
-    <!-- Modal de Rastreo -->
-<div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="trackingModalContent">
-        
-        <!-- Header del Modal -->
-        <div class="text-center mb-6">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-orange-400 to-red-500 mb-4">
-                <i class="fas fa-search text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Rastrear Pedido</h3>
-            <p class="text-gray-600">Ingresa tu email y número de pedido</p>
+            </main>
         </div>
 
+        <!-- Modal de Rastreo -->
+            <div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="trackingModalContent">
+            
+            <!-- Header del Modal -->
+            <div class="text-center mb-6">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-orange-400 to-red-500 mb-4">
+                    <i class="fas fa-search text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Rastrear Pedido</h3>
+                <p class="text-gray-600">Ingresa tu email y número de pedido</p>
+            </div>
+
+            <!-- Formulario -->
         <!-- Formulario -->
-      <!-- Formulario -->
-        <form id="trackingForm" onsubmit="trackOrder(event)" class="space-y-6">
-            
-            <!-- Email Input -->
-            <div class="relative">
-                <label for="tracking-email" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-envelope mr-2 text-orange-500"></i>Email
-                </label>
-                <input type="email" 
-                       id="tracking-email" 
-                       name="email"
-                       required
-                       placeholder="tu@email.com"
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
-            </div>
-
-            <!-- Order Number Input -->
-            <div class="relative">
-                <label for="tracking-order" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-hashtag mr-2 text-orange-500"></i>Número de Pedido
-                </label>
-                <input type="text" 
-                       id="tracking-order" 
-                       name="order_number"
-                       required
-                       placeholder="COP-2025-123456"
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex space-x-4 pt-4">
-                <button type="button" 
-                        onclick="closeTrackingModal()"
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    Cancelar
-                </button>
-                <button type="submit" 
-                        class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105">
-                    <span id="track-btn-text">Buscar</span>
-                    <i id="track-loading" class="fas fa-spinner fa-spin ml-2 hidden"></i>
-                </button>
-            </div>
-        </form>
-
-        <!-- Resultado del Rastreo -->
-        <div id="trackingResult" class="hidden mt-6">
-            <!-- El contenido se cargará dinámicamente -->
-        </div>
-
-    </div>
-</div>
-<div id="registerModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center hidden">
-    <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        
-        <!-- Modal Header -->
-        <div class="flex justify-between items-center p-6 border-b border-gray-100">
-            <h2 class="text-xl font-semibold text-gray-800">Crea tu cuenta</h2>
-            <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <!-- Modal Body -->
-        <div class="p-6 space-y-4">
-            <form id="registerForm" onsubmit="handleRegister(event)">
+            <form id="trackingForm" onsubmit="trackOrder(event)" class="space-y-6">
                 
-                <!-- Nombre y apellidos -->
-                <div class="input-group">
-                    <i class="fas fa-user input-icon"></i>
-                    <input 
-                        type="text" 
-                        name="full_name"
-                        class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
-                        placeholder="Nombre y apellidos"
-                        required
-                    >
-                </div>
-                
-                <!-- Correo electrónico -->
-                <div class="input-group">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input 
-                        type="email" 
+                <!-- Email Input -->
+                <div class="relative">
+                    <label for="tracking-email" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-envelope mr-2 text-orange-500"></i>Email
+                    </label>
+                    <input type="email" 
+                        id="tracking-email" 
                         name="email"
-                        class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
-                        placeholder="Correo electrónico"
                         required
-                    >
+                        placeholder="tu@email.com"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
                 </div>
-                <div class="input-group">
-    <i class="fas fa-phone input-icon"></i>
-    <input 
-        type="tel" 
-        name="phone"
-        value="+34"
-        class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
-        placeholder="Teléfono"
-    >
-</div>
+
+                <!-- Order Number Input -->
+                <div class="relative">
+                    <label for="tracking-order" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-hashtag mr-2 text-orange-500"></i>Número de Pedido
+                    </label>
+                    <input type="text" 
+                        id="tracking-order" 
+                        name="order_number"
+                        required
+                        placeholder="COP-2025-123456"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex space-x-4 pt-4">
+                    <button type="button" 
+                            onclick="closeTrackingModal()"
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105">
+                        <span id="track-btn-text">Buscar</span>
+                        <i id="track-loading" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Resultado del Rastreo -->
+            <div id="trackingResult" class="hidden mt-6">
+                <!-- El contenido se cargará dinámicamente -->
+            </div>
+
+        </div>
+    </div>
+    <div id="registerModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center hidden">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800">Crea tu cuenta</h2>
+                <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 space-y-4">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    
+                    <!-- Nombre y apellidos -->
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input 
+                            type="text" 
+                            name="full_name"
+                            class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
+                            placeholder="Nombre y apellidos"
+                            required
+                        >
+                    </div>
+                    
+                    <!-- Correo electrónico -->
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input 
+                            type="email" 
+                            name="email"
+                            class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
+                            placeholder="Correo electrónico"
+                            required
+                        >
+                    </div>
+                    <div class="input-group">
+        <i class="fas fa-phone input-icon"></i>
+        <input 
+            type="tel" 
+            name="phone"
+            value="+34"
+            class="input-field w-full py-4 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-500"
+            placeholder="Teléfono"
+        >
+    </div>
                 
                 <!-- Contraseña -->
                 <div class="input-group">

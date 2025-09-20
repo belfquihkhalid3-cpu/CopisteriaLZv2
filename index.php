@@ -263,70 +263,156 @@ h1:hover {
                     </div>
                 </div>
 
-                <!-- Acabado -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Acabado
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Tipo de acabado</span>
-                        </div>
-                    </h3>
-                    <p class="section-subtitle">Selecciona el tipo de acabado</p>
-                    
-                    <div class="finishing-grid">
-                        <button class="option-btn active" onclick="selectFinishing('individual')" data-finishing="individual">
-                            <i class="fas fa-file text-green-500 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Individual</div>
-                            <div class="text-xs opacity-75">Cada documento</div>
-                        </button>
-                        <button class="option-btn" onclick="selectFinishing('grouped')" data-finishing="grouped">
-                            <i class="fas fa-copy text-blue-500 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Agrupado</div>
-                            <div class="text-xs opacity-75">Todos en uno</div>
-                        </button>
-                    </div>
-                    
-                    <div class="finishing-grid">
-                        <button class="option-btn" onclick="selectFinishing('none')" data-finishing="none">
-                            <i class="fas fa-file-alt text-gray-500 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Sin acabado</div>
-                            <div class="text-xs opacity-75">Solo imprimir</div>
-                        </button>
-                        <button class="option-btn" onclick="selectFinishing('spiral')" data-finishing="spiral">
-                            <i class="fas fa-book text-blue-500 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Encuadernado</div>
-                            <div class="text-xs opacity-75">En espiral</div>
-                        </button>
-                    </div>
-                    
-                    <div class="finishing-grid">
-                        <button class="option-btn" onclick="selectFinishing('staple')" data-finishing="staple">
-                            <i class="fas fa-paperclip text-gray-600 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Grapado</div>
-                            <div class="text-xs opacity-75">En esquina</div>
-                        </button>
-                        <button class="option-btn" onclick="selectFinishing('laminated')" data-finishing="laminated">
-                            <i class="fas fa-shield-alt text-yellow-500 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Plastificado</div>
-                            <div class="text-xs opacity-75">Ultra resistente</div>
-                        </button>
-                    </div>
-                    
-                    <div class="finishing-grid">
-                        <button class="option-btn" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
-                            <i class="fas fa-circle text-gray-400 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Perforado</div>
-                            <div class="text-xs opacity-75">2 agujeros</div>
-                        </button>
-                        <button class="option-btn" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
-                            <i class="fas fa-circle text-gray-400 mb-2 text-lg"></i>
-                            <div class="font-semibold mb-1">Perforado</div>
-                            <div class="text-xs opacity-75">4 agujeros</div>
-                        </button>
-                    </div>
-                </div>
+                <!-- Nouvelle section Orientación/Reliure -->
+<div class="config-section">
+    <h3 class="section-title">Orientación de reliure</h3>
+    <p class="section-subtitle">Selecciona el lado de encuadernación</p>
+    
+    <div class="option-grid-2">
+        <button class="option-btn relative" onclick="selectBindingSide('long')" data-binding="long">
+            <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
+            <img src="assets/img/vell.svg" alt="Lado largo" class="w-12 h-12 mb-2 mx-auto">
+            <div class="font-semibold">Lado largo</div>
+        </button>
+        
+        <button class="option-btn relative" onclick="selectBindingSide('short')" data-binding="short">
+            <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
+            <img src="assets/img/velc.svg" alt="Lado corto" class="w-12 h-12 mb-2 mx-auto">
+            <div class="font-semibold">Lado corto</div>
+        </button>
+    </div>
+</div>
 
+<!-- Section Pages par feuille -->
+<div class="config-section">
+    <h3 class="section-title">Páginas por hoja</h3>
+    <p class="section-subtitle">Selecciona la distribución</p>
+    
+    <!-- Première rangée : Normal et 2 páginas -->
+    <div class="option-grid-2 mb-3">
+        <button class="option-btn" onclick="selectPagesPerSheet('normal')" data-pages="normal">
+            <svg width="28" height="28" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
+                <rect x="2" y="2" rx="2" ry="2" width="34" height="38" style="fill:white;stroke:#9e9e9e;stroke-width:1.5;opacity:1"></rect>
+                <rect x="6" y="6" rx="1" ry="1" width="26" height="30" style="fill:#1976d2;stroke:#1976d2;stroke-width:1.5;opacity:.8"></rect>
+            </svg>
+            <div class="font-semibold mb-1">Normal</div>
+            <div class="text-xs opacity-75">1 página por cara</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectPagesPerSheet('two-horizontal')" data-pages="two-horizontal">
+            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
+                <rect x="6" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                <rect x="22" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+            </svg>
+            <div class="font-semibold mb-1">2 páginas</div>
+            <div class="text-xs opacity-75">Papel en horizontal</div>
+        </button>
+    </div>
+    
+    <!-- Deuxième rangée : 2 diapositivas et 4 diapositivas -->
+    <div class="option-grid-2">
+        <button class="option-btn" onclick="selectPagesPerSheet('two-vertical')" data-pages="two-vertical">
+            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill:white;stroke:#1976d2;stroke-width:.5;opacity:1"></rect>
+                <rect x="6" y="6" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                <rect x="6" y="22" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+            </svg>
+            <div class="font-semibold mb-1">2 diapositivas</div>
+            <div class="text-xs opacity-75">Orientación vertical</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectPagesPerSheet('four')" data-pages="four">
+            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
+                <rect x="6" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                <rect x="22" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                <rect x="6" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                <rect x="22" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+            </svg>
+            <div class="font-semibold mb-1">4 diapositivas</div>
+            <div class="text-xs opacity-75">por cara impresa</div>
+        </button>
+    </div>
+</div>
+                <!-- Acabado -->
+             
+<!-- Section Acabado dans index.php -->
+<div class="config-section">
+    <h3 class="section-title">Acabado</h3>
+    <p class="section-subtitle">Selecciona el tipo de acabado</p>
+    
+    <!-- Première rangée : Individual et Agrupado -->
+    <div class="finishing-grid mb-3">
+        <button class="option-btn" onclick="selectFinishing('individual')" data-finishing="individual">
+            <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1; opacity: 1;"></rect>
+                <line x1="6" y1="4" x2="6" y2="32" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+                <rect x="12" y="5" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1; opacity: 1;"></rect>
+                <line x1="16" y1="7" x2="16" y2="36" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+            </svg>
+            <div class="font-semibold mb-1">Individual</div>
+            <div class="text-xs opacity-75">Cada documento</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectFinishing('grouped')" data-finishing="grouped">
+            <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill: white; stroke: rgb(191, 191, 191); stroke-width: 1.15px; opacity: 1;"></rect>
+                <line x1="6" y1="4" x2="6" y2="37" style="stroke-width: 3px; fill: rgb(66, 133, 244); stroke: rgb(66, 133, 244); opacity: 0.8;"></line>
+            </svg>
+            <div class="font-semibold mb-1">Agrupado</div>
+            <div class="text-xs opacity-75">Todos en uno</div>
+        </button>
+    </div>
+    
+    <!-- Deuxième rangée : Sin acabado et Encuadernado -->
+    <div class="finishing-grid mb-3">
+        <button class="option-btn" onclick="selectFinishing('none')" data-finishing="none">
+            <img src="assets/img/SA.svg" alt="Sin acabado" class="w-10 h-10 mb-2 mx-auto">
+            <div class="font-semibold mb-1">Sin acabado</div>
+            <div class="text-xs opacity-75">Solo impresión</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectFinishing('spiral')" data-finishing="spiral">
+            <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
+                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-gray-400"></rect>
+                <line x1="6" y1="4" x2="6" y2="37" class="stroke-blue-500" style="stroke-width: 3px;"></line>
+            </svg>
+            <div class="font-semibold mb-1">Encuadernado</div>
+            <div class="text-xs opacity-75">En espiral</div>
+        </button>
+    </div>
+    
+    <!-- Troisième rangée : Grapado et Plastificado -->
+    <div class="finishing-grid mb-3">
+        <button class="option-btn" onclick="selectFinishing('staple')" data-finishing="staple">
+            <img src="assets/img/GR.svg" alt="Grapado" class="w-10 h-10 mb-2 mx-auto">
+            <div class="font-semibold mb-1">Grapado</div>
+            <div class="text-xs opacity-75">En esquina</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectFinishing('laminated')" data-finishing="laminated">
+            <img src="assets/img/SA.svg" alt="Plastificado" class="w-10 h-10 mb-2 mx-auto">
+            <div class="font-semibold mb-1">Plastificado</div>
+            <div class="text-xs opacity-75">Ultraresistente</div>
+        </button>
+    </div>
+    
+    <!-- Quatrième rangée : Perforados -->
+    <div class="finishing-grid">
+        <button class="option-btn" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
+            <img src="assets/img/2AG.svg" alt="Perforado 2" class="w-10 h-10 mb-2 mx-auto">
+            <div class="font-semibold mb-1">Perforado</div>
+            <div class="text-xs opacity-75">2 agujeros</div>
+        </button>
+        
+        <button class="option-btn" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
+            <img src="assets/img/4AG.svg" alt="Perforado 4" class="w-10 h-10 mb-2 mx-auto">
+            <div class="font-semibold mb-1">Perforado</div>
+            <div class="text-xs opacity-75">4 agujeros</div>
+        </button>
+    </div>
+</div>
                 <!-- Comentario -->
                 <div class="config-section">
                     <h3 class="section-title">

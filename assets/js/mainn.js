@@ -1177,6 +1177,50 @@ function socialLogin(provider) {
     showNotification(`Redirigiendo a ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`, 'info');
 }
 
+// Variable pour stocker l'orientation de reliure
+config.bindingSide = 'long'; // par défaut
+
+function selectBindingSide(side) {
+    config.bindingSide = side;
+    
+    // Mettre à jour les boutons actifs
+    const bindingButtons = document.querySelectorAll('[data-binding]');
+    bindingButtons.forEach(btn => {
+        const checkIcon = btn.querySelector('.binding-check');
+        btn.classList.remove('active');
+        checkIcon.classList.add('hidden');
+        
+        if (btn.dataset.binding === side) {
+            btn.classList.add('active');
+            checkIcon.classList.remove('hidden');
+        }
+    });
+    
+    calculatePrice();
+    updateConfigBadges();
+    saveConfiguration();
+}
+
+// Variable pour stocker les pages par feuille
+config.pagesPerSheet = 'normal'; // par défaut
+
+function selectPagesPerSheet(type) {
+    config.pagesPerSheet = type;
+    
+    // Mettre à jour les boutons actifs
+    const pagesButtons = document.querySelectorAll('[data-pages]');
+    pagesButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.pages === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    calculatePrice();
+    updateConfigBadges();
+    saveConfiguration();
+}
+
 // Charger les coûts de finition depuis l'API
 
 
