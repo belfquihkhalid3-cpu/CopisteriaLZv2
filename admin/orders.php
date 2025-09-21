@@ -438,32 +438,100 @@ global $terminals;
                                         </div>
                                         
                                         <!-- Acabado -->
-                                        <div class="flex items-center space-x-1">
-                                            <?php
-                                            $finishing_labels = [
-                                                'individual' => ['Individual', '📋'],
-                                                'grouped' => ['Agrupado', '📚'], 
-                                                'none' => ['Sin acabado', '📄'],
-                                                'spiral' => ['Encuadernado', '📖'],
-                                                'staple' => ['Grapado', '📎'],
-                                                'laminated' => ['Plastificado', '🛡️'],
-                                                'perforated2' => ['Perforado 2', '🕳️'],
-                                                'perforated4' => ['Perforado 4', '🕳️']
-                                            ];
-                                            
-                                            $finishing_info = $finishing_labels[$config['finishing']] ?? [$config['finishing'], '❓'];
-                                            $finishing_text = $finishing_info[1] . ' ' . $finishing_info[0];
-                                            
-                                            // Ajouter couleur spiral si présente
-                                            if ($config['finishing'] === 'spiral' && isset($config['spiralColor'])) {
-                                                $spiral_color = $config['spiralColor'] === 'black' ? 'Negro ⚫' : 'Blanco ⚪';
-                                                $finishing_text .= " ($spiral_color)";
-                                            }
-                                            ?>
-                                            <span class="config-badge bg-orange-100 text-orange-800">
-                                                <?= $finishing_text ?>
-                                            </span>
-                                        </div>
+                                     <!-- Acabado avec détails complets -->
+<div class="flex items-center space-x-1">
+    <?php
+    $finishing_labels = [
+        'individual' => ['Individual', '📋'],
+        'grouped' => ['Agrupado', '📚'], 
+        'none' => ['Sin acabado', '📄'],
+        'spiral' => ['Encuadernado', '📖'],
+        'staple' => ['Grapado', '📎'],
+        'laminated' => ['Plastificado', '🛡️'],
+        'perforated2' => ['Perforado 2', '🕳️'],
+        'perforated4' => ['Perforado 4', '🕳️']
+    ];
+    
+    $finishing_info = $finishing_labels[$config['finishing']] ?? [$config['finishing'], '❓'];
+    $finishing_text = $finishing_info[1] . ' ' . $finishing_info[0];
+    
+    // Ajouter détails complets pour spiral
+    if ($config['finishing'] === 'spiral') {
+        $spiral_details = [];
+        
+        // Couleur du spiral
+        if (isset($config['spiralColor'])) {
+            $spiral_colors = [
+                'negro' => 'Negro ⚫',
+                'blanco' => 'Blanco ⚪',
+                'transparente' => 'Transparente 🔍'
+            ];
+            $spiral_details[] = 'Espiral: ' . ($spiral_colors[$config['spiralColor']] ?? $config['spiralColor']);
+        }
+        
+        // Tapa delantera
+        if (isset($config['frontCover'])) {
+            $cover_colors = [
+                'negro' => 'Negro ⚫',
+                'blanco' => 'Blanco ⚪',
+                'transparente' => 'Transparente 🔍'
+            ];
+            $spiral_details[] = 'T.Delantera: ' . ($cover_colors[$config['frontCover']] ?? $config['frontCover']);
+        }
+        
+        // Tapa trasera
+        if (isset($config['backCover'])) {
+            $cover_colors = [
+                'negro' => 'Negro ⚫',
+                'blanco' => 'Blanco ⚪',
+                'transparente' => 'Transparente 🔍'
+            ];
+            $spiral_details[] = 'T.Trasera: ' . ($cover_colors[$config['backCover']] ?? $config['backCover']);
+        }
+
+ 
+        
+        if (!empty($spiral_details)) {
+            $finishing_text .= ' (' . implode(', ', $spiral_details) . ')';
+        }
+    }
+    ?>
+    <span class="config-badge bg-orange-100 text-orange-800">
+        <?= $finishing_text ?>
+    </span>
+</div>
+<?php if (isset($config['bindingSide'])): ?>
+<div class="flex items-center space-x-1">
+    <?php
+    $binding_labels = [
+        'long' => 'Lado largo 📏',
+        'short' => 'Lado corto 📐'
+    ];
+    $binding_text = $binding_labels[$config['bindingSide']] ?? $config['bindingSide'];
+    ?>
+    <span class="config-badge bg-yellow-100 text-yellow-800">
+        🔗 <?= $binding_text ?>
+    </span>
+</div>
+<?php endif; ?>
+
+<!-- Páginas por hoja -->
+<?php if (isset($config['pagesPerSheet'])): ?>
+<div class="flex items-center space-x-1">
+    <?php
+    $pages_labels = [
+        'normal' => '1 página por cara 📄',
+        'two-horizontal' => '2 páginas horizontal 📑',
+        'two-vertical' => '2 diapositivas vertical 📊',
+        'four' => '4 diapositivas por cara 🗂️'
+    ];
+    $pages_text = $pages_labels[$config['pagesPerSheet']] ?? $config['pagesPerSheet'];
+    ?>
+    <span class="config-badge bg-teal-100 text-teal-800">
+        📋 <?= $pages_text ?>
+    </span>
+</div>
+<?php endif; ?>
                                         
                                         <!-- Copias y Páginas -->
                                         <div class="flex items-center space-x-1">

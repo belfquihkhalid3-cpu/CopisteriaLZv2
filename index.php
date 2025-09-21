@@ -342,75 +342,96 @@ h1:hover {
     <h3 class="section-title">Acabado</h3>
     <p class="section-subtitle">Selecciona el tipo de acabado</p>
     
-    <!-- Première rangée : Individual et Agrupado -->
-    <div class="finishing-grid mb-3">
-        <button class="option-btn" onclick="selectFinishing('individual')" data-finishing="individual">
-            <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1; opacity: 1;"></rect>
-                <line x1="6" y1="4" x2="6" y2="32" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
-                <rect x="12" y="5" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1; opacity: 1;"></rect>
-                <line x1="16" y1="7" x2="16" y2="36" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
-            </svg>
-            <div class="font-semibold mb-1">Individual</div>
-            <div class="text-xs opacity-75">Cada documento</div>
-        </button>
-        
-        <button class="option-btn" onclick="selectFinishing('grouped')" data-finishing="grouped">
-            <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill: white; stroke: rgb(191, 191, 191); stroke-width: 1.15px; opacity: 1;"></rect>
-                <line x1="6" y1="4" x2="6" y2="37" style="stroke-width: 3px; fill: rgb(66, 133, 244); stroke: rgb(66, 133, 244); opacity: 0.8;"></line>
-            </svg>
-            <div class="font-semibold mb-1">Agrupado</div>
-            <div class="text-xs opacity-75">Todos en uno</div>
-        </button>
+    <!-- Section 1: Individual vs Agrupado -->
+    <div class="mb-6">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">Tipo de documento</h4>
+        <div class="finishing-grid">
+            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('individual')" data-document="individual">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 42 42" class="mr-3 flex-shrink-0">
+                    <rect x="2" y="2" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
+                    <line x1="6" y1="4" x2="6" y2="32" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+                    <rect x="12" y="5" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
+                    <line x1="16" y1="7" x2="16" y2="36" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+                </svg>
+                <div>
+                    <div class="font-semibold">Individual</div>
+                    <div class="text-xs opacity-75">Cada documento</div>
+                </div>
+            </button>
+            
+            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('grouped')" data-document="grouped">
+                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
+                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill: white; stroke: rgb(191, 191, 191); stroke-width: 1.15px;"></rect>
+                    <line x1="6" y1="4" x2="6" y2="37" style="stroke-width: 3px; stroke: rgb(66, 133, 244);"></line>
+                </svg>
+                <div>
+                    <div class="font-semibold">Agrupado</div>
+                    <div class="text-xs opacity-75">Todos en uno</div>
+                </div>
+            </button>
+        </div>
     </div>
     
-    <!-- Deuxième rangée : Sin acabado et Encuadernado -->
-    <div class="finishing-grid mb-3">
-        <button class="option-btn" onclick="selectFinishing('none')" data-finishing="none">
-            <img src="assets/img/SA.svg" alt="Sin acabado" class="w-10 h-10 mb-2 mx-auto">
-            <div class="font-semibold mb-1">Sin acabado</div>
-            <div class="text-xs opacity-75">Solo impresión</div>
-        </button>
+    <!-- Section 2: Types de finition -->
+    <div>
+        <h4 class="text-sm font-medium text-gray-700 mb-3">Opciones de acabado</h4>
         
-        <button class="option-btn" onclick="selectFinishing('spiral')" data-finishing="spiral">
-            <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-gray-400"></rect>
-                <line x1="6" y1="4" x2="6" y2="37" class="stroke-blue-500" style="stroke-width: 3px;"></line>
-            </svg>
-            <div class="font-semibold mb-1">Encuadernado</div>
-            <div class="text-xs opacity-75">En espiral</div>
-        </button>
-    </div>
-    
-    <!-- Troisième rangée : Grapado et Plastificado -->
-    <div class="finishing-grid mb-3">
-        <button class="option-btn" onclick="selectFinishing('staple')" data-finishing="staple">
-            <img src="assets/img/GR.svg" alt="Grapado" class="w-10 h-10 mb-2 mx-auto">
-            <div class="font-semibold mb-1">Grapado</div>
-            <div class="text-xs opacity-75">En esquina</div>
-        </button>
+        <div class="finishing-grid mb-3">
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('none')" data-finishing="none">
+                <img src="assets/img/SA.svg" alt="Sin acabado" class="w-8 h-8 mr-3 flex-shrink-0">
+                <div>
+                    <div class="font-semibold">Sin acabado</div>
+                    <div class="text-xs opacity-75">Solo impresión</div>
+                </div>
+            </button>
+            
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('spiral')" data-finishing="spiral">
+                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
+                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-gray-400"></rect>
+                    <line x1="6" y1="4" x2="6" y2="37" class="stroke-blue-500" style="stroke-width: 3px;"></line>
+                </svg>
+                <div>
+                    <div class="font-semibold">Encuadernado</div>
+                    <div class="text-xs opacity-75">En espiral</div>
+                </div>
+            </button>
+        </div>
         
-        <button class="option-btn" onclick="selectFinishing('laminated')" data-finishing="laminated">
-            <img src="assets/img/SA.svg" alt="Plastificado" class="w-10 h-10 mb-2 mx-auto">
-            <div class="font-semibold mb-1">Plastificado</div>
-            <div class="text-xs opacity-75">Ultraresistente</div>
-        </button>
-    </div>
-    
-    <!-- Quatrième rangée : Perforados -->
-    <div class="finishing-grid">
-        <button class="option-btn" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
-            <img src="assets/img/2AG.svg" alt="Perforado 2" class="w-10 h-10 mb-2 mx-auto">
-            <div class="font-semibold mb-1">Perforado</div>
-            <div class="text-xs opacity-75">2 agujeros</div>
-        </button>
+        <div class="finishing-grid mb-3">
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('staple')" data-finishing="staple">
+                <img src="assets/img/GR.svg" alt="Grapado" class="w-8 h-8 mr-3 flex-shrink-0">
+                <div>
+                    <div class="font-semibold">Grapado</div>
+                    <div class="text-xs opacity-75">En esquina</div>
+                </div>
+            </button>
+            
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('laminated')" data-finishing="laminated">
+                <img src="assets/img/SA.svg" alt="Plastificado" class="w-8 h-8 mr-3 flex-shrink-0">
+                <div>
+                    <div class="font-semibold">Plastificado</div>
+                    <div class="text-xs opacity-75">Ultraresistente</div>
+                </div>
+            </button>
+        </div>
         
-        <button class="option-btn" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
-            <img src="assets/img/4AG.svg" alt="Perforado 4" class="w-10 h-10 mb-2 mx-auto">
-            <div class="font-semibold mb-1">Perforado</div>
-            <div class="text-xs opacity-75">4 agujeros</div>
-        </button>
+        <div class="finishing-grid">
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
+                <img src="assets/img/2AG.svg" alt="Perforado 2" class="w-8 h-8 mr-3 flex-shrink-0">
+                <div>
+                    <div class="font-semibold">Perforado</div>
+                    <div class="text-xs opacity-75">2 agujeros</div>
+                </div>
+            </button>
+            
+            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
+                <img src="assets/img/4AG.svg" alt="Perforado 4" class="w-8 h-8 mr-3 flex-shrink-0">
+                <div>
+                    <div class="font-semibold">Perforado</div>
+                    <div class="text-xs opacity-75">4 agujeros</div>
+                </div>
+            </button>
+        </div>
     </div>
 </div>
                 <!-- Comentario -->

@@ -1,11 +1,15 @@
 <?php
 session_start();
+
+
+
+
 require_once 'auth.php';
 requireAdmin();
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
-require_once '../includes/security_headers.php';
+
 require_once '../terminal/config.php';
 
 $admin = getAdminUser();
@@ -488,8 +492,7 @@ global $terminals;
 </a>
                                    <!-- Dans la colonne Actions -->
 <button onclick="selectPrinterAndPrint(<?= $order['id'] ?>)" 
-        class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-lg text-sm transition-all duration-200" 
-        title="Seleccionar impresora e imprimir">
+        class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
     <i class="fas fa-print mr-1"></i>Imprimir
 </button>
                                 </div>
@@ -559,118 +562,196 @@ global $terminals;
             window.location.href = 'export-orders.php?' + params.toString();
         }
 
-      
-async function changeOrderStatus(orderId, newStatus) {
-    const selectElement = event.target;
-    selectElement.setAttribute('data-status', newStatus);
-    
+// Utiliser EXACTEMENT la même configuration que print-manager.php
+const LOCAL_PRINT_SERVER = 'http://localhost:5000'; // Configuration fixe qui fonctionne
+
+// Fonction principale pour le bouton "Imprimir"
+async function selectPrinterAndPrint(orderId) {
     try {
-        const response = await fetch('api/update-order-status.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: orderId, status: newStatus })
-        });
+        showNotification('Detectando impresoras...', 'info');
         
+        // MÊME MÉTHODE que print-manager.php
+        const response = await fetch(`${LOCAL_PRINT_SERVER}/detect-printers`);
         const result = await response.json();
         
-        if (result.success) {
-            showNotification('Estado actualizado correctamente', 'success');
+        if (result.success && result.printers.length > 0) {
+            // Récupérer les détails de la commande
+            const orderResponse = await fetch(`api/get-order-details.php?order_id=${orderId}`);
+            const orderData = await orderResponse.json();
+            
+            if (orderData.success) {
+                showPrinterSelectionModal(orderId, orderData, result.printers);
+            } else {
+                showNotification('Error: No se encontraron detalles del pedido', 'error');
+            }
         } else {
-            showNotification('Error: ' + result.error, 'error');
+            showNotification('Aucune imprimante détectée sur le PC local. Vérifiez que le service Python fonctionne.', 'error');
         }
     } catch (error) {
-        showNotification('Error de conexión', 'error');
+        showNotification('Erreur de connexion au serveur d\'impression local: ' + error.message, 'error');
+        console.error('Error:', error);
     }
 }
 
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl ${type === 'success' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-red-600'} text-white font-medium`;
-    notification.innerHTML = `
-        <div class="flex items-center space-x-2">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-function directPrint(orderId) {
-    // Confirmación antes de imprimir
-    if (confirm('¿Enviar este pedido directamente a la impresora?')) {
-        // Abrir ventana de impresión
-        const printWindow = window.open(
-            `direct-print-terminal.php?order_id=${orderId}&auto=1`, 
-            'DirectPrint', 
-            'width=800,height=600,scrollbars=yes'
-        );
-        
-        // Mostrar notificación
-        showNotification('Enviando a impresora...', 'info');
-        
-        // Opcional: actualizar estado del pedido
-        setTimeout(() => {
-            changeOrderStatus(orderId, 'PRINTING');
-        }, 2000);
-    }
-}
-
-function quickPrint(orderId) {
-    // Impresión rápida sin confirmación
-    window.open(`direct-print-terminal.php?order_id=${orderId}&auto=1`, '_blank');
-}
-
-async function selectPrinterAndPrint(orderId) {
-    // Récupérer imprimantes disponibles
-    const response = await fetch('api/get-printers.php');
-    const printers = await response.json();
-    
-    if (printers.length === 0) {
-        alert('No hay impresoras configuradas. Ve a Configuración > Impresoras');
-        return;
-    }
-    
-    // Créer modal de sélection
-    showPrinterSelectionModal(orderId, printers);
-}
-
-function showPrinterSelectionModal(orderId, printers) {
+// Interface de sélection d'imprimante (MÊME STYLE que print-manager)
+function showPrinterSelectionModal(orderId, orderData, printers) {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
     modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">Seleccionar Impresora</h3>
-            <div class="space-y-3">
-                ${printers.map(printer => `
-                    <button onclick="printWithPrinter(${orderId}, ${printer.id})" 
-                            class="w-full text-left p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <div class="font-medium">${printer.name}</div>
-                        <div class="text-sm text-gray-500">${printer.type === 'COLOR' ? 'Color' : printer.type === 'BW' ? 'Blanco y Negro' : 'Color y B/N'}</div>
-                    </button>
-                `).join('')}
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-print mr-2 text-blue-500"></i>
+                Seleccionar Impresora Local
+            </h3>
+            
+            <!-- État de connexion (comme print-manager) -->
+            <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-lg">
+                <i class="fas fa-check-circle mr-2"></i>
+                <strong>Conexión Exitosa</strong><br>
+                PC conectado: ${LOCAL_PRINT_SERVER}<br>
+                Impresoras encontradas: ${printers.length}
             </div>
+            
+            <!-- Résumé de la commande -->
+            <div class="mb-4 p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold mb-2">Detalles del Pedido</h4>
+                <div class="text-sm space-y-1">
+                    <div><strong>Pedido:</strong> #${orderData.order_number}</div>
+                    <div><strong>Cliente:</strong> ${orderData.customer_name}</div>
+                    ${orderData.customer_phone ? `<div><strong>Teléfono:</strong> ${orderData.customer_phone}</div>` : ''}
+                </div>
+                
+                <!-- Détail des dossiers -->
+                <div class="mt-3 space-y-2">
+                    ${orderData.folders.map((folder, index) => `
+                        <div class="bg-white p-3 rounded border border-gray-200">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-medium">${folder.name}</span>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                    ${folder.copies} ${folder.copies > 1 ? 'copias' : 'copia'}
+                                </span>
+                            </div>
+                            
+                            <div class="text-xs text-gray-600 grid grid-cols-2 gap-1">
+                                <div>📄 ${folder.configuration.paperSize}</div>
+                                <div>🎨 ${folder.configuration.colorMode === 'bw' ? 'B/N' : 'Color'}</div>
+                                <div>📑 ${folder.configuration.sides === 'double' ? 'Doble cara' : 'Una cara'}</div>
+                                <div>🔄 ${folder.configuration.orientation === 'landscape' ? 'Horizontal' : 'Vertical'}</div>
+                            </div>
+                            
+                            <div class="text-xs text-gray-500 mt-1">
+                                Archivos: ${folder.files.map(f => f.name).join(', ')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- Lista de imprimantes (MÊME STYLE que print-manager) -->
+            <div class="space-y-3 mb-4">
+                <h4 class="font-semibold">Impresoras Disponibles:</h4>
+                ${printers.map(printer => {
+                    const typeColor = printer.type === 'COLOR' ? 'purple' : 'gray';
+                    const statusColor = printer.status === 'Normal' ? 'green' : 'yellow';
+                    
+                    return `
+                        <button onclick="printWithLocalPrinter(${orderId}, '${printer.name}', ${JSON.stringify(orderData).replace(/"/g, '&quot;')})" 
+                                class="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">${printer.name}</h4>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${typeColor}-100 text-${typeColor}-800 mr-2">
+                                            ${printer.type}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-${statusColor}-100 text-${statusColor}-800">
+                                            <i class="fas fa-circle mr-1" style="font-size: 6px;"></i>
+                                            ${printer.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-print text-blue-500 text-xl"></i>
+                            </div>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+            
             <button onclick="document.body.removeChild(this.closest('.fixed'))" 
-                    class="mt-4 w-full bg-gray-500 text-white py-2 rounded-lg">
+                    class="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
                 Cancelar
             </button>
         </div>
     `;
-    
     document.body.appendChild(modal);
 }
 
-function printWithPrinter(orderId, printerId) {
-    // Fermer modal
+// Fonction d'impression (MÊME LOGIQUE que print-manager)
+async function printWithLocalPrinter(orderId, printerName, orderData) {
     document.querySelector('.fixed').remove();
     
-    // Ouvrir impression avec imprimante sélectionnée
-    window.open(`print-files-direct.php?order_id=${orderId}&printer_id=${printerId}`, 'PrintWindow', 'width=800,height=600');
+    try {
+        showNotification(`Enviando pedido a ${printerName}...`, 'info');
+        
+        const printData = {
+            printer_name: printerName,
+            folders: orderData.folders,
+            order_id: orderId
+        };
+        
+        // Utiliser la MÊME méthode que print-manager.php
+        const printResponse = await fetch(`${LOCAL_PRINT_SERVER}/print-order`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(printData)
+        });
+        
+        const printResult = await printResponse.json();
+        
+        if (printResult.success) {
+            showNotification('✅ Documento enviado a impresora local', 'success');
+            // Marquer comme imprimé
+            updateOrderStatus(orderId, 'PRINTING');
+        } else {
+            showNotification('❌ Error: ' + printResult.error, 'error');
+        }
+    } catch (error) {
+        showNotification('❌ Error de conexión: ' + error.message, 'error');
+    }
 }
+
+// Marquer commande comme imprimée
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        await fetch('api/update-order-status.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({order_id: orderId, status: newStatus})
+        });
+        
+        // Actualiser la page après 2 secondes
+        setTimeout(() => location.reload(), 2000);
+    } catch (error) {
+        console.error('Status update error:', error);
+    }
+}
+
+// Système de notifications
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+    } text-white`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
 
     </script>
 

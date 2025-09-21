@@ -4,6 +4,14 @@
  */
 
 // Configuration object (starting with 5 copies like the image)
+
+// Variables pour les options du spiral
+let spiralOptions = {
+    color: 'negro',
+    frontCover: 'blanco',
+    backCover: 'negro'
+};
+// Configuration object avec valeurs par défaut
 let config = {
     copies: 1,
     colorMode: 'bw',
@@ -11,7 +19,10 @@ let config = {
     paperWeight: '80g',
     sides: 'double',
     orientation: 'portrait',
-    finishing: 'individual',
+    documentType: 'individual',    // ← AJOUTER
+    finishing: 'none',            // ← MODIFIER (était 'individual')
+    bindingSide: 'long',
+    pagesPerSheet: 'normal',
     files: []
 };
 // Au début du fichier, après la déclaration de pricing, ajouter :
@@ -321,35 +332,34 @@ function showSpiralOptionsModal() {
     }, 100);
 }
 
-// Fonctions de sélection avec styles améliorés
 function selectSpiralColor(color) {
     spiralOptions.color = color;
     document.querySelectorAll('.spiral-color-btn').forEach(btn => {
-        btn.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
+        btn.classList.remove('border-blue-500', 'bg-blue-50');
         btn.classList.add('border-gray-200');
     });
     event.target.closest('button').classList.remove('border-gray-200');
-    event.target.closest('button').classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
+    event.target.closest('button').classList.add('border-blue-500', 'bg-blue-50');
 }
 
 function selectFrontCover(color) {
     spiralOptions.frontCover = color;
     document.querySelectorAll('.cover-btn').forEach(btn => {
-        btn.classList.remove('border-green-500', 'bg-green-50', 'shadow-md');
+        btn.classList.remove('border-green-500', 'bg-green-50');
         btn.classList.add('border-gray-200');
     });
     event.target.closest('button').classList.remove('border-gray-200');
-    event.target.closest('button').classList.add('border-green-500', 'bg-green-50', 'shadow-md');
+    event.target.closest('button').classList.add('border-green-500', 'bg-green-50');
 }
 
 function selectBackCover(color) {
     spiralOptions.backCover = color;
     document.querySelectorAll('.back-cover-btn').forEach(btn => {
-        btn.classList.remove('border-purple-500', 'bg-purple-50', 'shadow-md');
+        btn.classList.remove('border-purple-500', 'bg-purple-50');
         btn.classList.add('border-gray-200');
     });
     event.target.closest('button').classList.remove('border-gray-200');
-    event.target.closest('button').classList.add('border-purple-500', 'bg-purple-50', 'shadow-md');
+    event.target.closest('button').classList.add('border-purple-500', 'bg-purple-50');
 }
 
 function confirmSpiralOptions() {
@@ -372,7 +382,7 @@ function confirmSpiralOptions() {
     saveConfiguration();
     closeSpiralModal();
     
-    showNotification(`Encuadernado configurado: Espiral ${spiralOptions.color}, Tapa delantera ${spiralOptions.frontCover}, Tapa trasera ${spiralOptions.backCover}`, 'success');
+    showNotification(`Encuadernado: Espiral ${spiralOptions.color}, Tapa delantera ${spiralOptions.frontCover}, Tapa trasera ${spiralOptions.backCover}`, 'success');
 }
 
 function closeSpiralModal() {
@@ -731,8 +741,41 @@ function updateUIFromConfig() {
         const orientationContainer = document.querySelector('[data-orientation]')?.closest('.option-grid-2');
         if (orientationContainer) updateActiveButton(orientationContainer, 'orientation', config.orientation);
         
-        const finishingContainer = document.querySelector('[data-finishing]')?.closest('.config-section');
-        if (finishingContainer) updateActiveButton(finishingContainer, 'finishing', config.finishing);
+        // Mise à jour bindingSide - CORRECTION ICI
+        const bindingButtons = document.querySelectorAll('[data-binding]');
+        bindingButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.binding === config.bindingSide) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Mise à jour documentType
+        const documentButtons = document.querySelectorAll('[data-document]');
+        documentButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.document === config.documentType) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Mise à jour finishing
+        const finishingButtons = document.querySelectorAll('[data-finishing]');
+        finishingButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.finishing === config.finishing) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Mise à jour pagesPerSheet
+        const pagesButtons = document.querySelectorAll('[data-pages]');
+        pagesButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.pages === config.pagesPerSheet) {
+                btn.classList.add('active');
+            }
+        });
         
         calculatePrice();
     }, 100);

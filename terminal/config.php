@@ -36,6 +36,13 @@ $terminals = [
         'location' => 'Test',
         'status' => 'active'
     ]
+    ,
+    'a7f8e9d6c2b4a1f7e8d5c3b6a9f2e7d41z2x3c4v5b6n7m8q9w1e2r3t4y5u6i7o8p9l1k' => [
+        'id' => 'Client Telephone',
+        'name' => 'Client Telephone',
+        'location' => 'Tinta',
+        'status' => 'active'
+    ]
 ];
 
 // Configuration spécifique terminaux
