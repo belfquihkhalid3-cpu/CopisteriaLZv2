@@ -853,11 +853,32 @@ document.addEventListener('keydown', function(e) {
 });
 
 async function processOrder() {
-    try {
-        // Validation des données
-           // Validation des données
-        if (!customerName || customerName.trim() === '') {
+       try {
+        // Récupérer les champs avec les BONS IDs
+        const nameInput = document.getElementById('customer-name');
+        const phoneInput = document.getElementById('customer-phone');
+        const dataCheckbox = document.getElementById('data-consent');
+        
+        const customerName = nameInput?.value?.trim() || '';
+        const customerPhone = phoneInput?.value?.trim() || '';
+        const dataConsent = dataCheckbox?.checked || false;
+        
+        // VALIDATIONS OBLIGATOIRES
+        if (!customerName) {
             showNotification('El nombre del cliente es obligatorio', 'error');
+            nameInput?.focus();
+            return;
+        }
+        
+        if (!customerPhone) {
+            showNotification('El teléfono del cliente es obligatorio', 'error');
+            phoneInput?.focus();
+            return;
+        }
+        
+        if (!dataConsent) {
+            showNotification('Debe autorizar el tratamiento de datos personales', 'error');
+            dataCheckbox?.focus();
             return;
         }
         
@@ -870,8 +891,8 @@ async function processOrder() {
             folders: currentCartData.folders,
             paymentMethod: selectedPayment,
             comments: document.getElementById('order-comments')?.value || '',
-         customerName: customerName.trim(),
-            customerPhone: customerPhone.trim(),
+            customerName: customerName,
+            customerPhone: customerPhone,
             promoCode: currentPromoCode,
             discount: discountAmount,
             finalTotal: currentCartData.folders.reduce((sum, folder) => sum + folder.total, 0)
@@ -891,6 +912,9 @@ async function processOrder() {
         const result = JSON.parse(responseText);
         
         if (result.success) {
+             // Vider le panier après succès
+    currentCartData = { folders: [] };
+    localStorage.removeItem('terminalCart');
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
             sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));
             
