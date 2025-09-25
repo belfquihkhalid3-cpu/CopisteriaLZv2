@@ -4,6 +4,8 @@ require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/security_headers.php';
 
+
+
 // Vérifier si l'utilisateur est connecté
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 ?>
@@ -19,7 +21,8 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <link rel="icon" href="assets/img/imprimerie.ico" type="image/x-icon">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+
 </head>
 <body class="bg-gray-100">
     <!-- Header -->
@@ -124,318 +127,357 @@ h1:hover {
 
     <div class="flex h-screen">
         <!-- Sidebar de Configuration -->
-        <aside class="w-100 bg-gray-50 border-r border-gray-200">
-            <div class="sidebar-scroll p-6">
-                <!-- Header Sidebar -->
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold text-gray-800">Configuración</h2>
-                    <p class="text-sm text-gray-600">Selecciona cómo lo imprimimos</p>
-                </div>
-
-                <!-- Copias -->
-                <div class="config-section">
-                    <h3 class="section-title">Copias</h3>
-                    <div class="flex items-center justify-center space-x-6">
-                        <button class="quantity-btn border-blue-200 text-blue-500 hover:bg-blue-50" onclick="changeQuantity(-1)">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-copy text-blue-500 text-2xl"></i>
-                            <span class="text-3xl font-bold text-gray-800" id="copies-count">1</span>
-                            <i class="fas fa-plus text-blue-500 text-xl"></i>
-                        </div>
-                        <button class="quantity-btn bg-blue-500 text-white hover:bg-blue-600" onclick="changeQuantity(1)">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Color de la impresión -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Color de la impresión
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Selecciona el tipo de impresión</span>
-                        </div>
-                    </h3>
-                    <p class="section-subtitle">Selecciona el tipo de impresión</p>
-                    <div class="option-grid-2">
-                        <button class="option-btn active" onclick="selectColorMode('bw')" data-color="bw">
-                            <div class="font-semibold mb-1">B/N</div>
-                            <div class="text-xs opacity-75">Escala de grises</div>
-                        </button>
-                        <button class="option-btn" onclick="selectColorMode('color')" data-color="color">
-                            <div class="font-semibold mb-1">Color</div>
-                            <div class="text-xs opacity-75">Formato CMYK</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tamaño del papel -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Tamaño del papel
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Formato del papel</span>
-                        </div>
-                    </h3>
-                    <div class="option-grid-3">
-                        <button class="option-btn" onclick="selectPaperSize('A3')" data-size="A3">
-                            <div class="font-semibold mb-1">A3</div>
-                            <div class="text-xs opacity-75">420 x 297 mm</div>
-                        </button>
-                        <button class="option-btn active" onclick="selectPaperSize('A4')" data-size="A4">
-                            <div class="font-semibold mb-1">A4</div>
-                            <div class="text-xs opacity-75">297 x 210 mm</div>
-                        </button>
-                        <button class="option-btn" onclick="selectPaperSize('A5')" data-size="A5">
-                            <div class="font-semibold mb-1">A5</div>
-                            <div class="text-xs opacity-75">210 x 148 mm</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Grosor del papel -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Grosor del papel
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Peso del papel en gramos</span>
-                        </div>
-                    </h3>
-                    <p class="section-subtitle">Peso del papel en gramos</p>
-                    <div class="option-grid-3">
-                        <button class="option-btn active" onclick="selectPaperWeight('80g')" data-weight="80g">
-                            <div class="font-semibold mb-1">80 gr</div>
-                            <div class="text-xs opacity-75">Estándar</div>
-                        </button>
-                        <button class="option-btn" onclick="selectPaperWeight('160g')" data-weight="160g">
-                            <div class="font-semibold mb-1">160 gr</div>
-                            <div class="text-xs opacity-75">Grueso alto</div>
-                        </button>
-                        <button class="option-btn" onclick="selectPaperWeight('280g')" data-weight="280g">
-                            <div class="font-semibold mb-1">280 gr</div>
-                            <div class="text-xs opacity-75">Tipo cartulina</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Forma de impresión -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Forma de impresión
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Una cara o ambas caras</span>
-                        </div>
-                    </h3>
-                    <div class="option-grid-2">
-                        <button class="option-btn" onclick="selectSides('single')" data-sides="single">
-                            <div class="font-semibold mb-1">Una cara</div>
-                            <div class="text-xs opacity-75">por una cara del papel</div>
-                        </button>
-                        <button class="option-btn active" onclick="selectSides('double')" data-sides="double">
-                            <div class="font-semibold mb-1">Doble cara</div>
-                            <div class="text-xs opacity-75">por ambas caras del papel</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Orientación -->
-                <div class="config-section">
-                    <h3 class="section-title">
-                        Orientación
-                        <div class="tooltip">
-                            <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
-                            <span class="tooltiptext">Orientación del documento</span>
-                        </div>
-                    </h3>
-                    <div class="option-grid-2">
-                        <button class="option-btn active" onclick="selectOrientation('portrait')" data-orientation="portrait">
-                            <div class="font-semibold">Vertical</div>
-                        </button>
-                        <button class="option-btn" onclick="selectOrientation('landscape')" data-orientation="landscape">
-                            <div class="font-semibold">Horizontal</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Nouvelle section Orientación/Reliure -->
-<div class="config-section">
-    <h3 class="section-title">Orientación de reliure</h3>
-    <p class="section-subtitle">Selecciona el lado de encuadernación</p>
-    
-    <div class="option-grid-2">
-        <button class="option-btn relative" onclick="selectBindingSide('long')" data-binding="long">
-            <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
-            <img src="assets/img/vell.svg" alt="Lado largo" class="w-12 h-12 mb-2 mx-auto">
-            <div class="font-semibold">Lado largo</div>
-        </button>
+  <aside class="w-100 bg-gray-50 border-r border-gray-200">
+    <div class="sidebar-scroll p-6">
         
-        <button class="option-btn relative" onclick="selectBindingSide('short')" data-binding="short">
-            <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
-            <img src="assets/img/velc.svg" alt="Lado corto" class="w-12 h-12 mb-2 mx-auto">
-            <div class="font-semibold">Lado corto</div>
-        </button>
-    </div>
-</div>
-
-<!-- Section Pages par feuille -->
-<div class="config-section">
-    <h3 class="section-title">Páginas por hoja</h3>
-    <p class="section-subtitle">Selecciona la distribución</p>
-    
-    <!-- Première rangée : Normal et 2 páginas -->
-    <div class="option-grid-2 mb-3">
-        <button class="option-btn" onclick="selectPagesPerSheet('normal')" data-pages="normal">
-            <svg width="28" height="28" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
-                <rect x="2" y="2" rx="2" ry="2" width="34" height="38" style="fill:white;stroke:#9e9e9e;stroke-width:1.5;opacity:1"></rect>
-                <rect x="6" y="6" rx="1" ry="1" width="26" height="30" style="fill:#1976d2;stroke:#1976d2;stroke-width:1.5;opacity:.8"></rect>
-            </svg>
-            <div class="font-semibold mb-1">Normal</div>
-            <div class="text-xs opacity-75">1 página por cara</div>
-        </button>
-        
-        <button class="option-btn" onclick="selectPagesPerSheet('two-horizontal')" data-pages="two-horizontal">
-            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
-                <rect x="6" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
-                <rect x="22" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
-            </svg>
-            <div class="font-semibold mb-1">2 páginas</div>
-            <div class="text-xs opacity-75">Papel en horizontal</div>
-        </button>
-    </div>
-    
-    <!-- Deuxième rangée : 2 diapositivas et 4 diapositivas -->
-    <div class="option-grid-2">
-        <button class="option-btn" onclick="selectPagesPerSheet('two-vertical')" data-pages="two-vertical">
-            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill:white;stroke:#1976d2;stroke-width:.5;opacity:1"></rect>
-                <rect x="6" y="6" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
-                <rect x="6" y="22" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
-            </svg>
-            <div class="font-semibold mb-1">2 diapositivas</div>
-            <div class="text-xs opacity-75">Orientación vertical</div>
-        </button>
-        
-        <button class="option-btn" onclick="selectPagesPerSheet('four')" data-pages="four">
-            <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
-                <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
-                <rect x="6" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
-                <rect x="22" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
-                <rect x="6" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
-                <rect x="22" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
-            </svg>
-            <div class="font-semibold mb-1">4 diapositivas</div>
-            <div class="text-xs opacity-75">por cara impresa</div>
-        </button>
-    </div>
-</div>
-                <!-- Acabado -->
-             
-<!-- Section Acabado dans index.php -->
-<div class="config-section">
-    <h3 class="section-title">Acabado</h3>
-    <p class="section-subtitle">Selecciona el tipo de acabado</p>
-    
-    <!-- Section 1: Individual vs Agrupado -->
-    <div class="mb-6">
-        <h4 class="text-sm font-medium text-gray-700 mb-3">Tipo de documento</h4>
-        <div class="finishing-grid">
-            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('individual')" data-document="individual">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 42 42" class="mr-3 flex-shrink-0">
-                    <rect x="2" y="2" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
-                    <line x1="6" y1="4" x2="6" y2="32" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
-                    <rect x="12" y="5" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
-                    <line x1="16" y1="7" x2="16" y2="36" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
-                </svg>
-                <div>
-                    <div class="font-semibold">Individual</div>
-                    <div class="text-xs opacity-75">Cada documento</div>
+        <!-- Section Configuración -->
+        <div class="collapsible-section">
+            <div class="section-header bg-white rounded-lg border p-3 flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleCollapse('config')">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-cog text-blue-500"></i>
+                    <div>
+                        <div class="font-semibold text-gray-800">Configuración</div>
+                        <div class="text-sm text-gray-500">Selecciona cómo lo imprimimos</div>
+                    </div>
                 </div>
-            </button>
+                <i class="fas fa-chevron-down transition-transform" id="config-icon"></i>
+            </div>
             
-            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('grouped')" data-document="grouped">
-                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
-                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill: white; stroke: rgb(191, 191, 191); stroke-width: 1.15px;"></rect>
-                    <line x1="6" y1="4" x2="6" y2="37" style="stroke-width: 3px; stroke: rgb(66, 133, 244);"></line>
-                </svg>
-                <div>
-                    <div class="font-semibold">Agrupado</div>
-                    <div class="text-xs opacity-75">Todos en uno</div>
+            <div class="section-content mt-3" id="config-section">
+                <div class="space-y-4">
+                    <!-- Copias -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">Copias</h3>
+                        <div class="flex items-center justify-center space-x-6">
+                            <button class="quantity-btn border-blue-200 text-blue-500 hover:bg-blue-50" onclick="changeQuantity(-1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-copy text-blue-500 text-2xl"></i>
+                                <span class="text-3xl font-bold text-gray-800" id="copies-count">1</span>
+                                <i class="fas fa-plus text-blue-500 text-xl"></i>
+                            </div>
+                            <button class="quantity-btn bg-blue-500 text-white hover:bg-blue-600" onclick="changeQuantity(1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Color de la impresión -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">
+                            Color de la impresión
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                                <span class="tooltiptext">Selecciona el tipo de impresión</span>
+                            </div>
+                        </h3>
+                        <p class="section-subtitle">Selecciona el tipo de impresión</p>
+                        <div class="option-grid-2">
+                            <button class="option-btn active" onclick="selectColorMode('bw')" data-color="bw">
+                                <div class="font-semibold mb-1">B/N</div>
+                                <div class="text-xs opacity-75">Escala de grises</div>
+                            </button>
+                            <button class="option-btn" onclick="selectColorMode('color')" data-color="color">
+                                <div class="font-semibold mb-1">Color</div>
+                                <div class="text-xs opacity-75">Formato CMYK</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tamaño del papel -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">
+                            Tamaño del papel
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                                <span class="tooltiptext">Formato del papel</span>
+                            </div>
+                        </h3>
+                        <div class="option-grid-3">
+                            <button class="option-btn" onclick="selectPaperSize('A3')" data-size="A3">
+                                <div class="font-semibold mb-1">A3</div>
+                                <div class="text-xs opacity-75">420 x 297 mm</div>
+                            </button>
+                            <button class="option-btn active" onclick="selectPaperSize('A4')" data-size="A4">
+                                <div class="font-semibold mb-1">A4</div>
+                                <div class="text-xs opacity-75">297 x 210 mm</div>
+                            </button>
+                            <button class="option-btn" onclick="selectPaperSize('A5')" data-size="A5">
+                                <div class="font-semibold mb-1">A5</div>
+                                <div class="text-xs opacity-75">210 x 148 mm</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grosor del papel -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">
+                            Grosor del papel
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                                <span class="tooltiptext">Peso del papel en gramos</span>
+                            </div>
+                        </h3>
+                        <p class="section-subtitle">Peso del papel en gramos</p>
+                        <div class="option-grid-3">
+                            <button class="option-btn active" onclick="selectPaperWeight('80g')" data-weight="80g">
+                                <div class="font-semibold mb-1">80 gr</div>
+                                <div class="text-xs opacity-75">Estándar</div>
+                            </button>
+                            <button class="option-btn" onclick="selectPaperWeight('160g')" data-weight="160g">
+                                <div class="font-semibold mb-1">160 gr</div>
+                                <div class="text-xs opacity-75">Grueso alto</div>
+                            </button>
+                            <button class="option-btn" onclick="selectPaperWeight('280g')" data-weight="280g">
+                                <div class="font-semibold mb-1">280 gr</div>
+                                <div class="text-xs opacity-75">Tipo cartulina</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Forma de impresión -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">
+                            Forma de impresión
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                                <span class="tooltiptext">Una cara o ambas caras</span>
+                            </div>
+                        </h3>
+                        <div class="option-grid-2">
+                            <button class="option-btn" onclick="selectSides('single')" data-sides="single">
+                                <div class="font-semibold mb-1">Una cara</div>
+                                <div class="text-xs opacity-75">por una cara del papel</div>
+                            </button>
+                            <button class="option-btn active" onclick="selectSides('double')" data-sides="double">
+                                <div class="font-semibold mb-1">Doble cara</div>
+                                <div class="text-xs opacity-75">por ambas caras del papel</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orientación -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">
+                            Orientación
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle text-gray-400 text-sm cursor-help"></i>
+                                <span class="tooltiptext">Orientación del documento</span>
+                            </div>
+                        </h3>
+                        <div class="option-grid-2">
+                            <button class="option-btn active" onclick="selectOrientation('portrait')" data-orientation="portrait">
+                                <div class="font-semibold">Vertical</div>
+                            </button>
+                            <button class="option-btn" onclick="selectOrientation('landscape')" data-orientation="landscape">
+                                <div class="font-semibold">Horizontal</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orientación de reliure -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">Orientación de reliure</h3>
+                        <p class="section-subtitle">Selecciona el lado de encuadernación</p>
+                        
+                        <div class="option-grid-2">
+                            <button class="option-btn relative" onclick="selectBindingSide('long')" data-binding="long">
+                                <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
+                                <img src="assets/img/vell.svg" alt="Lado largo" class="w-12 h-12 mb-2 mx-auto">
+                                <div class="font-semibold">Lado largo</div>
+                            </button>
+                            
+                            <button class="option-btn relative" onclick="selectBindingSide('short')" data-binding="short">
+                                <i class="fas fa-check-circle text-green-500 absolute top-2 right-2 text-lg hidden binding-check"></i>
+                                <img src="assets/img/velc.svg" alt="Lado corto" class="w-12 h-12 mb-2 mx-auto">
+                                <div class="font-semibold">Lado corto</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pages par feuille -->
+                    <div class="config-section bg-white rounded-lg p-4 border">
+                        <h3 class="section-title">Páginas por hoja</h3>
+                        <p class="section-subtitle">Selecciona la distribución</p>
+                        
+                        <div class="option-grid-2 mb-3">
+                            <button class="option-btn" onclick="selectPagesPerSheet('normal')" data-pages="normal">
+                                <svg width="28" height="28" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mb-2">
+                                    <rect x="2" y="2" rx="2" ry="2" width="34" height="38" style="fill:white;stroke:#9e9e9e;stroke-width:1.5;opacity:1"></rect>
+                                    <rect x="6" y="6" rx="1" ry="1" width="26" height="30" style="fill:#1976d2;stroke:#1976d2;stroke-width:1.5;opacity:.8"></rect>
+                                </svg>
+                                <div class="font-semibold mb-1">Normal</div>
+                                <div class="text-xs opacity-75">1 página por cara</div>
+                            </button>
+                            
+                            <button class="option-btn" onclick="selectPagesPerSheet('two-horizontal')" data-pages="two-horizontal">
+                                <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                                    <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
+                                    <rect x="6" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                                    <rect x="22" y="6" rx="1" ry="1" width="14" height="26" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                                </svg>
+                                <div class="font-semibold mb-1">2 páginas</div>
+                                <div class="text-xs opacity-75">Papel en horizontal</div>
+                            </button>
+                        </div>
+                        
+                        <div class="option-grid-2">
+                            <button class="option-btn" onclick="selectPagesPerSheet('two-vertical')" data-pages="two-vertical">
+                                <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill:white;stroke:#1976d2;stroke-width:.5;opacity:1"></rect>
+                                    <rect x="6" y="6" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                                    <rect x="6" y="22" rx="1" ry="1" width="26" height="14" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:.8"></rect>
+                                </svg>
+                                <div class="font-semibold mb-1">2 diapositivas</div>
+                                <div class="text-xs opacity-75">Orientación vertical</div>
+                            </button>
+                            
+                            <button class="option-btn" onclick="selectPagesPerSheet('four')" data-pages="four">
+                                <svg style="margin-top:1px;" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 42 42" class="mb-2">
+                                    <rect x="2" y="2" rx="3" ry="3" width="38" height="34" style="fill:white;stroke:#1976d2;stroke-width:0.5;opacity:1"></rect>
+                                    <rect x="6" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                                    <rect x="22" y="6" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                                    <rect x="6" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                                    <rect x="22" y="20" rx="1" ry="1" width="14" height="12" style="fill:#1976d2;stroke:#1976d2;stroke-width:0.5;opacity:0.8"></rect>
+                                </svg>
+                                <div class="font-semibold mb-1">4 diapositivas</div>
+                                <div class="text-xs opacity-75">por cara impresa</div>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </button>
+            </div>
         </div>
-    </div>
-    
-    <!-- Section 2: Types de finition -->
-    <div>
-        <h4 class="text-sm font-medium text-gray-700 mb-3">Opciones de acabado</h4>
-        
-        <div class="finishing-grid mb-3">
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('none')" data-finishing="none">
-                <img src="assets/img/SA.svg" alt="Sin acabado" class="w-8 h-8 mr-3 flex-shrink-0">
-                <div>
-                    <div class="font-semibold">Sin acabado</div>
-                    <div class="text-xs opacity-75">Solo impresión</div>
+
+        <!-- Section Acabado -->
+        <div class="collapsible-section">
+            <div class="section-header bg-white rounded-lg border p-3 flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleCollapse('acabado')">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-file-alt text-green-500"></i>
+                    <div>
+                        <div class="font-semibold text-gray-800">Acabado</div>
+                        <div class="text-sm text-gray-500">Selecciona el tipo de acabado</div>
+                    </div>
                 </div>
-            </button>
+                <i class="fas fa-chevron-down transition-transform" id="acabado-icon"></i>
+            </div>
             
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('spiral')" data-finishing="spiral">
-                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
-                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-gray-400"></rect>
-                    <line x1="6" y1="4" x2="6" y2="37" class="stroke-blue-500" style="stroke-width: 3px;"></line>
-                </svg>
-                <div>
-                    <div class="font-semibold">Encuadernado</div>
-                    <div class="text-xs opacity-75">En espiral</div>
+            <div class="section-content mt-3 collapsed" id="acabado-section">
+                <div class="config-section bg-white rounded-lg p-4 border">
+                    <h3 class="section-title">Acabado</h3>
+                    <p class="section-subtitle">Selecciona el tipo de acabado</p>
+                    
+                    <!-- Section 1: Individual vs Agrupado -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Tipo de documento</h4>
+                        <div class="finishing-grid">
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('individual')" data-document="individual">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 42 42" class="mr-3 flex-shrink-0">
+                                    <rect x="2" y="2" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
+                                    <line x1="6" y1="4" x2="6" y2="32" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+                                    <rect x="12" y="5" rx="3" ry="3" width="29" height="33" style="fill: white; stroke: rgb(175, 175, 175); stroke-width: 1;"></rect>
+                                    <line x1="16" y1="7" x2="16" y2="36" style="stroke: rgb(66, 133, 244); stroke-width: 1.5;"></line>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Individual</div>
+                                    <div class="text-xs opacity-75">Cada documento</div>
+                                </div>
+                            </button>
+                            
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectDocumentType('grouped')" data-document="grouped">
+                                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
+                                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" style="fill: white; stroke: rgb(191, 191, 191); stroke-width: 1.15px;"></rect>
+                                    <line x1="6" y1="4" x2="6" y2="37" style="stroke-width: 3px; stroke: rgb(66, 133, 244);"></line>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Agrupado</div>
+                                    <div class="text-xs opacity-75">Todos en uno</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2: Types de finition -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Opciones de acabado</h4>
+                        
+                        <div class="finishing-grid mb-3">
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('none')" data-finishing="none">
+                                <img src="assets/img/SA.svg" alt="Sin acabado" class="w-8 h-8 mr-3 flex-shrink-0">
+                                <div>
+                                    <div class="font-semibold">Sin acabado</div>
+                                    <div class="text-xs opacity-75">Solo impresión</div>
+                                </div>
+                            </button>
+                            
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('spiral')" data-finishing="spiral">
+                                <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" class="mr-3 flex-shrink-0">
+                                    <rect x="2" y="2" rx="3" ry="3" width="34" height="38" class="fill-white stroke-gray-400"></rect>
+                                    <line x1="6" y1="4" x2="6" y2="37" class="stroke-blue-500" style="stroke-width: 3px;"></line>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Encuadernado</div>
+                                    <div class="text-xs opacity-75">En espiral</div>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div class="finishing-grid mb-3">
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('staple')" data-finishing="staple">
+                                <img src="assets/img/GR.svg" alt="Grapado" class="w-8 h-8 mr-3 flex-shrink-0">
+                                <div>
+                                    <div class="font-semibold">Grapado</div>
+                                    <div class="text-xs opacity-75">En esquina</div>
+                                </div>
+                            </button>
+                            
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('laminated')" data-finishing="laminated">
+                                <img src="assets/img/SA.svg" alt="Plastificado" class="w-8 h-8 mr-3 flex-shrink-0">
+                                <div>
+                                    <div class="font-semibold">Plastificado</div>
+                                    <div class="text-xs opacity-75">Ultraresistente</div>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div class="finishing-grid">
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
+                                <img src="assets/img/2AG.svg" alt="Perforado 2" class="w-8 h-8 mr-3 flex-shrink-0">
+                                <div>
+                                    <div class="font-semibold">Perforado</div>
+                                    <div class="text-xs opacity-75">2 agujeros</div>
+                                </div>
+                            </button>
+                            
+                            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
+                                <img src="assets/img/4AG.svg" alt="Perforado 4" class="w-8 h-8 mr-3 flex-shrink-0">
+                                <div>
+                                    <div class="font-semibold">Perforado</div>
+                                    <div class="text-xs opacity-75">4 agujeros</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </button>
+            </div>
         </div>
-        
-        <div class="finishing-grid mb-3">
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('staple')" data-finishing="staple">
-                <img src="assets/img/GR.svg" alt="Grapado" class="w-8 h-8 mr-3 flex-shrink-0">
-                <div>
-                    <div class="font-semibold">Grapado</div>
-                    <div class="text-xs opacity-75">En esquina</div>
+
+        <!-- Section Comentario -->
+        <div class="collapsible-section">
+            <div class="section-header bg-white rounded-lg border p-3 flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleCollapse('comentario')">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-comment text-purple-500"></i>
+                    <div>
+                        <div class="font-semibold text-gray-800">Comentario</div>
+                        <div class="text-sm text-gray-500">Comentario de la impresión</div>
+                    </div>
                 </div>
-            </button>
+                <i class="fas fa-chevron-up transition-transform" id="comentario-icon"></i>
+            </div>
             
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('laminated')" data-finishing="laminated">
-                <img src="assets/img/SA.svg" alt="Plastificado" class="w-8 h-8 mr-3 flex-shrink-0">
-                <div>
-                    <div class="font-semibold">Plastificado</div>
-                    <div class="text-xs opacity-75">Ultraresistente</div>
-                </div>
-            </button>
-        </div>
-        
-        <div class="finishing-grid">
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated2')" data-finishing="perforated2">
-                <img src="assets/img/2AG.svg" alt="Perforado 2" class="w-8 h-8 mr-3 flex-shrink-0">
-                <div>
-                    <div class="font-semibold">Perforado</div>
-                    <div class="text-xs opacity-75">2 agujeros</div>
-                </div>
-            </button>
-            
-            <button class="option-btn flex items-center text-left p-3" onclick="selectFinishing('perforated4')" data-finishing="perforated4">
-                <img src="assets/img/4AG.svg" alt="Perforado 4" class="w-8 h-8 mr-3 flex-shrink-0">
-                <div>
-                    <div class="font-semibold">Perforado</div>
-                    <div class="text-xs opacity-75">4 agujeros</div>
-                </div>
-            </button>
-        </div>
-    </div>
-</div>
-                <!-- Comentario -->
-                <div class="config-section">
+            <div class="section-content mt-3" id="comentario-section">
+                <div class="config-section bg-white rounded-lg p-4 border">
                     <h3 class="section-title">
                         Comentario
                         <i class="fas fa-comment text-gray-400"></i>
@@ -446,11 +488,18 @@ h1:hover {
                         placeholder="Comentario de impresión"
                         rows="3"
                         id="print-comments"
+                        maxlength="400"
+                        oninput="updateCharCount()"
                     ></textarea>
+                    <div class="flex justify-end mt-2">
+                        <span class="text-sm text-gray-500"><span id="char-count">0</span> / 400</span>
+                    </div>
                 </div>
             </div>
-        </aside>
+        </div>
 
+    </div>
+</aside>
         <!-- Zone principale -->
         <main class="flex-1 bg-white flex flex-col">
             <!-- Document Title Bar -->
@@ -461,14 +510,14 @@ h1:hover {
                         <span class="font-medium text-gray-800">Carpeta sin título</span>
                         <i class="fas fa-edit text-gray-400 text-sm cursor-pointer"></i>
                         <div class="flex flex-wrap gap-1">
-    <span class="badge badge-blue" id="color-badge">BN</span>
-    <span class="badge badge-green" id="size-badge">A4</span>
-    <span class="badge badge-orange" id="weight-badge">80</span>
-    <span class="badge badge-purple" id="sides-badge">DC</span>
-    <span class="badge badge-teal" id="finishing-badge">IN</span>
-    <span class="badge badge-cyan" id="orientation-badge">VE</span>
-    <span class="badge badge-pink" id="copies-badge">5</span>
-</div>
+                <span class="badge badge-blue" id="color-badge">BN</span>
+                <span class="badge badge-green" id="size-badge">A4</span>
+                <span class="badge badge-orange" id="weight-badge">80</span>
+                <span class="badge badge-purple" id="sides-badge">DC</span>
+                <span class="badge badge-teal" id="finishing-badge">IN</span>
+                <span class="badge badge-cyan" id="orientation-badge">VE</span>
+                    <span class="badge badge-pink" id="copies-badge">5</span>
+                </div>
 
                     </div>
                     <div class="text-right">
@@ -806,7 +855,8 @@ h1:hover {
     </div>
 </div>
     <!-- JavaScript -->
-    <script src="assets/js/mainn.js"></script>
+    <script src="assets/js/mainn.js?v=<?= time() ?>"></script>
+   
     <script>
 function openTrackingModal() {
     const modal = document.getElementById('trackingModal');
@@ -867,6 +917,37 @@ async function trackOrder(event) {
         trackLoading.classList.add('hidden');
     }
 }
+
+function toggleCollapse(sectionName) {
+    const section = document.getElementById(sectionName + '-section');
+    const icon = document.getElementById(sectionName + '-icon');
+    
+    if (section && icon) {
+        if (section.classList.contains('collapsed')) {
+            section.classList.remove('collapsed');
+            icon.classList.add('rotate-180');
+        } else {
+            section.classList.add('collapsed');
+            icon.classList.remove('rotate-180');
+        }
+    }
+}
+
+function updateCharCount() {
+    const textarea = document.getElementById('print-comments');
+    const counter = document.getElementById('char-count');
+    if (textarea && counter) {
+        counter.textContent = textarea.value.length;
+    }
+}
+
+// Initialiser la section commentarios comme ouverte
+document.addEventListener('DOMContentLoaded', function() {
+    const comentarioIcon = document.getElementById('comentario-icon');
+    if (comentarioIcon) {
+        comentarioIcon.classList.add('rotate-180');
+    }
+});
 
 function displayTrackingResult(order, timeline) {
     const resultDiv = document.getElementById('trackingResult');

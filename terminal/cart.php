@@ -912,8 +912,7 @@ async function processOrder() {
         const result = JSON.parse(responseText);
         
         if (result.success) {
-             // Vider le panier après succès
-    currentCartData = { folders: [] };
+                currentCartData = { folders: [] };
     localStorage.removeItem('terminalCart');
             sessionStorage.setItem('orderConfirmation', JSON.stringify(result));
             sessionStorage.setItem('orderCart', JSON.stringify(currentCartData));

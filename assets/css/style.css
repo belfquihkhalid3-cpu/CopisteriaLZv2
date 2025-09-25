@@ -2,7 +2,273 @@
    Copisteria - Custom Styles
    Styles pour l'interface de configuration
    ============================================== */
+/* ====== RESPONSIVE DESIGN ====== */
 
+/* Mobile First - Base styles for mobile */
+@media (max-width: 640px) {
+    /* Header responsive */
+    header .max-w-full {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    header .flex {
+        flex-wrap: wrap;
+    }
+    
+    header .h-20 {
+        height: 3rem;
+        width: 3rem;
+    }
+    
+    header .text-2xl {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+    }
+    
+    /* Cache certains éléments sur mobile */
+    header .space-x-4 > *:nth-child(n+3) {
+        display: none;
+    }
+    
+    /* Layout principal en colonne sur mobile */
+    .flex.h-screen {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    /* Sidebar pleine largeur sur mobile */
+    aside {
+        width: 100% !important;
+        position: relative;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    /* Configuration sections plus compactes */
+    .config-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+    }
+    
+    .section-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    /* Boutons plus petits */
+    .option-btn {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+        min-height: 50px;
+    }
+    
+    .quantity-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.875rem;
+    }
+    
+    /* Grilles adaptatives */
+    .option-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .option-grid-3 {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .finishing-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    /* Upload zone plus petite */
+    .upload-zone {
+        min-height: 150px;
+        padding: 1rem;
+    }
+    
+    /* Main content area */
+    main {
+        padding: 1rem;
+    }
+    
+    /* Cart responsive */
+    .grid.grid-cols-12 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .col-span-8,
+    .col-span-4 {
+        grid-column: span 1;
+    }
+    
+    /* Buttons full width on mobile */
+    .px-8.py-4 {
+        padding: 0.75rem 1rem;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Tablet styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* Header ajustements */
+    header .space-x-4 {
+        space-x: 0.5rem;
+    }
+    
+    header .px-8 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Sidebar ajustée pour tablette */
+    aside {
+         overflow-x: hidden;
+           width: 400px;
+    }
+    
+    /* Configuration grid pour tablette */
+    .option-grid-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    
+    /* Cart layout pour tablette */
+    .grid.grid-cols-12 {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .col-span-8 {
+        grid-column: span 1;
+    }
+    
+    .col-span-4 {
+        grid-column: span 1;
+    }
+}
+
+/* Desktop improvements */
+@media (min-width: 1025px) {
+    /* Sticky sidebar */
+    aside {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    /* Cart sticky summary */
+    .sticky {
+        position: sticky;
+        top: 1.5rem;
+    }
+}
+
+/* Landscape orientation fixes */
+@media (orientation: landscape) and (max-height: 500px) {
+    aside {
+        max-height: 40vh;
+    }
+    
+    .config-section {
+        padding: 0.5rem;
+    }
+    
+    .option-btn {
+        min-height: 40px;
+        padding: 0.5rem;
+    }
+}
+
+/* Touch improvements */
+@media (hover: none) and (pointer: coarse) {
+    .option-btn,
+    .quantity-btn,
+    button {
+        min-height: 44px; /* Touch target size */
+        touch-action: manipulation;
+    }
+    
+    .hover\:bg-gray-100:hover {
+        background-color: transparent;
+    }
+    
+    .hover\:shadow-md:hover {
+        box-shadow: none;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .upload-zone {
+        border-width: 0.5px;
+    }
+    
+    .border {
+        border-width: 0.5px;
+    }
+}
+
+/* WhatsApp button responsive */
+@media (max-width: 640px) {
+    .whatsapp-btn {
+        width: 3.5rem;
+        height: 3.5rem;
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .whatsapp-btn i {
+        font-size: 1.25rem;
+    }
+    
+    .whatsapp-btn .tooltip {
+        display: none;
+    }
+}
+
+/* Animations performance on mobile */
+@media (prefers-reduced-motion: reduce) {
+    .animate-pulse,
+    .hover\:animate-bounce,
+    .transition-all,
+    .transition-colors,
+    .transform,
+    .hover\:scale-105 {
+        animation: none;
+        transition: none;
+        transform: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    /* Optionnel pour plus tard */
+}
+
+/* Print styles */
+@media print {
+    header,
+    aside,
+    .whatsapp-btn {
+        display: none;
+    }
+    
+    main {
+        width: 100%;
+        padding: 0;
+    }
+}
 /* Configuration Sections */
 .config-section {
     background-color: white;
@@ -139,6 +405,7 @@
 /* Sidebar Scroll */
 .sidebar-scroll {
     overflow-y: auto;
+      overflow-x: hidden;
     max-height: calc(100vh - 100px);
     padding-right: 8px;
 }
@@ -836,3 +1103,32 @@ input[type="checkbox"] {
         padding: 8px 10px;       /* était 10px 12px */
     }
 }
+
+
+.collapsible-section {
+    margin-bottom: 1rem;
+}
+
+.section-header {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.section-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.section-content.collapsed {
+      display: none;
+}
+
+.section-content:not(.collapsed) {
+   display: block;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+

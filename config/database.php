@@ -15,7 +15,7 @@ if (file_exists(__DIR__ . '/../.env')) {
     }
 }
 // Configuration de la base de données
-define('DB_HOST', '91.234.194.20');
+define('DB_HOST', 'localhost');
 define('DB_NAME', 'c2662029c_copie');
 define('DB_USER', 'c2662029c_lz');
 define('DB_PASS', 'P@ssw00rd2025');

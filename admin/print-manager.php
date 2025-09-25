@@ -88,7 +88,7 @@ requireAdmin();
 
 <script>
 // Configuration
-let PRINT_SERVICE_URL = 'http://192.168.11.101:5000';
+let PRINT_SERVICE_URL = 'http://192.168.1.138:5000';
 
 // Charger configuration sauvegardée
 document.addEventListener('DOMContentLoaded', function() {

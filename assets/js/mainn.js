@@ -1402,6 +1402,35 @@ function selectPagesPerSheet(type) {
     saveConfiguration();
 }
 
+
+
+function toggleSection(sectionName) {
+    const content = document.getElementById(sectionName + '-content');
+    const arrow = document.getElementById(sectionName + '-arrow');
+    const header = content.previousElementSibling;
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        header.classList.add('active');
+        arrow.classList.remove('fa-chevron-down');
+        arrow.classList.add('fa-chevron-up');
+    } else {
+        content.classList.add('hidden');
+        header.classList.remove('active');
+        arrow.classList.remove('fa-chevron-up');
+        arrow.classList.add('fa-chevron-down');
+    }
+}
+
+function updateCharCount() {
+    const textarea = document.getElementById('print-comments');
+    const counter = document.getElementById('char-count');
+    if (textarea && counter) {
+        counter.textContent = textarea.value.length;
+    }
+}
+
+
 // Charger les coûts de finition depuis l'API
 
 
